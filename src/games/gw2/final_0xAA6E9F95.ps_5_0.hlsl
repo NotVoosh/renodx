@@ -44,7 +44,7 @@ void main(
 												 : o0.rgb;
 		if (injectedData.toneMapType == 0) {
 	o0.rgb = min(o0.rgb, injectedData.toneMapGameNits / 80.f);	// vanilla isn't clamped
-	} else {
+	} else if (injectedData.toneMapType =! 1) {
 	o0.rgb = min(o0.rgb, injectedData.toneMapPeakNits / 80.f);	// this is for CEF (TP) zzzzzz
 	}
   return;
