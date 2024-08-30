@@ -21,6 +21,7 @@
 #include <embed/0x750F53C0.h>      // Dragonfall (Kralkatorrik)
 #include <embed/0x187268D3.h>      // Environment Zone Intensity
 #include <embed/0x66130D94.h>      // slideshow cutscenes
+#include <embed/0xDF711B8B.h>      // PoA
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -83,6 +84,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x750F53C0),      // Dragonfall                                           green artifacting
     CustomShaderEntry(0x187268D3),      // Environment Zone Intensity                   alpha stuff, no clue again but it looks nice
     CustomShaderEntry(0x66130D94),      // Slideshow cutscenes                          remove negative colors to fix stuff
+    CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
