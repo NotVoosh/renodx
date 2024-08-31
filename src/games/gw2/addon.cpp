@@ -22,6 +22,12 @@
 #include <embed/0x187268D3.h>      // Environment Zone Intensity
 #include <embed/0x66130D94.h>      // slideshow cutscenes
 #include <embed/0xDF711B8B.h>      // PoA
+#include <embed/0x38A5D61E.h>      // Mesmer 1
+#include <embed/0x46E87959.h>      // Mesmer 2
+#include <embed/0x7DF6F3AD.h>      // Mesmer 3
+#include <embed/0x9D19DDCF.h>      // Mesmer 4
+#include <embed/0x5019ED9B.h>      // Mesmer 5
+#include <embed/0xD5804E21.h>      // Light Rays
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -85,6 +91,12 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x187268D3),      // Environment Zone Intensity                   alpha stuff, no clue again but it looks nice
     CustomShaderEntry(0x66130D94),      // Slideshow cutscenes                          remove negative colors to fix stuff
     CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate
+    CustomShaderEntry(0x38A5D61E),      // Mesmer spell 1                                         alpha saturate
+    CustomShaderEntry(0x46E87959),      // Mesmer spell 2                                         alpha saturate
+    CustomShaderEntry(0x7DF6F3AD),      // Mesmer spell 3                                         alpha saturate
+    CustomShaderEntry(0x9D19DDCF),      // Mesmer spell 4                                         alpha saturate
+    CustomShaderEntry(0x5019ED9B),      // Mesmer spell 5                                         alpha saturate
+    CustomShaderEntry(0xD5804E21),      // Light rays                                 removed negative colors to avoid leaks
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -397,7 +409,7 @@ renodx::utils::settings::Settings settings = {
     */
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings.",
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. Light Adaptation should work but isn't recommended as it defeats the purpose.",
         .section = "Instructions",
     },
 };
