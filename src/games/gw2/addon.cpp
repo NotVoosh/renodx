@@ -15,6 +15,7 @@
 
 #include <embed/0xED61CCE3.h>      // bloom-ish
 #include <embed/0xB47204C8.h>      // SSR
+#include <embed/0xD5804E21.h>      // Light Rays
 #include <embed/0x88DE9EDE.h>      // Mistlock 1
 #include <embed/0x24CE1FCB.h>      // Mistlock 2
 #include <embed/0xD90FE0AC.h>      // Mistlock 3
@@ -27,7 +28,9 @@
 #include <embed/0x7DF6F3AD.h>      // Mesmer 3
 #include <embed/0x9D19DDCF.h>      // Mesmer 4
 #include <embed/0x5019ED9B.h>      // Mesmer 5
-#include <embed/0xD5804E21.h>      // Light Rays
+#include <embed/0xA437811A.h>      // Necro
+#include <embed/0x053DC742.h>      // Vermillion
+#include <embed/0xEC3267AA.h>      // Falling Star
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -84,6 +87,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //
+    CustomShaderEntry(0xD5804E21),      // Light rays                                                    // (to prevent leaks)
     CustomShaderEntry(0x88DE9EDE),      // Mistlock 1                                        dirty fix for artifacts
     CustomShaderEntry(0x24CE1FCB),      // Mistlock 2                                   same here, no clue what's going on
     CustomShaderEntry(0xD90FE0AC),      // Mistlock 3                                       something about alpha
@@ -91,12 +95,14 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x187268D3),      // Environment Zone Intensity                   alpha stuff, no clue again but it looks nice
     CustomShaderEntry(0x66130D94),      // Slideshow cutscenes                          remove negative colors to fix stuff
     CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate
-    CustomShaderEntry(0x38A5D61E),      // Mesmer spell 1                                         alpha saturate
-    CustomShaderEntry(0x46E87959),      // Mesmer spell 2                                         alpha saturate
-    CustomShaderEntry(0x7DF6F3AD),      // Mesmer spell 3                                         alpha saturate
-    CustomShaderEntry(0x9D19DDCF),      // Mesmer spell 4                                         alpha saturate
-    CustomShaderEntry(0x5019ED9B),      // Mesmer spell 5                                         alpha saturate
-    CustomShaderEntry(0xD5804E21),      // Light rays                                 removed negative colors to avoid leaks
+    CustomShaderEntry(0x38A5D61E),      // Mesmer spell 1                                             //
+    CustomShaderEntry(0x46E87959),      // Mesmer spell 2                                             //
+    CustomShaderEntry(0x7DF6F3AD),      // Mesmer spell 3                                             //
+    CustomShaderEntry(0x9D19DDCF),      // Mesmer spell 4                                             //
+    CustomShaderEntry(0x5019ED9B),      // Mesmer spell 5                                             //
+    CustomShaderEntry(0xA437811A),      // necro spell                                                //
+    CustomShaderEntry(0x053DC742),      // vermillion feather                                         //
+    CustomShaderEntry(0xEC3267AA),      // falling star spear                                        /=/
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
