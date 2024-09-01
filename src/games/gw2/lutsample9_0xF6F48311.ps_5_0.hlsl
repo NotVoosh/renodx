@@ -49,6 +49,9 @@ void main(
   r0.xyz = float3(1,1,1) + -r0.xyz;
   r1.xyz = cb0[0].xyz * r1.xyz * injectedData.fxBloom;              // Bloom
   r1.xyz = -r1.xyz * float3(2,2,2) + float3(1,1,1);
+    
+   		r1.rgb = max(0, r1.rgb);				// highlight color fix
+
   r0.xyz = -r0.xyz * r1.xyz + float3(1,1,1);
   r0.w = r0.w * 2 + -1;
   r1.x = cmp(r0.w < -0.00999999978);

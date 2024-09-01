@@ -33,6 +33,10 @@
 #include <embed/0xA437811A.h>      // Necro
 #include <embed/0x053DC742.h>      // Vermillion
 #include <embed/0xEC3267AA.h>      // Falling Star
+#include <embed/0x3E7DA787.h>      // Metrica 1
+#include <embed/0x4F249A2F.h>      // Metrica 2
+#include <embed/0x00EB18B3.h>      // Metrica 3
+#include <embed/0xB7069766.h>      // Metrica 4
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -108,6 +112,10 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xA437811A),      // necro spell                                                //
     CustomShaderEntry(0x053DC742),      // vermillion feather                                         //
     CustomShaderEntry(0xEC3267AA),      // falling star spear                                        /=/
+    CustomShaderEntry(0x3E7DA787),      // Metrica 1                                    something something saturate something
+    CustomShaderEntry(0x4F249A2F),      // Metrica 2                                                  //
+    CustomShaderEntry(0x00EB18B3),      // Metrica 3                                                  //
+    CustomShaderEntry(0xB7069766),      // Metrica 4                                                  //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -223,8 +231,8 @@ renodx::utils::settings::Settings settings = {
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x87581D,
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.005f; },
+        .max = 99.f,
+        .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
