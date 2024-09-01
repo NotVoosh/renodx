@@ -38,11 +38,12 @@ void main(
   r0.xyz = t1.Sample(s1_s, w0.xy).xyz;
   r0.xyz = cb0[0].xyz * r0.xyz * injectedData.fxBloom;						// Bloom
   r0.xyz = -r0.xyz * float3(2,2,2) + float3(1,1,1);
+	
+		r0.rgb = max(0, r0.rgb);				// highlight color fix
+
   r1.xyz = t0.Sample(s0_s, v0.xy).xyz;
   r1.xyz = float3(1,1,1) + -r1.xyz;
 	
-		r1.rgb = max(0, r1.rgb);				// highlight color fix
-
   //r0.xyz = saturate(-r1.xyz * r0.xyz + float3(1,1,1));
 	r0.xyz = -r1.xyz * r0.xyz + float3(1,1,1);
 	
