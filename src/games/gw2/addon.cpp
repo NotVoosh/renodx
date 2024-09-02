@@ -231,7 +231,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x87581D,
-        .max = 99.f,
+        .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{

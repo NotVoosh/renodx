@@ -14,8 +14,13 @@ float3 applyFilmGrain(float3 outputColor, float2 screen){
 
 float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSampler, float3 vanilla, float2 screenXY){
 		
-		float3 outputColor = LUTless;
-
+		float3 outputColor;
+			
+				if (injectedData.toneMapType == 0){
+			outputColor = lerp(LUTless, vanilla, injectedData.colorGradeLUTStrength);
+			} else {
+			outputColor = LUTless;
+			}
 			outputColor= max(0, renodx::color::bt709::from::SRGB(outputColor));
 			
 			renodx::tonemap::Config config = renodx::tonemap::config::Create();
@@ -30,9 +35,11 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CLAMPED;
-			config.hue_correction_color = vanilla;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
+			config.hue_correction_color =  lerp(
+				LUTless,
+				renodx::tonemap::Reinhard(LUTless),
+				injectedData.toneMapHueCorrection);
 			config.reno_drt_saturation = 1.04f;
 			
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
@@ -43,8 +50,10 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			renodx::lut::config::type::SRGB,							//           about this
 			16.f);
 			
+				if(injectedData.toneMapType != 0) {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
-			
+			}
+
 			    if (injectedData.fxFilmGrain) {
 			outputColor = applyFilmGrain(outputColor, screenXY);
 			}
@@ -76,7 +85,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CLAMPED;
 			config.hue_correction_color = vanilla;
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
-			config.reno_drt_saturation = 1.04f;
+			config.reno_drt_saturation = 1.02f;
 			
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			
