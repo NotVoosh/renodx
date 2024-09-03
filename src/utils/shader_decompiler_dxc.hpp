@@ -8,6 +8,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <exception>
 #include <format>
@@ -15,6 +16,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <print>
 #include <regex>
@@ -984,21 +986,36 @@ class Decompiler {
     }
   };
 
-  struct PreprocessState {
-    std::vector<Signature> input_signature;
-    std::vector<Signature> output_signature;
-    std::vector<ResourceDescription> resource_descriptions;
-    std::map<std::string, std::string> global_variables;
-    std::map<std::string, std::string> resource_binding_variables;
-    std::vector<SRVResource> srv_resources;
-    std::vector<UAVResource> uav_resources;
-    std::vector<CBVResource> cbv_resources;
-    std::vector<SamplerResource> sampler_resources;
+  struct DataType {
+    size_t array_size;
+    size_t vector_size;
+    std::string data_type;
+
+    explicit DataType(std::string_view line) {
+      static auto regex = std::regex{R"(^(?:\[(\S+) x )?(?:<(\S+) x )?(\w+)(\*)?>?\]?$)"};
+      const auto [array_size, vector_size, data_type, is_pointer] = StringViewMatch<4>(line, regex);
+      if (array_size.empty()) {
+        this->array_size = 0;
+      } else {
+        FromStringView(array_size, this->array_size);
+      }
+      if (vector_size.empty()) {
+        this->vector_size = 0;
+      } else {
+        FromStringView(vector_size, this->vector_size);
+      }
+      if (data_type == "i32") {
+        this->data_type = "int";
+      } else {
+        this->data_type = data_type;
+      }
+    }
   };
 
   struct TypeDefinition {
     std::string_view name;
-    std::vector<std::string_view> types;
+    std::vector<std::pair<std::string, DataType>> types;
+    std::optional<uint32_t> size;
 
     TypeDefinition() = default;
 
@@ -1011,8 +1028,96 @@ class Decompiler {
       this->name = name;
 
       static auto type_split = std::regex(R"( ((?:[^%][^},]+)|(?:%"[^"]+"))(?:,| ))");
-      this->types = StringViewSplitAll(types, type_split, 1);
+      auto type_strings = StringViewSplitAll(types, type_split, 1);
+      int value = 0;
+      for (const auto type : type_strings) {
+        this->types.emplace_back(std::format("value{:02}", value++), type);
+      }
     }
+  };
+
+  struct PreprocessState {
+    std::vector<Signature> input_signature;
+    std::vector<Signature> output_signature;
+    std::vector<ResourceDescription> resource_descriptions;
+    std::map<std::string, std::string> global_variables;
+    std::map<std::string, std::pair<std::string, uint32_t>> resource_binding_variables;
+    std::vector<SRVResource> srv_resources;
+    std::vector<UAVResource> uav_resources;
+    std::vector<CBVResource> cbv_resources;
+    std::vector<SamplerResource> sampler_resources;
+    std::map<std::string_view, TypeDefinition> type_definitions;
+
+    size_t GetTypeSize(const std::string& name) {
+      uint32_t data_type_size;
+      if (name == "float") {
+        return 32 / 8;
+      }
+      if (name == "int") {
+        return 32 / 8;
+      }
+      if (name == "i32") {
+        return 32 / 8;
+      }
+      if (name == "bool") {
+        return 8 / 8;
+      }
+
+      auto& definition = type_definitions[name];
+      return GetTypeDefinitionSize(definition);
+    }
+
+    size_t GetTypeDefinitionSize(TypeDefinition& type_definition) {
+      if (type_definition.size.has_value()) return type_definition.size.value();
+      size_t size = 0;
+      for (auto& [name, type] : type_definition.types) {
+        uint32_t data_type_size = GetTypeSize(type.data_type);
+        if (type.vector_size > 1) {
+          data_type_size *= type.vector_size;
+        }
+        if (type.array_size > 1) {
+          data_type_size *= type.array_size;
+        }
+        size += data_type_size;
+      }
+      type_definition.size = size;
+      return size;
+    }
+
+    TypeDefinition& GetCBVType(CBVResource cbv_resource) {
+      auto type_name = cbv_resource.pointer.substr(0, cbv_resource.pointer.length() - 1);
+      auto& definition = type_definitions[type_name];
+      return definition;
+    }
+
+    std::string DataTypeNameAtIndex(std::span<std::pair<std::string, DataType>> data_types, uint32_t index) {
+      std::string name = "";
+      auto current_index = 0;
+      auto pending = index;
+      for (auto& [name, type] : data_types) {
+        uint32_t base_size = GetTypeSize(type.data_type);
+        uint32_t data_type_size = base_size;
+        if (type.vector_size > 1) {
+          data_type_size *= type.vector_size;
+        }
+        if (type.array_size > 1) {
+          data_type_size *= type.array_size;
+        }
+        if (pending > data_type_size) {
+          pending -= data_type_size;
+          continue;
+        }
+
+        // in this type
+        if (type.vector_size > 1) {
+        }
+      }
+      return name;
+    };
+    std::string CBVVariableNameAtIndex(CBVResource& cbv_resource, uint32_t index) {
+      auto name = DataTypeNameAtIndex(GetCBVType(cbv_resource).types, index);
+      return "";
+    };
   };
 
   struct CodeBranch {
@@ -1023,6 +1128,7 @@ class Decompiler {
 
   struct CodeBlock {
     std::vector<std::string> hlsl_lines;
+    std::vector<std::string> phi_lines;
     CodeBranch branch;
   };
 
@@ -1074,19 +1180,19 @@ class Decompiler {
           if (resource_class == "0") {
             auto srv = preprocess_state.srv_resources[index_value];
             decompiled = std::format("// texture _{} = {};", variable, srv.name);
-            preprocess_state.resource_binding_variables[std::string(variable)] = srv.name;
+            preprocess_state.resource_binding_variables[std::string(variable)] = {srv.name, index_value};
           } else if (resource_class == "1") {
             auto uav = preprocess_state.uav_resources[index_value];
             decompiled = std::format("// rwtexture _{} = {};", variable, uav.name);
-            preprocess_state.resource_binding_variables[std::string(variable)] = uav.name;
+            preprocess_state.resource_binding_variables[std::string(variable)] = {uav.name, index_value};
           } else if (resource_class == "2") {
             auto cbv = preprocess_state.cbv_resources[index_value];
             decompiled = std::format("// cbuffer _{} = {};", variable, cbv.name);
-            preprocess_state.resource_binding_variables[std::string(variable)] = cbv.name;
+            preprocess_state.resource_binding_variables[std::string(variable)] = {cbv.name, index_value};
           } else if (resource_class == "3") {
             auto sampler = preprocess_state.sampler_resources[index_value];
-            decompiled = std::format("// SamplerState _{} = s{};", variable, sampler.name);
-            preprocess_state.resource_binding_variables[std::string(variable)] = sampler.name;
+            decompiled = std::format("// SamplerState _{} = {};", variable, sampler.name);
+            preprocess_state.resource_binding_variables[std::string(variable)] = {sampler.name, index_value};
           } else {
             throw std::invalid_argument("Unknown resource type");
           }
@@ -1105,19 +1211,36 @@ class Decompiler {
             resource_class = inner_params[3];
           }
 
+          int index_value;
+          FromStringView(index, index_value);
           if (resource_class == "0") {
-            decompiled = std::format("// texture _{} = t{};", variable, ParseInt(index));
-            preprocess_state.resource_binding_variables[std::string(variable)] = std::format("t{}", ParseInt(index));
+            auto srv = preprocess_state.srv_resources[index_value];
+            decompiled = std::format("// texture _{} = {};", variable, srv.name);
+            preprocess_state.resource_binding_variables[std::string(variable)] = {srv.name, index_value};
+          } else if (resource_class == "1") {
+            auto uav = preprocess_state.uav_resources[index_value];
+            decompiled = std::format("// rwtexture _{} = {};", variable, uav.name);
+            preprocess_state.resource_binding_variables[std::string(variable)] = {uav.name, index_value};
           } else if (resource_class == "2") {
-            decompiled = std::format("// cbuffer _{} = cb{};", variable, ParseInt(index));
-            preprocess_state.resource_binding_variables[std::string(variable)] = std::format("cb{}", ParseInt(index));
+            int space_value;
+            int bind_start_value;
+            FromStringView(space, space_value);
+            FromStringView(bind_start, bind_start_value);
+            auto cbv = std::find_if(preprocess_state.cbv_resources.begin(), preprocess_state.cbv_resources.end(), [&](CBVResource& resource) {
+              return resource.space == space_value && resource.signature_index == bind_start_value;
+            });
+            int real_index = cbv - preprocess_state.cbv_resources.begin();
+            decompiled = std::format("// cbuffer _{} = {}; // index={}", variable, cbv->name, real_index);
+            preprocess_state.resource_binding_variables[std::string(variable)] = {cbv->name, real_index};
           } else if (resource_class == "3") {
-            decompiled = std::format("// SamplerState _{} = s{};", variable, ParseInt(index));
-            preprocess_state.resource_binding_variables[std::string(variable)] = std::format("s{}", ParseInt(index));
+            auto sampler = preprocess_state.sampler_resources[index_value];
+            decompiled = std::format("// SamplerState _{} = {};", variable, sampler.name);
+            preprocess_state.resource_binding_variables[std::string(variable)] = {sampler.name, index_value};
           } else {
             throw std::invalid_argument("Unknown resource type");
           }
         } else if (functionName == "@dx.op.annotateHandle") {
+          // %4 = call %dx.types.Handle @dx.op.annotateHandle(i32 216, %dx.types.Handle %3, %dx.types.ResourceProperties { i32 13, i32 644 })  ; AnnotateHandle(res,props)  resource: CBuffer
           auto [opNumber, res, props] = StringViewSplit<3>(functionParamsString, param_regex, 2);
           auto ref = std::string{res.substr(1)};
           preprocess_state.resource_binding_variables[std::string(variable)] = preprocess_state.resource_binding_variables.at(ref);
@@ -1153,11 +1276,29 @@ class Decompiler {
         } else if (functionName == "@dx.op.cbufferLoadLegacy.f32") {
           auto [opNumber, handle, regIndex] = StringViewSplit<3>(functionParamsString, param_regex, 2);
           auto ref = std::string{handle.substr(1)};
-          decompiled = std::format("float4 _{} = {}[{}u];", variable, preprocess_state.resource_binding_variables.at(ref), ParseInt(regIndex));
+          auto cbv_resource = preprocess_state.cbv_resources[preprocess_state.resource_binding_variables.at(ref).second];
+
+          uint32_t cbv_variable_index;
+          FromStringView(regIndex, cbv_variable_index);
+          auto name = preprocess_state.CBVVariableNameAtIndex(cbv_resource, cbv_variable_index);
+
+          // decompiled = std::format("// float4 _{} = {}.{};", variable, cbv_resource.name, cbv_variable_index);
+          // decompiled = std::format("float4 _{} = {}.;", variable, binding_name, cbv_index);
+          decompiled = std::format("float4 _{} = {}[{}u];", variable, cbv_resource.name, cbv_variable_index);
+
         } else if (functionName == "@dx.op.cbufferLoadLegacy.i32") {
+          // %18 = call %dx.types.CBufRet.i32 @dx.op.cbufferLoadLegacy.i32(i32 59, %dx.types.Handle %4, i32 40)  ; CBufferLoadLegacy(handle,regIndex)
           auto [opNumber, handle, regIndex] = StringViewSplit<3>(functionParamsString, param_regex, 2);
           auto ref = std::string{handle.substr(1)};
-          decompiled = std::format("int4 _{} = {}[{}u];", variable, preprocess_state.resource_binding_variables.at(ref), ParseInt(regIndex));
+          auto cbv_resource = preprocess_state.cbv_resources[preprocess_state.resource_binding_variables.at(ref).second];
+
+          uint32_t cbv_variable_index;
+          FromStringView(regIndex, cbv_variable_index);
+          auto name = preprocess_state.CBVVariableNameAtIndex(cbv_resource, cbv_variable_index);
+
+          // preprocess_state.cbv_resources[index_value];
+          // decompiled = std::format("int4 _{} = {}[{}u];", variable, cbv_name, ParseInt(regIndex));
+          decompiled = std::format("int4 _{} = {}[{}u];", variable, cbv_resource.name, cbv_variable_index);
         } else if (functionName == "@dx.op.unary.f32") {
           auto [opNumber, value] = StringViewSplit<2>(functionParamsString, param_regex, 2);
           if (auto pair = UNARY_FLOAT_OPS.find(std::string(opNumber));
@@ -1216,10 +1357,11 @@ class Decompiler {
             offset = std::format("{}", ParseInt(offset0));
           }
           // skip mipLevelOrSampleCount
+          auto srv_resource = preprocess_state.srv_resources[preprocess_state.resource_binding_variables.at(ref_resource).second];
           if (offset == "0" || offset == "int2(0, 0)" || offset == "int3(0, 0, 0)") {
-            decompiled = std::format("float4 _{} = {}.Load({});", variable, preprocess_state.resource_binding_variables.at(ref_resource), coords);
+            decompiled = std::format("float4 _{} = {}.Load({});", variable, srv_resource.name, coords);
           } else {
-            decompiled = std::format("float4 _{} = {}.Load({}, {});", variable, preprocess_state.resource_binding_variables.at(ref_resource), coords, offset);
+            decompiled = std::format("float4 _{} = {}.Load({}, {});", variable, srv_resource.name, coords, offset);
           }
 
         } else if (functionName == "@dx.op.sample.f32") {
@@ -1251,10 +1393,13 @@ class Decompiler {
           if (has_clamp) {
             throw std::invalid_argument("Unknown clamp");
           }
+
+          auto srv_resource = preprocess_state.srv_resources[preprocess_state.resource_binding_variables.at(ref_resource).second];
+          auto sampler_resource = preprocess_state.sampler_resources[preprocess_state.resource_binding_variables.at(ref_sampler).second];
           if (offset == "0" || offset == "int2(0, 0)" || offset == "int3(0, 0, 0)") {
-            decompiled = std::format("float4 _{} = {}.Sample({}, {});", variable, preprocess_state.resource_binding_variables.at(ref_resource), preprocess_state.resource_binding_variables.at(ref_sampler), coords);
+            decompiled = std::format("float4 _{} = {}.Sample({}, {});", variable, srv_resource.name, sampler_resource.name, coords);
           } else {
-            decompiled = std::format("float4 _{} = {}.Sample({}, {}, {});", variable, preprocess_state.resource_binding_variables.at(ref_resource), preprocess_state.resource_binding_variables.at(ref_sampler), coords, offset);
+            decompiled = std::format("float4 _{} = {}.Sample({}, {}, {});", variable, srv_resource.name, sampler_resource.name, coords, offset);
           }
         } else if (functionName == "@dx.op.sampleLevel.f32") {
           auto [opNumber, srv, sampler, coord0, coord1, coord2, coord3, offset0, offset1, offset2, LOD] = StringViewSplit<11>(functionParamsString, param_regex, 2);
@@ -1281,10 +1426,13 @@ class Decompiler {
           } else {
             offset = std::format("{}", ParseInt(offset0));
           }
+
+          auto srv_resource = preprocess_state.srv_resources[preprocess_state.resource_binding_variables.at(ref_resource).second];
+          auto sampler_resource = preprocess_state.sampler_resources[preprocess_state.resource_binding_variables.at(ref_sampler).second];
           if (offset == "0" || offset == "int2(0, 0)" || offset == "int3(0, 0, 0)") {
-            decompiled = std::format("float4 _{} = {}.SampleLevel({}, {}, {});", variable, preprocess_state.resource_binding_variables.at(ref_resource), preprocess_state.resource_binding_variables.at(ref_sampler), coords, ParseFloat(LOD));
+            decompiled = std::format("float4 _{} = {}.SampleLevel({}, {}, {});", variable, srv_resource.name, sampler_resource.name, coords, ParseFloat(LOD));
           } else {
-            decompiled = std::format("float4 _{} = {}.SampleLevel({}, {}, {}, {});", variable, preprocess_state.resource_binding_variables.at(ref_resource), preprocess_state.resource_binding_variables.at(ref_sampler), coords, ParseFloat(LOD), offset);
+            decompiled = std::format("float4 _{} = {}.SampleLevel({}, {}, {}, {});", variable, srv_resource.name, sampler_resource.name, coords, ParseFloat(LOD), offset);
           }
         } else if (functionName == "@dx.op.dot2.f32") {
           auto [opNumber, ax, ay, bx, by] = StringViewSplit<5>(functionParamsString, param_regex, 2);
@@ -1299,7 +1447,8 @@ class Decompiler {
         } else if (functionName == "@dx.op.rawBufferLoad.f32") {
           auto [opNumber, srv, index, elementOffset, mask, alignment] = StringViewSplit<6>(functionParamsString, param_regex, 2);
           auto ref = std::string{srv.substr(1)};
-          decompiled = std::format("float4 _{} = {}.Load({} + ({} / {}));", variable, preprocess_state.resource_binding_variables.at(ref), ParseInt(index), ParseInt(elementOffset), ParseInt(alignment));
+          auto srv_resource = preprocess_state.srv_resources[preprocess_state.resource_binding_variables.at(ref).second];
+          decompiled = std::format("float4 _{} = {}.Load({} + ({} / {}));", variable, srv_resource.name, ParseInt(index), ParseInt(elementOffset), ParseInt(alignment));
         } else {
           throw std::invalid_argument("Unknown function name");
         }
@@ -1312,8 +1461,8 @@ class Decompiler {
           // float4 value
           decompiled = std::format("float _{} = {}.{};", variable, ParseVariable(input), ParseIndex(index));
         } else if (type == R"(%dx.types.CBufRet.i32)" || type == R"(%dx.types.ResRet.i32)") {
-          // float4 value
-          decompiled = std::format("int4 _{} = {}.{};", variable, ParseVariable(input), ParseIndex(index));
+          // int4 value
+          decompiled = std::format("int _{} = {}.{};", variable, ParseVariable(input), ParseIndex(index));
         } else {
           throw std::invalid_argument("Unknown extractvalue type");
         }
@@ -1395,22 +1544,29 @@ class Decompiler {
         // phi float [ 0x3FF61108E0000000, %0 ], [ 0x3FF069AC80000000, %21 ], [ 0x3FE6412500000000, %23 ], [ %27, %25 ]
         auto [type, arguments] = StringViewMatch<2>(assignment, std::regex{R"(phi (\S+) (.+))"});
         // Declare variable
-        auto declaration_line = std::format("{} _{};", type, variable);
-        this->code_blocks[0].hlsl_lines.push_back(declaration_line);
+        auto declaration_line = std::format("{} _{};", ParseType(type), variable);
+        this->code_blocks[0].phi_lines.push_back(declaration_line);
 
         auto pairs = StringViewSplitAll(arguments, std::regex{R"((\[ (\S+), %(\S+) \]),?)"}, {2, 3});
         for (const auto& [value, function_number] : pairs) {
           int function_int;
           FromStringView(function_number, function_int);
           auto assignment_line = std::format("_{} = {};", variable, ParseFloat(value));
-          this->code_blocks[function_int].hlsl_lines.push_back(assignment_line);
+          this->code_blocks[function_int].phi_lines.push_back(assignment_line);
         }
       } else if (instruction == "load") {
         // load float, float* %1681, align 4, !tbaa !26
         auto [source] = StringViewMatch<1>(assignment, std::regex{R"(load \S+, \S+ %(\S+),.*)"});
         decompiled = std::format("float _{} = {};", variable, stored_pointers[source]);
       } else if (instruction == "bitcast") {
-        // noop
+        // %63 = bitcast i32 %62 to float
+        auto [source_type, source_variable, dest_type] = StringViewMatch<3>(assignment, std::regex{R"(bitcast (\S+) %(\S+) to (\S+))"});
+        if (source_type.empty()) {
+          decompiled = std::format("// {}", line);
+        } else {
+          auto real_type = ParseType(dest_type);
+          decompiled = std::format("{} _{} = ({})_{};", real_type, variable, real_type, source_variable);
+        }
       } else if (instruction == "getelementptr") {
         auto [source, index] = StringViewMatch<2>(
             assignment,
@@ -1436,12 +1592,16 @@ class Decompiler {
       }
 
       if (!decompiled.empty()) {
+        // this->current_code_block.hlsl_lines.push_back(std::format("// {} ", line));
         this->current_code_block.hlsl_lines.push_back(decompiled);
       }
     }
 
     void CloseBranch() {
-      this->code_blocks[this->current_code_block_number] = this->current_code_block;
+      // may already exist via phi
+      auto& previous_code_block = this->code_blocks[this->current_code_block_number];
+      previous_code_block.branch = this->current_code_block.branch;
+      previous_code_block.hlsl_lines = this->current_code_block.hlsl_lines;
       this->current_code_block_number = -1;
       this->current_code_block = {};
     }
@@ -1564,6 +1724,25 @@ class Decompiler {
 
       return convergences;
     }
+
+    auto ListRecursions() {
+      std::map<int, std::set<int>> recursions;
+
+      for (const auto& [line_number, code_block] : code_blocks) {
+        if (code_block.branch.branch_condition_true != -1) {
+          if (line_number >= code_block.branch.branch_condition_true) {
+            recursions[code_block.branch.branch_condition_true].emplace(line_number);
+          }
+        }
+        if (code_block.branch.branch_condition_false != -1) {
+          if (line_number >= code_block.branch.branch_condition_false) {
+            recursions[code_block.branch.branch_condition_false].emplace(line_number);
+          }
+        }
+      }
+
+      return recursions;
+    }
   };
 
   PreprocessState preprocess_state;
@@ -1584,7 +1763,7 @@ class Decompiler {
   BufferDefinition current_buffer_definition;
   std::vector<BufferDefinition> buffer_definitions;
   size_t current_buffer_definition_depth = 0;
-  std::vector<TypeDefinition> type_definitions;
+
   std::vector<CodeFunction> code_functions;
   CodeFunction current_code_function;
   std::map<std::string_view, std::vector<std::string_view>> named_metadata;
@@ -1628,13 +1807,13 @@ class Decompiler {
     this->preprocess_state.resource_descriptions.clear();
     this->preprocess_state.global_variables.clear();
     this->preprocess_state.resource_binding_variables.clear();
+    this->preprocess_state.type_definitions.clear();
     this->pipeline_infos.clear();
     this->view_id_state_info.clear();
     this->sha256_hash = "";
     this->current_buffer_definition = {};
     this->buffer_definitions.clear();
     this->current_buffer_definition_depth = 0;
-    this->type_definitions.clear();
     this->code_functions.clear();
     this->current_code_function = {};
     this->output_lines.clear();
@@ -1895,13 +2074,13 @@ class Decompiler {
               throw std::invalid_argument("Unexpected line");
             }
             break;
-          case TokenizerState::TYPE_DEFINITION:
-            if (line == "" || line[0] != '%') {
-              state = TokenizerState::WHITESPACE;
-            }
-            type_definitions.emplace_back(line);
+          case TokenizerState::TYPE_DEFINITION: {
+            auto type_definition = TypeDefinition(line);
+            preprocess_state.type_definitions[type_definition.name] = type_definition;
+
             line_number++;
-            break;
+            state = TokenizerState::WHITESPACE;
+          } break;
           case TokenizerState::FUNCTION_DESCRIPTION:
           case TokenizerState::FUNCTION_DECLARE:
           case TokenizerState::FUNCTION_ATTRIBUTES:
@@ -1954,7 +2133,7 @@ class Decompiler {
               }
             }
             decompiled << " };";
-            std::cout << decompiled.str() << std::endl;
+            // std::cout << decompiled.str() << std::endl;
             preprocess_state.global_variables[std::string{variable_name}] = output_name;
 
             state = TokenizerState::WHITESPACE;
@@ -2005,6 +2184,36 @@ class Decompiler {
 
     std::stringstream string_stream;
 
+    // Type Definitions
+#if 0
+    bool added_type_definition = false;
+    for (const auto& [name, definition] : preprocess_state.type_definitions) {
+      // Only add hostlayout to root. The rest are inline.
+      static const std::string PREFIX = "%hostlayout.struct.";
+      static const auto PREFIX_LENGTH = PREFIX.length();
+      if (!name.starts_with(PREFIX)) continue;
+
+      string_stream << "struct " << name.substr(PREFIX_LENGTH) << " {\n";
+      for (const auto& [name, info] : definition.types) {
+        string_stream << "  " << info.data_type;
+        if (info.vector_size > 1) {
+          string_stream << info.vector_size;
+        }
+        string_stream << " " << name;
+        if (info.array_size > 1) {
+          string_stream << "[" << info.array_size << "]";
+        }
+        string_stream << ";\n";
+      }
+      string_stream << "};\n";
+      added_type_definition = true;
+    }
+
+    if (!preprocess_state.type_definitions.empty()) {
+      string_stream << "\n";
+    }
+#endif
+
     // Resources
 
     auto resource_list_reference = named_metadata["!dx.resources"][0];
@@ -2020,15 +2229,21 @@ class Decompiler {
     preprocess_state.srv_resources.reserve(srv_list.size());
     for (const auto srv_key : srv_list) {
       // srv_resources.emplace_back(named_metadata[srv_key], named_metadata);
+
       auto srv_resource = SRVResource(named_metadata[srv_key], named_metadata);
+      srv_resource.UpdateNameFromDescription(preprocess_state.resource_descriptions);
+
+      if (srv_resource.element_type == SRVResource::ComponentType::Invalid) {
+        string_stream << "struct _" << srv_resource.name << " {\n";
+        string_stream << "  float4 data[" << srv_resource.stride << "];\n";
+        string_stream << "};\n";
+      }
       string_stream << SRVResource::ResourceKindString(srv_resource.shape);
       if (srv_resource.element_type != SRVResource::ComponentType::Invalid) {
         string_stream << "<" << SRVResource::ComponentTypeString(srv_resource.element_type) << ">";
       } else {
-        string_stream << "< (" << srv_resource.stride << " bytes) >";
+        string_stream << "<_" << srv_resource.name << ">";
       }
-
-      srv_resource.UpdateNameFromDescription(preprocess_state.resource_descriptions);
 
       string_stream << " " << srv_resource.name;
       string_stream << " : register(t" << srv_resource.signature_index;
@@ -2091,8 +2306,33 @@ class Decompiler {
         string_stream << ", space" << cbv_resource.space;
       }
       string_stream << ") {\n";
+
+#if 0
+      auto type_name = cbv_resource.pointer.substr(0, cbv_resource.pointer.length() - 1);
+      auto definition = preprocess_state.type_definitions[type_name];
+      string_stream << "  struct " << definition.name.substr(1) << " {\n";
+      for (const auto& [name, info] : definition.types) {
+        auto size = preprocess_state.GetTypeSize(std::string(info.data_type));
+        string_stream << "    " << info.data_type;
+        if (info.vector_size > 1) {
+          string_stream << info.vector_size;
+          size *= info.vector_size;
+        }
+        string_stream << " " << name;
+        if (info.array_size > 1) {
+          string_stream << "[" << info.array_size << "]";
+          size *= info.array_size;
+        }
+        string_stream << ";";
+        string_stream << "  // " << size;
+        string_stream << "\n";
+      }
+      string_stream << "  } " << cbv_resource.name << " : packoffset(c0);\n";
+#else
       string_stream << "  float4 " << cbv_resource.name;
       string_stream << "[" << ceil(static_cast<float>(cbv_resource.buffer_size) / 16.f) << "] : packoffset(c0);\n";
+#endif
+
       string_stream << "};\n";
       preprocess_state.cbv_resources.push_back(cbv_resource);
     }
@@ -2108,7 +2348,7 @@ class Decompiler {
       sampler_list = named_metadata[sampler_list_key];
     }
     preprocess_state.sampler_resources.reserve(sampler_list.size());
-    for (const auto sampler_key : sampler_list) {
+    for (const auto& sampler_key : sampler_list) {
       // sampler_resources.emplace_back(named_metadata[sampler_key], named_metadata);
       auto sampler_resource = SamplerResource(named_metadata[sampler_key], named_metadata);
       sampler_resource.UpdateNameFromDescription(preprocess_state.resource_descriptions);
@@ -2139,51 +2379,122 @@ class Decompiler {
     // Parse Lines
     int line_spacing = 2;
     std::vector<int> pending_convergences = {};
+    std::vector<std::set<int>> pending_recursions = {};
+    std::vector<int> current_loops = {};
     current_code_function.DecompileLines(preprocess_state);
+
     auto convergences = current_code_function.ListConvergences();
+    auto recursions = current_code_function.ListRecursions();
+
+#if DECOMPILE_DEBUG
+    for (const auto& [a, b] : convergences) {
+      std::cout << "Convergences " << a << " = ";
+      for (const auto c : b) {
+        std::cout << c << " | ";
+      }
+      std::cout << "\n";
+    }
+
+    for (const auto& [a, b] : recursions) {
+      std::cout << "Recursion " << a << " = ";
+      for (const auto c : b) {
+        std::cout << c << " | ";
+      }
+      std::cout << "\n";
+    }
+
+    for (const auto& [a, b] : recursions) {
+      std::cout << "Recursion " << a << " = ";
+      for (const auto c : b) {
+        std::cout << c << " | ";
+      }
+      std::cout << "\n";
+    }
+#endif
+
     std::function<void(int line_number)> append_code_block = [&](int line_number) {
       std::string spacing;
       spacing.insert(0, line_spacing, ' ');
+      std::set<int> recursion_pops;
+      if (!pending_recursions.empty()) {
+        recursion_pops = pending_recursions.rbegin()[0];
+      }
+
+      bool using_recursion = recursions.contains(line_number);
+      if (using_recursion) {
+        pending_recursions.push_back(recursions[line_number]);
+        current_loops.push_back(line_number);
+        string_stream << spacing << "while(true) {\n";
+        line_spacing += 2;
+        spacing.insert(0, 2, ' ');
+        // break at these
+      }
+
+      auto on_continue = [&]() {
+      };
+
+      auto on_complete = [&]() {
+        if (using_recursion) {
+          string_stream << spacing << "break;\n";
+          line_spacing -= 2;
+          spacing = "";
+          spacing.insert(0, line_spacing, ' ');
+          string_stream << spacing << "}\n";
+          pending_recursions.pop_back();
+          current_loops.pop_back();
+        }
+      };
 
       auto& code_block = current_code_function.code_blocks[line_number];
       for (const auto& hlsl_line : code_block.hlsl_lines) {
         string_stream << spacing << hlsl_line << "\n";
       }
+      for (const auto& phi_line : code_block.phi_lines) {
+        string_stream << spacing << phi_line << "\n";
+      }
+
+      int current_loop = current_loops.empty() ? -1 : current_loop = current_loops.rbegin()[0];
 
       if (code_block.branch.branch_condition_true <= 0) return;
 
-      if (code_block.branch.branch_condition_true <= line_number) {
-        throw std::exception("Loop detected.");
-      }
-
       int next_convergence = pending_convergences.empty() ? -1 : pending_convergences.rbegin()[0];
 
+      auto on_branch = [&](int branch_number) {
+        if (current_loop == code_block.branch.branch_condition_true) {
+          string_stream << spacing << "continue;\n";  // go back
+        } else if (next_convergence == branch_number) {
+          // noop
+        } else {
+          append_code_block(branch_number);
+        }
+      };
+
       if (code_block.branch.branch_condition.empty()) {
-        if (next_convergence == code_block.branch.branch_condition_true) return;
-        append_code_block(code_block.branch.branch_condition_true);
-        return;
+        on_branch(code_block.branch.branch_condition_true);
+        return on_complete();
       }
 
-      if (code_block.branch.branch_condition_false <= line_number) {
-        throw std::exception("Loop detected.");
+      if (code_block.branch.branch_condition_false <= line_number
+          && code_block.branch.branch_condition_true <= line_number) {
+        throw std::exception("Unsupported loop detected.");
       }
 
       if (code_block.branch.branch_condition_true == next_convergence) {
         string_stream << spacing << "if (!" << code_block.branch.branch_condition << ") {\n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_false);
+        on_branch(code_block.branch.branch_condition_false);
         line_spacing -= 2;
         string_stream << spacing << "}\n";
-        return;
+        return on_complete();
       }
 
       if (code_block.branch.branch_condition_false == next_convergence) {
         string_stream << spacing << "if (" << code_block.branch.branch_condition << ") {\n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_true);
+        on_branch(code_block.branch.branch_condition_true);
         line_spacing -= 2;
         string_stream << spacing << "}\n";
-        return;
+        return on_complete();
       }
 
       // Find next convergence for these two items
@@ -2202,34 +2513,34 @@ class Decompiler {
       if (pair_convergence == code_block.branch.branch_condition_true) {
         string_stream << spacing << "if (!" << code_block.branch.branch_condition << ") {\n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_false);
+        on_branch(code_block.branch.branch_condition_false);
         line_spacing -= 2;
         string_stream << spacing << "}\n";
         // Only print else
       } else if (pair_convergence == code_block.branch.branch_condition_false) {
         string_stream << spacing << "if (" << code_block.branch.branch_condition << ") {\n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_true);
+        on_branch(code_block.branch.branch_condition_true);
         line_spacing -= 2;
         string_stream << spacing << "}\n";
       } else if (code_block.branch.branch_condition_true < code_block.branch.branch_condition_false) {
         string_stream << spacing << "if (" << code_block.branch.branch_condition << ") {\n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_true);
+        on_branch(code_block.branch.branch_condition_true);
         line_spacing -= 2;
         string_stream << spacing << "} else { \n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_false);
+        on_branch(code_block.branch.branch_condition_false);
         line_spacing -= 2;
         string_stream << spacing << "}\n";
       } else {
         string_stream << spacing << "if (!" << code_block.branch.branch_condition << ") {\n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_false);
+        on_branch(code_block.branch.branch_condition_false);
         line_spacing -= 2;
         string_stream << spacing << "} else { \n";
         line_spacing += 2;
-        append_code_block(code_block.branch.branch_condition_true);
+        on_branch(code_block.branch.branch_condition_true);
         line_spacing -= 2;
         string_stream << spacing << "}\n";
       }
@@ -2238,6 +2549,7 @@ class Decompiler {
         pending_convergences.pop_back();
         append_code_block(pair_convergence);
       };
+      on_complete();
     };
 
     auto output_signature_count = preprocess_state.output_signature.size();
