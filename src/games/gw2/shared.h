@@ -26,11 +26,11 @@ struct ShaderInjectData {
   float colorGradeColorSpace;
   float colorGradeColorTint;
   float fxBloom;
+  float fxLightAdaptation;
   float fxDof;
   float fxVignette;
   float fxFog;
   float fxFilmGrain;
-  float fxRaiseJoko;
   float elapsedTime;
 };
 

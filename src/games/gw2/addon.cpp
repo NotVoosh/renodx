@@ -352,6 +352,17 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxLightAdaptation",
+        .binding = &shader_injection.fxLightAdaptation,
+        .default_value = 100.f,
+        .label = "Light Adaptation",
+        .section = "Effects",
+        .tooltip = "Scales game's original Light Adaptation.",
+        .tint = 0x67A833,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxDof",
         .binding = &shader_injection.fxDof,
         .default_value = 50.f,
@@ -396,17 +407,6 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
-        .key = "fxRaiseJoko",
-        .binding = &shader_injection.fxRaiseJoko,
-        .default_value = 0.f,
-        .label = "Raise Joko!",
-        .section = "Joko",
-        .tooltip = "Elder Dragon food. Workaround for game Color Grading crushing blacks.",
-        .tint = 0x2C9D5D,
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.02f; },
-    },
-    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
         .label = "Discord",
         .section = "Links",
@@ -439,7 +439,7 @@ renodx::utils::settings::Settings settings = {
     */
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. Light Adaptation should work but isn't recommended as it defeats the purpose.",
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above.",
         .section = "Instructions",
     },
 };
@@ -463,11 +463,11 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeColorSpace", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeColorTint", 100.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 100.f);
+  renodx::utils::settings::UpdateSetting("fxLightAdaptation", 100.f);
   renodx::utils::settings::UpdateSetting("fxDof", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFog", 100.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
-  renodx::utils::settings::UpdateSetting("fxRaiseJoko", 0);
 }
 
 auto start = std::chrono::steady_clock::now();

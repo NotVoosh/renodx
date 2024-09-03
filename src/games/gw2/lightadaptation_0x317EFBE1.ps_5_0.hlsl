@@ -37,8 +37,17 @@ void main(
   r0.x = frac(r0.x);
   r0.y = max(9.99999975e-06, cb0[1].x);
   r1.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
+  
+		float3 preLA = r1.rgb;
+		
   r1.xyz = r1.xyz * r1.xyz;
-  o0.w = saturate(r1.w);
+  //o0.w = saturate(r1.w);
+	o0.w = r1.w;
+
+		if(injectedData.toneMapType == 0) {
+        o0.w = saturate(o0.w);
+		}
+		
   r0.z = dot(float3(0.212599993,0.715200007,0.0722000003), r1.xyz);
   r0.w = log2(r0.z);
   r0.y = r0.y * r0.w;
@@ -78,6 +87,8 @@ void main(
   r1.yz = sqrt(r0.yz);
   //o0.xyz = saturate(r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) + r1.xyz);
 	o0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) + r1.xyz;
+	
+		o0.rgb = lerp(preLA, o0.rgb, injectedData.fxLightAdaptation);
 	
 		if(injectedData.toneMapType == 0) {
         o0.rgb = saturate(o0.rgb);
