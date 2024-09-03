@@ -396,6 +396,17 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxRaiseJoko",
+        .binding = &shader_injection.fxRaiseJoko,
+        .default_value = 0.f,
+        .label = "Raise Joko!",
+        .section = "Joko",
+        .tooltip = "Elder Dragon food. Workaround for game Color Grading crushing blacks.",
+        .tint = 0x2C9D5D,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
         .label = "Discord",
         .section = "Links",
@@ -456,6 +467,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFog", 100.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
+  renodx::utils::settings::UpdateSetting("fxRaiseJoko", 0);
 }
 
 auto start = std::chrono::steady_clock::now();

@@ -21,7 +21,9 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			} else {
 			outputColor = LUTless;
 			}
-			outputColor= max(0, renodx::color::bt709::from::SRGB(outputColor));
+			outputColor = max(0, renodx::color::bt709::from::SRGB(outputColor));
+			
+			
 			
 			renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -31,15 +33,24 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.gamma_correction = injectedData.toneMapGammaCorrection;
 			config.exposure = injectedData.colorGradeExposure;
 			config.highlights = injectedData.colorGradeHighlights;
+				if(injectedData.fxRaiseJoko && injectedData.colorGradeLUTStrength > 0.5f){
+			outputColor = renodx::color::correct::Gamma(outputColor, true);
+			outputColor += lerp(0, 0.0030 * injectedData.fxRaiseJoko, injectedData.colorGradeLUTStrength * 2 - 1);
+			outputColor = renodx::color::correct::Gamma(outputColor);
+			config.shadows = injectedData.colorGradeShadows - lerp(0, 0.08 * injectedData.fxRaiseJoko, injectedData.colorGradeLUTStrength * 2 - 1);
+			config.contrast = injectedData.colorGradeContrast + lerp(0, 0.15 * injectedData.fxRaiseJoko, injectedData.colorGradeLUTStrength * 2 -1);
+			} else {
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
+			}
 			config.saturation = injectedData.colorGradeSaturation;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color =  lerp(
+			config.hue_correction_color = lerp(
 				LUTless,
 				renodx::tonemap::Reinhard(LUTless),
 				injectedData.toneMapHueCorrection);
+			config.hue_correction_strength = injectedData.toneMapHueCorrection / 2;
 			config.reno_drt_saturation = 1.04f;
 			
 			renodx::lut::Config lut_config = renodx::lut::config::Create(

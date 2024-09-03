@@ -30,6 +30,7 @@ struct ShaderInjectData {
   float fxVignette;
   float fxFog;
   float fxFilmGrain;
+  float fxRaiseJoko;
   float elapsedTime;
 };
 
