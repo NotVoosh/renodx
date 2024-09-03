@@ -12,6 +12,7 @@
 #include <embed/0xA033440E.h>      // Vignette
 #include <embed/0x99068912.h>      // Depth Blur
 #include <embed/0x0DFA0CA1.h>      // Fog
+#include <embed/0x02083F96.h>      // Bloom build
 
 #include <embed/0xED61CCE3.h>      // bloom-ish
 #include <embed/0xB47204C8.h>      // SSR
@@ -90,6 +91,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xA033440E),      // Vignette
     CustomShaderEntry(0x99068912),      // Depth Blur                            "simple" scaling, might be interesting to improve
     CustomShaderEntry(0x0DFA0CA1),      // Fog                                      can be pretty thick, added alpha slider
+    CustomShaderEntry(0x02083F96),      // Bloom Build
 
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //
