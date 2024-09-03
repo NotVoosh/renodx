@@ -41,6 +41,7 @@ void main(
 		float3 preLA = r1.rgb;
 		
   //r1.xyz = r1.xyz * r1.xyz;								// Gamma 2.0
+	r1.rgb = max(0, r1.rgb);
   //o0.w = saturate(r1.w);
 	o0.w = r1.w;
 
