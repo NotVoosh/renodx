@@ -13,6 +13,7 @@
 #include <embed/0x99068912.h>      // Depth Blur
 #include <embed/0x0DFA0CA1.h>      // Fog
 #include <embed/0x02083F96.h>      // Bloom build
+#include <embed/0x8BCC2057.h>      // character select
 
 #include <embed/0xED61CCE3.h>      // bloom-ish
 #include <embed/0xB47204C8.h>      // SSR
@@ -32,6 +33,7 @@
 #include <embed/0x9D19DDCF.h>      // Mesmer 4
 #include <embed/0x5019ED9B.h>      // Mesmer 5
 #include <embed/0xA437811A.h>      // Necro
+#include <embed/0x1036913A.h>      // Rev
 #include <embed/0x053DC742.h>      // Vermillion
 #include <embed/0xEC3267AA.h>      // Falling Star
 #include <embed/0x3E7DA787.h>      // Metrica 1
@@ -92,7 +94,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x99068912),      // Depth Blur                            "simple" scaling, might be interesting to improve
     CustomShaderEntry(0x0DFA0CA1),      // Fog                                      can be pretty thick, added alpha slider
     CustomShaderEntry(0x02083F96),      // Bloom Build
-
+    CustomShaderEntry(0x8BCC2057),      // character selection background
+	
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //
     CustomShaderEntry(0xD5804E21),      // Light rays                                                    // (to prevent leaks)
@@ -112,6 +115,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x9D19DDCF),      // Mesmer spell 4                                             //
     CustomShaderEntry(0x5019ED9B),      // Mesmer spell 5                                             //
     CustomShaderEntry(0xA437811A),      // necro spell                                                //
+	CustomShaderEntry(0x1036913A),      // revenant spell                                             //
     CustomShaderEntry(0x053DC742),      // vermillion feather                                         //
     CustomShaderEntry(0xEC3267AA),      // falling star spear                                        /=/
     CustomShaderEntry(0x3E7DA787),      // Metrica 1                                    something something saturate something
