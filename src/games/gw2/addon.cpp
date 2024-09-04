@@ -96,7 +96,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x0DFA0CA1),      // Fog                                      can be pretty thick, added alpha slider
     CustomShaderEntry(0x02083F96),      // Bloom Build
     CustomShaderEntry(0x8BCC2057),      // character selection background
-	CustomShaderEntry(0xB5038743),      // worldmap								we apply game brightness here to separate the rest of UI
+	  CustomShaderEntry(0xB5038743),      // worldmap
 	
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //
@@ -117,7 +117,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x9D19DDCF),      // Mesmer spell 4                                             //
     CustomShaderEntry(0x5019ED9B),      // Mesmer spell 5                                             //
     CustomShaderEntry(0xA437811A),      // necro spell                                                //
-	CustomShaderEntry(0x1036913A),      // revenant spell                                             //
+  	CustomShaderEntry(0x1036913A),      // revenant spell                                             //
     CustomShaderEntry(0x053DC742),      // vermillion feather                                         //
     CustomShaderEntry(0xEC3267AA),      // falling star spear                                        /=/
     CustomShaderEntry(0x3E7DA787),      // Metrica 1                                    something something saturate something

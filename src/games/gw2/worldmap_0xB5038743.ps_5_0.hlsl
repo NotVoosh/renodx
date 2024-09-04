@@ -109,6 +109,6 @@ void main(
   o0.xyz = r0.xxx * r1.xyz + r0.yzw;
   o0.w = cb0[0].w;
 	
-	o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    o0.rgb *= (injectedData.toneMapGameNits + injectedData.toneMapUINits) / (2 * injectedData.toneMapUINits);
   return;
 }
