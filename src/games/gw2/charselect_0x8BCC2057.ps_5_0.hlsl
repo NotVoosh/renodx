@@ -49,6 +49,7 @@ void main(
   r0.xyz = t0.Sample(s0_s, v0.xy).xyz;
   r0.xyz = cb0[0].xyz * r0.xyz;
   o0.xyz = r0.xyz + r0.xyz;
+	
 	o0.rgb = saturate(o0.rgb);
   return;
 }

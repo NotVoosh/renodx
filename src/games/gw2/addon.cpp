@@ -14,6 +14,7 @@
 #include <embed/0x0DFA0CA1.h>      // Fog
 #include <embed/0x02083F96.h>      // Bloom build
 #include <embed/0x8BCC2057.h>      // character select
+#include <embed/0xB5038743.h>      // worldmap
 
 #include <embed/0xED61CCE3.h>      // bloom-ish
 #include <embed/0xB47204C8.h>      // SSR
@@ -95,6 +96,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x0DFA0CA1),      // Fog                                      can be pretty thick, added alpha slider
     CustomShaderEntry(0x02083F96),      // Bloom Build
     CustomShaderEntry(0x8BCC2057),      // character selection background
+	CustomShaderEntry(0xB5038743),      // worldmap								we apply game brightness here to separate the rest of UI
 	
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //
