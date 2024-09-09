@@ -36,7 +36,7 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.saturation = injectedData.colorGradeSaturation;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = pow(LUTless, 2.2f);
+			config.hue_correction_color = sign(LUTless) * pow(abs(LUTless), 2.2f);
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 			config.reno_drt_saturation = 1.04f;
 			
@@ -84,7 +84,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.saturation = injectedData.colorGradeSaturation;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CLAMPED;
-			config.hue_correction_color = renodx::color::bt709::from::SRGB(vanilla);
+			config.hue_correction_color = sign(vanilla) * pow(abs(vanilla), 2.2f);
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 			config.reno_drt_saturation = 1.02f;
 				if (injectedData.toneMapGammaCorrection == 1 || injectedData.toneMapType == 0) {
