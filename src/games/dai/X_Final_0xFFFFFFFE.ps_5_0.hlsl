@@ -15,9 +15,8 @@ void main(
     //    color = saturate(color);
     //}
 
+    color.rgb = sign(color.rgb) * pow(abs(color.rgb), 2.2f);
 
-    color.rgb = renodx::color::bt709::from::SRGB(color.rgb);
-    
     if (injectedData.toneMapType == 0) {
       color.rgb *= injectedData.toneMapGameNits / 80.f;
     } else {

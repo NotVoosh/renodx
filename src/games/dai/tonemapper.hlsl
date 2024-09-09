@@ -32,25 +32,30 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.mid_gray_value = 0.18f;
 			config.mid_gray_nits = 18.f;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = renodx::color::bt709::from::SRGB(LUTless);
+			config.hue_correction_color = injectedData.toneMapGammaCorrection ? pow(LUTless, 2.2f)
+																			  : renodx::color::bt709::from::SRGB(LUTless);
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
-		
+
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
 			injectedData.colorGradeLUTStrength,
 			injectedData.colorGradeLUTScaling,																	// doesn't seem to be doing anything but could depend on the scene...
-			renodx::lut::config::type::SRGB,																	// not sure
-			renodx::lut::config::type::SRGB,																	//           about this
+			renodx::lut::config::type::GAMMA_2_2,																	// not sure
+			renodx::lut::config::type::GAMMA_2_2,																	//           about this
 			32.f);
 			
-			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
-		if (injectedData.toneMapGammaCorrection == 1) {
-			outputColor = renodx::color::correct::GammaSafe(outputColor);
+			config.reno_drt_contrast = 1.2f;
+			config.reno_drt_saturation = 1.16f;
+	
+		if (injectedData.toneMapGammaCorrection == 0) {
+			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 		}
+			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 	
 		if (injectedData.toneMapType == 0) {																	// vanilla, looks identical but less bright and unclamped? not sure why :s
 			outputColor = lerp(LUTless, vanilla, injectedData.colorGradeLUTStrength);							// lerp for LUT slider
-			outputColor = renodx::color::bt709::from::SRGB(outputColor);
+			outputColor = injectedData.toneMapGammaCorrection ? pow(outputColor, 2.2f)
+															  :renodx::color::bt709::from::SRGB(outputColor);
 		}
 		
 		if (injectedData.fxFilmGrain) {
@@ -58,8 +63,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 		}
 	
 			outputColor *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-			
-			outputColor = renodx::color::srgb::from::BT709(outputColor);
+			outputColor = sign(outputColor) * pow(abs(outputColor), 1 / 2.2f);
 	
 	return outputColor;
 }

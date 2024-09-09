@@ -33,12 +33,17 @@ void main(
   r1.w = 1;
   r0.y = dot(r1.xyzw, float4(1.16412354,-0.813476563,-0.391448975,0.529705048));
   r0.x = dot(r1.xyw, float3(1.16412354,1.59579468,-0.87065506));
-  r0.z = dot(r1.xzw, float3(1.16412354,2.01782227,-1.08166885));
-	
-    r0.rgb = renodx::color::bt709::from::SRGB(r0.rgb);
-	r0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;			// game brightness to separate from UI elements
-    r0.rgb = renodx::color::srgb::from::BT709(r0.rgb);
-    
+  r0.z = dot(r1.xzw, float3(1.16412354,2.01782227,-1.08166885));   
   o0.xyzw = v1.xyzw * r0.xyzw;
+  
+  	o0.rgba = saturate(r0.rgba);									// clean invalid colors
+    o0.rgba = injectedData.toneMapGammaCorrection ? pow(o0.rgba, 2.2f)
+												 : renodx::color::bt709::from::SRGBA(o0.rgba);
+		float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
+	o0.rgb = renodx::tonemap::inverse::bt2446a::BT709(o0.rgb, 100.f, videoPeak);
+	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;			// game brightness to separate from UI elements
+	o0.rgb /= injectedData.toneMapUINits;
+    o0.rgb = sign(o0.rgb) * pow(abs(o0.rgb), 1 / 2.2f);
+	
   return;
 }
