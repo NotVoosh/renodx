@@ -85,7 +85,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CLAMPED;
 			config.hue_correction_color = sign(vanilla) * pow(abs(vanilla), 2.2f);
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			config.hue_correction_strength = min(0.99f, injectedData.toneMapHueCorrection);
 			config.reno_drt_saturation = 1.02f;
 				if (injectedData.toneMapGammaCorrection == 1 || injectedData.toneMapType == 0) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor);

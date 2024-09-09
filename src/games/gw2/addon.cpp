@@ -41,6 +41,7 @@
 #include <embed/0x4F249A2F.h>      // Metrica 2
 #include <embed/0x00EB18B3.h>      // Metrica 3
 #include <embed/0xB7069766.h>      // Metrica 4
+#include <embed/0x6039EAA8.h>	     // grothmar arena
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -100,7 +101,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x0DFA0CA1),      // Fog                                      can be pretty thick, added alpha slider
     CustomShaderEntry(0x02083F96),      // Bloom Build
     CustomShaderEntry(0x8BCC2057),      // character selection background
-	  CustomShaderEntry(0xB5038743),      // worldmap
+    CustomShaderEntry(0xB5038743),      // worldmap
 	
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //
@@ -128,6 +129,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x4F249A2F),      // Metrica 2                                                  //
     CustomShaderEntry(0x00EB18B3),      // Metrica 3                                                  //
     CustomShaderEntry(0xB7069766),      // Metrica 4                                                  //
+	  CustomShaderEntry(0x6039EAA8),      // Grothmar Arena                                             //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
