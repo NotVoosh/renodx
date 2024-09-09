@@ -76,7 +76,11 @@
 #include <embed/0x7904D64C.h>      // PP15
 #include <embed/0xC3B7FFE7.h>      // PP16
 
-#include <embed/0x967994F1.h>      // addons
+#include <embed/0x967994F1.h>      // addons (Nexus/Arc)
+#include <embed/0x286DAA52.h>      // gw2radial1
+#include <embed/0x09C864EA.h>      // gw2radial2
+#include <embed/0x094260C9.h>      // gw2radial3
+
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -160,6 +164,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xC3B7FFE7),      // Post-processing 16                                           //
 
     CustomShaderEntry(0x967994F1),      // external/third-party addons                       Nexus, ArcDPS, maybe others...
+    CustomShaderEntry(0x286DAA52),      // gw2radial1
+    CustomShaderEntry(0x09C864EA),      // gw2radial2
+    CustomShaderEntry(0x094260C9),      // gw2radial3
   };
 
 ShaderInjectData shader_injection;
