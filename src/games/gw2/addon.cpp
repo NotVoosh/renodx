@@ -233,6 +233,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapGammaCorrection",
         .binding = &shader_injection.toneMapGammaCorrection,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
+        .default_value = 1,
         .can_reset = false,
         .label = "Gamma Correction",
         .section = "Tone Mapping",
@@ -245,6 +246,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
+        .tooltip = "Corrects RenoDRT hue to better match original colors.",
         .tint = 0x87581D,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -454,7 +456,7 @@ renodx::utils::settings::Settings settings = {
     */
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above.",
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above. Light Adaptation intensity can be adjusted aswell.",
         .section = "Instructions",
     },
 };

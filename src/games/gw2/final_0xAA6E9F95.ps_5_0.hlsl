@@ -29,8 +29,9 @@ void main(
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
   r0.xyzw = cb0[0].xxxx * r0.xyzw;					// in-game "Gamma" (brightness) setting
   o0.xyzw = r0.xyzw;
-	o0.rgb = renodx::color::bt709::from::SRGB(o0.rgb);
-	
+
+		o0.rgba = sign(o0.rgba) * pow(abs(o0.rgba), 2.2f);
+
     		if (injectedData.colorGradeColorSpace == 1) {
 		o0.rgb = renodx::color::bt709::clamp::BT709(o0.rgb);
 		} else if (injectedData.colorGradeColorSpace == 2) {
@@ -40,8 +41,7 @@ void main(
 		}
 	
 	o0.rgb *= injectedData.toneMapUINits / 80.f;
-    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::correct::GammaSafe(o0.rgb)
-												 : o0.rgb;
+
 		if (injectedData.toneMapType == 0) {
 	o0.rgb = min(o0.rgb, injectedData.toneMapGameNits / 80.f);	// vanilla isn't clamped
 	} else if (injectedData.toneMapType != 1) {
