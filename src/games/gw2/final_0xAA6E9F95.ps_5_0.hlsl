@@ -30,8 +30,9 @@ void main(
   r0.xyzw = cb0[0].xxxx * r0.xyzw;					// in-game "Gamma" (brightness) setting
   o0.xyzw = r0.xyzw;
 
-		o0.rgba = sign(o0.rgba) * pow(abs(o0.rgba), 2.2f);
-
+		//o0.rgba = sign(o0.rgba) * pow(abs(o0.rgba), 2.2f);
+		o0.rgb = sign(renodx::color::bt709::from::SRGB(o0.rgb)) * pow(renodx::color::srgb::from::BT709(abs(renodx::color::bt709::from::SRGB(o0.rgb))), 2.2f);
+		
     		if (injectedData.colorGradeColorSpace == 1) {
 		o0.rgb = renodx::color::bt709::clamp::BT709(o0.rgb);
 		} else if (injectedData.colorGradeColorSpace == 2) {

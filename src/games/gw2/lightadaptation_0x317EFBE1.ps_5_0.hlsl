@@ -59,8 +59,10 @@ void main(
 	
 		if(injectedData.toneMapType == 0) {
         r2.g = saturate(r2.g);
+		} else {
+		r2.g = max(0, r2.g);
 		}
-	
+		
   r0.y = dot(float3(0.0193000007,0.119199999,0.950500011), r1.xyz);
   r0.w = dot(float3(0.412400007,0.357600003,0.180500001), r1.xyz);
   r1.x = r0.w + r0.z;
