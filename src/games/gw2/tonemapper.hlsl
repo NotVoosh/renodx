@@ -52,7 +52,17 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 					if (injectedData.toneMapGammaCorrection == 0) {
 				outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 				}
-			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
+						if (injectedData.toneMapType == 4){
+					outputColor = renodx::tonemap::config::Apply(outputColor, config);
+					outputColor = renodx::tonemap::frostbite::BT709(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits);
+						
+						float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, saturate(outputColor));
+					outputColor = renodx::color::correct::Hue(outputColor, sign(LUTless) * pow(abs(LUTless), 2.2f), injectedData.toneMapHueCorrection);	
+					outputColor = renodx::tonemap::UpgradeToneMap(outputColor, saturate(outputColor), lutColor, injectedData.colorGradeLUTStrength);
+					
+					} else {
+					outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
+					}
 			}
 
 			    if (injectedData.fxFilmGrain) {
@@ -90,7 +100,14 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 				if (injectedData.toneMapGammaCorrection == 0) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 			}
+			
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
+				if (injectedData.toneMapType == 4){
+			outputColor = renodx::tonemap::frostbite::BT709(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits);
+			outputColor = renodx::color::correct::Hue(outputColor, sign(vanilla) * pow(abs(vanilla), 2.2f), injectedData.toneMapHueCorrection);
+			}
+			
+			
 
 			    if (injectedData.fxFilmGrain) {
 			outputColor = applyFilmGrain(outputColor, screenXY);

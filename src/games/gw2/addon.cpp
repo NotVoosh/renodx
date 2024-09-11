@@ -42,6 +42,8 @@
 #include <embed/0x00EB18B3.h>      // Metrica 3
 #include <embed/0xB7069766.h>      // Metrica 4
 #include <embed/0x6039EAA8.h>	     // grothmar arena
+#include <embed/0x351D5100.h>      // LA clouds
+#include <embed/0xAFBAF19F.h>	     // sc eyes
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -81,7 +83,6 @@
 #include <embed/0x286DAA52.h>      // gw2radial1
 #include <embed/0x09C864EA.h>      // gw2radial2
 #include <embed/0x094260C9.h>      // gw2radial3
-
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -130,6 +131,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x00EB18B3),      // Metrica 3                                                  //
     CustomShaderEntry(0xB7069766),      // Metrica 4                                                  //
 	  CustomShaderEntry(0x6039EAA8),      // Grothmar Arena                                             //
+    CustomShaderEntry(0x351D5100),      // LA cloud                                                   //
+    CustomShaderEntry(0xAFBAF19F),      // sc eyes                                                    //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -183,7 +186,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "DICE"},
         .tint = 0x69278A,
     },
     new renodx::utils::settings::Setting{
@@ -248,7 +251,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
-        .tooltip = "Corrects RenoDRT hue to better match original colors.",
+        .tooltip = "Corrects RenoDRT and DICE hue if needed to better match original colors.",
         .tint = 0x87581D,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -519,13 +522,27 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::prevent_full_screen = false;
       renodx::mods::swapchain::use_resize_buffer = false;
       //renodx::mods::shader::trace_unmodified_shaders = true;
-
+      // copy / UI things
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 6,
+          .ignore_size = true,
+      });
+      // pretty much everything else (post-launcher, can't be indexed?)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = -1,
+      });
+      /*
       // RGBA8_unorm
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_unorm,
           .new_format = reshade::api::format::r16g16b16a16_float,
           .ignore_size = false,
       });
+
       // BGRA8_unorm
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::b8g8r8a8_unorm,
@@ -541,7 +558,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .index = 6,
           .ignore_size = true,
       });
-      
+      */
       reshade::register_event<reshade::addon_event::present>(OnPresent);
 
       break;
