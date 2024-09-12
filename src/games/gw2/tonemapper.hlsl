@@ -23,6 +23,8 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			}
 			outputColor = max(0, renodx::color::bt709::from::SRGB(outputColor));
 			
+		float3 hueCorrectionColor = sign(LUTless) * pow(abs(LUTless), 2.2f);
+			
 			renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
 			config.type = injectedData.toneMapType;
@@ -33,10 +35,12 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
+				if (injectedData.toneMapType <= 3){							// Frostbite gets that later
 			config.saturation = injectedData.colorGradeSaturation;
+			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = sign(LUTless) * pow(abs(LUTless), 2.2f);
+			config.hue_correction_color = hueCorrectionColor;
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 			config.reno_drt_saturation = 1.04f;
 			
@@ -55,11 +59,14 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 						if (injectedData.toneMapType == 4){
 					outputColor = renodx::tonemap::config::Apply(outputColor, config);
 					outputColor = renodx::tonemap::frostbite::BT709(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits);
-						
-						float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, saturate(outputColor));
-					outputColor = renodx::color::correct::Hue(outputColor, sign(LUTless) * pow(abs(LUTless), 2.2f), injectedData.toneMapHueCorrection);	
-					outputColor = renodx::tonemap::UpgradeToneMap(outputColor, saturate(outputColor), lutColor, injectedData.colorGradeLUTStrength);
 					
+						float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, saturate(outputColor));
+						
+					outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);	
+					outputColor = renodx::tonemap::UpgradeToneMap(outputColor, saturate(outputColor), lutColor, injectedData.colorGradeLUTStrength);
+					outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
+																		injectedData.colorGradeSaturation,
+																		max(0, (injectedData.colorGradeBlowout - 0.5f)) * 2, 0.f);
 					} else {
 					outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 					}
