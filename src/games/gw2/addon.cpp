@@ -26,6 +26,7 @@
 #include <embed/0x187268D3.h>      // Environment Zone Intensity
 #include <embed/0x3BC05D0D.h>      // water 1
 #include <embed/0x6C5C7797.h>      // water 2
+#include <embed/0x98553490.h>      // no AO
 #include <embed/0x66130D94.h>      // slideshow cutscenes
 #include <embed/0xDF711B8B.h>      // PoA
 #include <embed/0x38A5D61E.h>      // Mesmer 1
@@ -114,6 +115,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x187268D3),      // Environment Zone Intensity                   alpha stuff, no clue again but it looks nice
     CustomShaderEntry(0x3BC05D0D),      // Underwater fog kinda 1                           cleared negative colors
     CustomShaderEntry(0x6C5C7797),      // Underwater fog kinda 2                                     //
+    CustomShaderEntry(0x98553490),      // no AO (Crystal Oasis, maybe other)                         //
 
     CustomShaderEntry(0x66130D94),      // Slideshow cutscenes                          remove negative colors to fix stuff
     CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate

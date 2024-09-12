@@ -98,7 +98,9 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
+				if (injectedData.toneMapType <= 3){							// Frostbite gets that later
 			config.saturation = injectedData.colorGradeSaturation;
+			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CLAMPED;
 			config.hue_correction_color = sign(vanilla) * pow(abs(vanilla), 2.2f);
@@ -112,6 +114,9 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 				if (injectedData.toneMapType == 4){
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits);
 			outputColor = renodx::color::correct::Hue(outputColor, sign(vanilla) * pow(abs(vanilla), 2.2f), injectedData.toneMapHueCorrection);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
+																		injectedData.colorGradeSaturation,
+																		max(0, (injectedData.colorGradeBlowout - 0.5f)) * 2, 0.f);
 			}
 			
 			
