@@ -119,7 +119,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tint = 0xEC4E1B,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType <= 2; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{

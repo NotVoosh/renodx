@@ -48,7 +48,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::GAMMA_2_2,														//           about this
 			32.f);
 			
-			config.reno_drt_contrast = 1.145f;
+			config.reno_drt_contrast = 1.09f;
 			config.reno_drt_saturation = 1.09f;
 			config.reno_drt_flare = 0.0008f;
 	
