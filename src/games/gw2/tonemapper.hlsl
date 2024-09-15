@@ -73,7 +73,7 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 					outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);	
 					outputColor = renodx::tonemap::UpgradeToneMap(outputColor, saturate(outputColor), lutColor, injectedData.colorGradeLUTStrength);
 					outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																		injectedData.colorGradeSaturation,
+																		injectedData.colorGradeSaturation + 0.04,
 																		0.f, 0.f);
 					} else {
 					outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
