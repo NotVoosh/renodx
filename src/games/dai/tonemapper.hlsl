@@ -74,7 +74,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
 																injectedData.colorGradeSaturation + 0.07,
-																max(0, (injectedData.colorGradeBlowout - 0.5f)) * 2, 0.f);
+																0.f, 0.f);
 		} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 				if (injectedData.toneMapType == 2) {													// ACES hue correction
@@ -82,8 +82,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 		}
 	
-		if (injectedData.toneMapType == 0) {																	// vanilla, looks identical but less bright and unclamped? not sure why :s
-			outputColor = lerp(LUTless, vanilla, injectedData.colorGradeLUTStrength);							// lerp for LUT slider
+		if (injectedData.toneMapType == 0) {
+			outputColor = lerp(LUTless, vanilla, injectedData.colorGradeLUTStrength);
 			outputColor = injectedData.toneMapGammaCorrection ? pow(outputColor, 2.2f)
 															  :renodx::color::bt709::from::SRGB(outputColor);
 		}

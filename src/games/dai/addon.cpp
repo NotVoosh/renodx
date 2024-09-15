@@ -114,11 +114,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xEC4E1B,
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType <= 2; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -180,6 +181,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x3A5953,
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType == 3; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
