@@ -59,6 +59,6 @@ void main(
   r0.xyzw = r0.xyzw * cxmul.xyzw + cxadd.xyzw;
   o0.w = v2.w * r0.w;
   o0.xyz = r0.xyz;
-    o0.w = saturate(o0.w);
+    o0.w = max(0, o0.w);
   return;
 }

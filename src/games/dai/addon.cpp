@@ -62,7 +62,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
         .tint = 0xAFD8B5,
     },
     new renodx::utils::settings::Setting{
@@ -114,7 +114,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 50.f,
+        .default_value = 0.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xEC4E1B,
@@ -238,18 +238,8 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
-        .key = "miscWindowBox",
-        .binding = &shader_injection.miscWindowBox,
-        .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
-        .label = "Window-boxing",
-        .section = "Misc",
-        .tooltip = "Disable in Behaviours menu on ultrawide ratio. Has unintended side-effects.",
-        .labels = {"Off", "On"},
-    },
-    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Set Resolution Scaling at 100 & Post-Process Antialiasing (FXAA) to Off in game Graphic Settings.",
+        .label = "Set Resolution Scaling to 100 & Post-Process Antialiasing (FXAA) to Off in game Graphic Settings.",
         .section = "Instructions",
     },
 };
