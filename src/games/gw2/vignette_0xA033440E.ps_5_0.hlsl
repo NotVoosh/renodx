@@ -49,5 +49,6 @@ void main(
   r1.xyz = r0.yzw + r0.yzw;
   r1.xyzw = float4(-1,-1,-1,-1) + r1.xyzw;
   o0.xyzw = r0.xxxx * r1.xyzw + float4(1,1,1,1);
+		o0.rgb = pow(o0.rgb, 1 / 2.2f);
   return;
 }

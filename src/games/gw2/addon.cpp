@@ -45,6 +45,8 @@
 #include <embed/0x6039EAA8.h>	     // grothmar arena
 #include <embed/0x351D5100.h>      // LA clouds
 #include <embed/0xAFBAF19F.h>	     // sc eyes
+#include <embed/0xBFAC7226.h>	     // conflux
+#include <embed/0x9CAD85A7.h>	     // sb fc
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -135,6 +137,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 	  CustomShaderEntry(0x6039EAA8),      // Grothmar Arena                                             //
     CustomShaderEntry(0x351D5100),      // LA cloud                                                   //
     CustomShaderEntry(0xAFBAF19F),      // sc eyes                                                    //
+    CustomShaderEntry(0xBFAC7226),      // conflux                                                    //
+    CustomShaderEntry(0x9CAD85A7),      // sb fc                                                      //   (VS wtf)
+
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -250,12 +255,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
-        .tooltip = "Corrects RenoDRT and DICE hue if needed to better match original colors.",
         .tint = 0x87581D,
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -317,6 +322,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x186885,
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType == 3; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -352,6 +358,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Selects color space gamut when clamping.",
         .labels = {"None", "BT709", "BT2020", "AP1"},
         .tint = 0x2C9D5D,
+        .is_enabled = []() { return shader_injection.toneMapType != 0; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeColorTint",
@@ -463,7 +470,7 @@ renodx::utils::settings::Settings settings = {
     */
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above. Light Adaptation intensity can be adjusted aswell.",
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above, as well as Light Adaptation.",
         .section = "Instructions",
     },
 };
@@ -531,13 +538,52 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .index = 6,
           .ignore_size = true,
       });
-      // pretty much everything else (post-launcher, can't be indexed?)
+      // pretty much everything else
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+        .old_format = reshade::api::format::b8g8r8a8_unorm,
+        .new_format = reshade::api::format::r16g16b16a16_float,
+      });
+      /*
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::b8g8r8a8_unorm,
           .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = -1,
+          .index = 4,
       });
-      /*
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 5,
+      });
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 6,
+      });
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 16,
+          .ignore_size = true,
+      });
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 17,
+          .ignore_size = true,
+      });
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 18,
+          .ignore_size = true,
+      });
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 999,
+          .ignore_size = true,
+      });
+      
       // RGBA8_unorm
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_unorm,
