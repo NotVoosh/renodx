@@ -33,6 +33,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
+			config.reno_drt_flare = injectedData.colorGradeFlare;
 			config.mid_gray_value = 0.18f;
 			config.mid_gray_nits = 18.f;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
@@ -48,9 +49,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::GAMMA_2_2,														//           about this
 			32.f);
 			
-			config.reno_drt_contrast = 1.127f;
+			config.reno_drt_contrast = 1.145f;
 			config.reno_drt_saturation = 1.09f;
-			config.reno_drt_flare = 0.00015f;
 	
 				if (injectedData.toneMapType == 2) {													// ACES default config
 			config.shadows += 0.025;
