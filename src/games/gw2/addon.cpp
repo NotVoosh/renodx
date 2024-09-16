@@ -47,6 +47,8 @@
 #include <embed/0xAFBAF19F.h>	     // sc eyes
 #include <embed/0xBFAC7226.h>	     // conflux
 #include <embed/0x9CAD85A7.h>	     // sb fc
+#include <embed/0x70EC17AE.h>	     // sg bp / if ss
+#include <embed/0xB0009D2C.h>	     // if ss 2
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -139,7 +141,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xAFBAF19F),      // sc eyes                                                    //
     CustomShaderEntry(0xBFAC7226),      // conflux                                                    //
     CustomShaderEntry(0x9CAD85A7),      // sb fc                                                      //   (VS wtf)
-
+    CustomShaderEntry(0x70EC17AE),      // if ss / sg bp                                              //
+    CustomShaderEntry(0xB0009D2C),      // if ss  2                                                   //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -456,21 +459,9 @@ renodx::utils::settings::Settings settings = {
           system("start https://github.com/NotVoosh/renodx");
         },
     },
-    /*
-    new renodx::utils::settings::Setting{
-        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
-        .label = "Donate (Ko-Fi)",
-        .section = "Links",
-        .group = "button-line-1",
-        .tint = 0x850000,
-        .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
-        },
-    },
-    */
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above, as well as Light Adaptation.",
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation aswell). Render Sampling should be Native. ",
         .section = "Instructions",
     },
 };
