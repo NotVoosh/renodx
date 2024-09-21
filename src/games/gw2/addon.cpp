@@ -16,8 +16,8 @@
 #include <embed/0x8BCC2057.h>      // character select
 #include <embed/0xB5038743.h>      // worldmap
 #include <embed/0x4D512CDB.h>      // location markers
-//#include <embed/0x295B28DB.h>      // DE malice
-//#include <embed/0x115840E1.h>      // DE malice 2
+#include <embed/0x295B28DB.h>      // DE malice
+#include <embed/0x115840E1.h>      // DE malice 2
 
 #include <embed/0xED61CCE3.h>      // bloom-ish
 #include <embed/0xB47204C8.h>      // SSR
@@ -112,8 +112,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x8BCC2057),      // character selection background
     CustomShaderEntry(0xB5038743),      // worldmap
     CustomShaderEntry(0x4D512CDB),      // location markers
-    //CustomShaderEntry(0x295B28DB),      // DE malice
-    //CustomShaderEntry(0x115840E1),      // DE malice2
+    CustomShaderEntry(0x295B28DB),      // DE malice
+    CustomShaderEntry(0x115840E1),      // DE malice2
 	
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
     CustomShaderEntry(0xB47204C8),      // SSR                                                           //

@@ -84,7 +84,8 @@ void main(
   r0.x = saturate(r0.x + r0.x);
   r0.y = r1.w + -r0.x;
   r0.x = r0.w * r0.y + r0.x;
-  r0.x = cb0[3].w * r0.x;
-  o0.w = saturate(cb0[0].z * r0.x);			// "fix" until I figure out or game update
+  //r0.x = cb0[3].w * r0.x;
+	r0.x = max(0, cb0[3].w) * r0.x;
+  o0.w = cb0[0].z * r0.x;
   return;
 }

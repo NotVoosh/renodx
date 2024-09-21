@@ -57,11 +57,7 @@ void main(
   //r2.y = saturate(r0.z * r2.z + r0.y);
 	r2.y = r0.z * r2.z + r0.y;
 	
-		if(injectedData.toneMapType == 0) {
-        r2.g = saturate(r2.g);
-		} else {
 		r2.g = max(0, r2.g);
-		}
 		
   r0.y = dot(float3(0.0193000007,0.119199999,0.950500011), r1.xyz);
   r0.w = dot(float3(0.412400007,0.357600003,0.180500001), r1.xyz);
@@ -87,12 +83,7 @@ void main(
 	o0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) + r1.xyz;
 	
 		o0.rgb = lerp(preLA, o0.rgb, injectedData.fxLightAdaptation);
-	
-		if(injectedData.toneMapType == 0) {
-        o0.rgb = saturate(o0.rgb);
-		} else {
 		o0.rgb = max(0, o0.rgb);
-		}
 	
   return;
 }
