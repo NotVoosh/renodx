@@ -11,6 +11,8 @@
 #include <embed/0xE363E5C8.h>   // uberpost
 #include <embed/0x3BD8B8FD.h>   // uberpost (title menu)
 #include <embed/0x192EEB27.h>   // HDRP final
+#include <embed/0x02AB22C6.h>   // HDRP (title menu)
+#include <embed/0x0FA783B7.h>   // HDRP2 (title menu)
 #include <embed/0xCF6A37F9.h>   // HDRP final (DLSS/TAAU)
 #include <embed/0x066C98CB.h>   // loading screen/video
 #include <embed/0x10161AF3.h>   // UI composite
@@ -30,6 +32,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xE363E5C8),  // uberpost = tonemap/LUT/postprocess
     CustomShaderEntry(0x3BD8B8FD),  // uberpost (title menu)
     CustomShaderEntry(0x192EEB27),  // HDRPfinal
+    CustomShaderEntry(0x02AB22C6),  // HDRPfinal (title menu)
+    CustomShaderEntry(0x0FA783B7),  // HDRPfinal2 (title menu)
     CustomShaderEntry(0xCF6A37F9),  // HDRPfinal (DLSS/TAAU)
     CustomShaderEntry(0x066C98CB),  // loading screen/video
     CustomShaderEntry(0x10161AF3),  // UI composite
@@ -47,7 +51,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapPeakNits",
@@ -90,6 +94,16 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
         .labels = {"Off", "On"},
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 50.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2; },
+        .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -206,7 +220,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Upscaler Mode: EdgeAdaptiveScalingUpres, is not supported.",
+        .label = "Upscaler Mode: EdgeAdaptiveScalingUpres, is not supported. Game brightness setting is disabled on purpose, use dedicated setting above.",
         .section = "Instructions",
     },
 };
@@ -301,13 +315,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .ignore_size = false,
       });
       
-      // R11G11B10_float
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 8,
-          .ignore_size = false,
-      });
+      
       */
       break;
     case DLL_PROCESS_DETACH:

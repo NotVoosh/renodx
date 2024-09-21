@@ -208,8 +208,8 @@ cbuffer cb0 : register(b0)
 	  
             float3 vanilla = r0.rgb;
 		  
-            r0.rgb = applyUserTonemap(untonemapped, t4, s2_s, vanilla);
-        }
+      r0.rgb = applyUserTonemap(untonemapped, t4, s2_s, vanilla);
+    }
   }
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
