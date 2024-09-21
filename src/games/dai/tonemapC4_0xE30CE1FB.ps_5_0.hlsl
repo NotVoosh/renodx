@@ -1,9 +1,9 @@
-// used in cutscenes, specifically at the end/fade to black?
+// used in cutscenes mostly
 
 #include "./shared.h"
 #include "./tonemapper.hlsl"																			// custom tonemapper
 
-// ---- Created with 3Dmigoto v1.3.16 on Wed Jul 31 02:04:53 2024
+// ---- Created with 3Dmigoto v1.3.16 on Mon Aug 19 00:26:37 2024
 
 cbuffer _Globals : register(b0)
 {
@@ -51,10 +51,14 @@ cbuffer _Globals : register(b0)
 
 SamplerState mainTextureSampler_s : register(s0);
 SamplerState colorGradingTextureSampler_s : register(s1);
-SamplerState tonemapBloomTextureSampler_s : register(s2);
+SamplerState distortionTextureSampler_s : register(s2);
+SamplerState tonemapBloomTextureSampler_s : register(s3);
+SamplerState exposureTextureSampler_s : register(s4);
 Texture2D<float4> mainTexture : register(t0);
 Texture3D<float4> colorGradingTexture : register(t1);
-Texture2D<float4> tonemapBloomTexture : register(t2);
+Texture2D<float4> distortionTexture : register(t2);
+Texture2D<float4> tonemapBloomTexture : register(t3);
+Texture2D<float4> exposureTexture : register(t4);
 
 
 // 3Dmigoto declarations
@@ -67,45 +71,46 @@ void main(
   float2 v2 : TEXCOORD1,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1,r2;
+  float4 r0,r1;
   uint4 bitmask, uiDest;
   float4 fDest;
 
-  r0.xy = float2(-0.5,-0.5) + v2.xy;
-  r0.xy = vignetteParams.xy * r0.xy;
-  r0.x = dot(r0.xy, r0.xy);
-  r0.x = saturate(-r0.x * vignetteColor.w + 1);
-  r0.x = log2(r0.x);
-  r0.x = vignetteParams.z * injectedData.fxVignette * r0.x;													// Vignette slider
-  r0.x = exp2(r0.x);
-  r0.yzw = mainTexture.Sample(mainTextureSampler_s, v2.xy).xyz;
-  r1.xyz = tonemapBloomTexture.Sample(tonemapBloomTextureSampler_s, v2.xy).xyz;
-  r0.yzw = r1.xyz * bloomScale.xyz * injectedData.fxBloom + r0.yzw;											// Bloom slider
-  r0.yzw = colorScale.xyz * r0.yzw;
-  r0.xyz = r0.yzw * r0.xxx;
+  r0.xy = distortionTexture.Sample(distortionTextureSampler_s, v2.xy).xy;
+  r0.xy = r0.xy * distortionScaleOffset.xy + distortionScaleOffset.zw;
+  r0.xy = v2.xy + r0.xy;
   
-      	float3 untonemapped = r0.xyz;
+		float2 screen = r0.xy;
+		
+  r1.xyz = mainTexture.Sample(mainTextureSampler_s, r0.xy).xyz;
+  r0.xyz = tonemapBloomTexture.Sample(tonemapBloomTextureSampler_s, r0.xy).xyz;
+  r0.xyz = r0.xyz * bloomScale.xyz * injectedData.fxBloom + r1.xyz;											// Bloom slider
+  r0.w = exposureTexture.Sample(exposureTextureSampler_s, v2.xy).x;
+  r0.xyz = r0.xyz * r0.www;
+  r0.xyz = colorScale.xyz * r0.xyz;
+  r1.xy = float2(-0.5,-0.5) + v2.xy;
+  r1.xy = vignetteParams.xy * r1.xy;
+  r0.w = dot(r1.xy, r1.xy);
+  r0.w = saturate(-r0.w * vignetteColor.w + 1);
+  r0.w = log2(r0.w);
+  r0.w = vignetteParams.z * r0.w * injectedData.fxVignette;													// Vignette slider
+  r0.w = exp2(r0.w);
+  r0.xyz = r0.xyz * r0.www;
   
-  r1.xyz = float3(0.985521019,0.985521019,0.985521019) * r0.xyz;											// OG tonemapper start, I think ? different from others.
-  r2.xyz = r0.xyz * float3(0.985521019,0.985521019,0.985521019) + float3(0.058662001,0.058662001,0.058662001);
-  r1.xyz = r2.xyz * r1.xyz;
-  r2.xyz = r0.xyz * float3(0.774596989,0.774596989,0.774596989) + float3(0.0482814983,0.0482814983,0.0482814983);
-  r0.xyz = r0.xyz * float3(0.774596989,0.774596989,0.774596989) + float3(1.24270999,1.24270999,1.24270999);
-  r0.xyz = r2.xyz * r0.xyz;
-  r0.xyz = r1.xyz / r0.xyz;
+		float3 untonemapped = r0.xyz;
+		
   r0.xyz = log2(r0.xyz);
-  r0.xyz = float3(0.454545468,0.454545468,0.454545468) * r0.xyz; 
+  r0.xyz = invGamma.xyz * r0.xyz;
   r0.xyz = exp2(r0.xyz);
   
 		float3 LUTless = r0.xyz;
 		
   r0.xyz = r0.xyz * float3(0.96875,0.96875,0.96875) + float3(0.015625,0.015625,0.015625);
-  r0.xyz = colorGradingTexture.Sample(colorGradingTextureSampler_s, r0.xyz).xyz;							// OG LUT
+  r0.xyz = colorGradingTexture.Sample(colorGradingTextureSampler_s, r0.xyz).xyz;
   o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
-  o0.xyz = r0.xyz;																							// vanilla output
+  o0.xyz = r0.xyz;
   
 		float3 vanilla = o0.rgb;
-
-	o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, v2.xy);
+		
+	o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, screen.xy);
   return;
 }

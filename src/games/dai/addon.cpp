@@ -10,7 +10,7 @@
 #include <embed/0xFFFFFFFD.h>     // Custom final VS
 #include <embed/0xFFFFFFFE.h>     // Custom final PS
 
-#include <embed/0x5545BDF0.h>     // Title Menu background video
+#include <embed/0x5545BDF0.h>     // Title Menu background video / pre-rendered cutscenes
 #include <embed/0xE8AAA41F.h>     // UI alpha
 #include <embed/0xA13A374B.h>     // loading screen
 
@@ -24,6 +24,7 @@
 #include <embed/0xB3B5916C.h>     // tonemapper Cutscene 1
 #include <embed/0x298147DD.h>     // tonemapper Cutscene 2
 #include <embed/0xEE7DEA72.h>     // tonemapper Cutscene 3
+#include <embed/0xE30CE1FB.h>     // tonemapper Cutscene 4
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -36,7 +37,7 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-    CustomShaderEntry(0x5545BDF0),      // Title Menu background video
+    CustomShaderEntry(0x5545BDF0),      // Title Menu background video, pre-rendered cutscenes
     CustomShaderEntry(0xE8AAA41F),      // UI alpha                                               saturated
     CustomShaderEntry(0xA13A374B),      // loading screen                                         gamma thing
 
@@ -49,7 +50,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0xB3B5916C),      // tonemapper Cutscene 1                                 Cutscenes only I think?
     CustomShaderEntry(0x298147DD),      // tonemapper Cutscene 2                                          //
-    CustomShaderEntry(0xEE7DEA72),      // tonemapper Cutscene 3                                 same but why is it different... 
+    CustomShaderEntry(0xEE7DEA72),      // tonemapper Cutscene 3                                 same but why is it different...
+    CustomShaderEntry(0xE30CE1FB),      // tonemapper Cutscene 4                                          //
   };
 
 ShaderInjectData shader_injection;
@@ -254,9 +256,23 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
-        .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Set Resolution Scaling to 100 & Post-Process Antialiasing (FXAA) to Off in game Graphic Settings.",
-        .section = "Instructions",
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Discord",
+        .section = "Links",
+        .group = "button-line-1",
+        .tint = 0x5865F2,
+        .on_change = []() {
+          system("start https://discord.gg/5WZXDpmbpP");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Github",
+        .section = "Links",
+        .group = "button-line-1",
+        .on_change = []() {
+          system("start https://github.com/clshortfuse/renodx");
+        },
     },
 };
 
@@ -282,6 +298,78 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("miscWindowBox", 1);
 }
 auto start = std::chrono::steady_clock::now();
+bool HandlePreDraw(reshade::api::command_list* cmd_list, bool is_dispatch = false) {
+  const auto& shader_state = cmd_list->get_private_data<renodx::utils::shader::CommandListData>();
+
+  auto pixel_shader_hash = shader_state.GetCurrentPixelShaderHash();
+  auto vertex_shader_hash = shader_state.GetCurrentVertexShaderHash();
+  if (
+      !is_dispatch
+      && (pixel_shader_hash == 0x39c155aa // t
+       || pixel_shader_hash == 0x59d67072 //  o
+       || pixel_shader_hash == 0xa6483dbe //   n
+       || pixel_shader_hash == 0x4a22ebe7 //    e
+       || pixel_shader_hash == 0xb3b5916c //     m
+       || pixel_shader_hash == 0x298147dd //      a
+       || pixel_shader_hash == 0xee7dea72 //       p
+       || pixel_shader_hash == 0xe30ce1fb //        s
+       || pixel_shader_hash == 0xc372881a // FXAA
+       || pixel_shader_hash == 0x79766f9d // Resolution Scaling (1st pass only, as 2nd draws on swapchain)
+          )) {
+    auto& swapchain_state = cmd_list->get_private_data<renodx::utils::swapchain::CommandListData>();
+
+    bool changed = false;
+    const uint32_t render_target_count = swapchain_state.current_render_targets.size();
+    for (uint32_t i = 0; i < render_target_count; i++) {
+      auto render_target = swapchain_state.current_render_targets[i];
+      if (render_target.handle == 0) continue;
+      if (renodx::mods::swapchain::ActivateCloneHotSwap(cmd_list->get_device(), render_target)) {
+        std::stringstream s;
+        s << "Upgrading RTV: ";
+        s << reinterpret_cast<void*>(render_target.handle);
+        s << ", shader: ";
+        s << PRINT_CRC32(pixel_shader_hash);
+        s << ")";
+        reshade::log::message(reshade::log::level::debug, s.str().c_str());
+
+        changed = true;
+      }
+    }
+    if (changed) {
+      // Change render targets to desired
+      renodx::mods::swapchain::RewriteRenderTargets(
+          cmd_list,
+          render_target_count,
+          swapchain_state.current_render_targets.data(),
+          swapchain_state.current_depth_stencil);
+      renodx::mods::swapchain::FlushDescriptors(cmd_list);
+    }
+  } else {
+    renodx::mods::swapchain::DiscardDescriptors(cmd_list);
+  }
+
+  return false;
+}
+
+bool OnDraw(reshade::api::command_list* cmd_list, uint32_t vertex_count,
+            uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) {
+  return HandlePreDraw(cmd_list);
+}
+
+bool OnDrawIndexed(reshade::api::command_list* cmd_list, uint32_t index_count,
+                   uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) {
+  return HandlePreDraw(cmd_list);
+}
+
+bool OnDrawOrDispatchIndirect(reshade::api::command_list* cmd_list, reshade::api::indirect_command type,
+                              reshade::api::resource buffer, uint64_t offset, uint32_t draw_count, uint32_t stride) {
+  return HandlePreDraw(cmd_list);
+}
+
+bool OnDispatch(reshade::api::command_list* cmd_list,
+                uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z) {
+  return HandlePreDraw(cmd_list, true);
+}
 
 }  // namespace
 
@@ -499,17 +587,11 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
-      //renodx::mods::swapchain::upgrade_unknown_resource_views = true;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
-      //renodx::mods::swapchain::use_resize_buffer = true;
-      //renodx::mods::swapchain::use_resize_buffer_on_set_full_screen = true;
-      renodx::mods::swapchain::use_resize_buffer_on_demand = false;
-      //renodx::mods::swapchain::use_resize_buffer_on_present = true;
-      //renodx::mods::shader::expected_constant_buffer_index = 2;
+      renodx::mods::swapchain::use_resource_cloning = true;
       renodx::mods::shader::trace_unmodified_shaders = true;
-      //renodx::mods::shader::force_pipeline_cloning = true;
-      //renodx::mods::shader::using_counted_shaders = true;
+      
       //  final shader copy pasta start
       reshade::register_event<reshade::addon_event::init_device>(OnInitDevice);
       reshade::register_event<reshade::addon_event::destroy_device>(OnDestroyDevice);
@@ -517,38 +599,21 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       reshade::register_event<reshade::addon_event::destroy_swapchain>(OnDestroySwapchain);
       reshade::register_event<reshade::addon_event::present>(OnPresent);
       // final shader copy pasta end
-      /*
-      // RGBA8_unorm
-      for (auto index : {12, 23, 24, 25, 26, 27, 28, 29, 30, 31}) {
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = index,
-          .ignore_size = false,
-      });
-    }
-      
-      // RGBA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-      });
 
-      // RGBA8_unorm
+      // shader_hash based upgrade
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_unorm,
           .new_format = reshade::api::format::r16g16b16a16_float,
-      
-      // RGBA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 999,
           .ignore_size = true,
-          //.aspect_ratio = 16.f / 9.f,
+          .use_resource_view_cloning = true,
+          .use_resource_view_hot_swap = true,
       });
-      */
 
+      reshade::register_event<reshade::addon_event::draw>(OnDraw);
+      reshade::register_event<reshade::addon_event::draw_indexed>(OnDrawIndexed);
+      reshade::register_event<reshade::addon_event::draw_or_dispatch_indirect>(OnDrawOrDispatchIndirect);
+      reshade::register_event<reshade::addon_event::dispatch>(OnDispatch);
+      
       break;
     case DLL_PROCESS_DETACH:
       // Final shader copy pasta start

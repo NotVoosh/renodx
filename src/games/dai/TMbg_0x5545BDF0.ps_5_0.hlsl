@@ -1,4 +1,4 @@
-// Title Menu background video
+// Title Menu background video. also other pre-rendered cutscenes
 
 #include "./shared.h"
 
@@ -41,7 +41,7 @@ void main(
 												 : renodx::color::bt709::from::SRGBA(o0.rgba);
 		float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
 	o0.rgb = renodx::tonemap::inverse::bt2446a::BT709(o0.rgb, 100.f, videoPeak);
-	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;			// game brightness to separate from UI elements
+	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
 	o0.rgb /= injectedData.toneMapUINits;
     o0.rgb = sign(o0.rgb) * pow(abs(o0.rgb), 1 / 2.2f);
 	
