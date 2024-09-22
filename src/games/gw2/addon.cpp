@@ -87,6 +87,8 @@
 #include <embed/0x7904D64C.h>      // PP15
 #include <embed/0xC3B7FFE7.h>      // PP16
 
+#include <embed/0x8090A92E.h>      // cutscenes (prerendered)
+
 #include <embed/0x967994F1.h>      // addons (Nexus/Arc)
 #include <embed/0x286DAA52.h>      // gw2radial1
 #include <embed/0x09C864EA.h>      // gw2radial2
@@ -183,6 +185,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x4DEA5928),      // Post-processing 14                                           //
     CustomShaderEntry(0x7904D64C),      // Post-processing 15                                           //
     CustomShaderEntry(0xC3B7FFE7),      // Post-processing 16                                           //
+
+    CustomShaderEntry(0x8090A92E),      // pre-rendered cutscenes
 
     CustomShaderEntry(0x967994F1),      // external/third-party addons                       Nexus, ArcDPS, maybe others...
     CustomShaderEntry(0x286DAA52),      // gw2radial1
@@ -447,9 +451,19 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation aswell).",
+        .section = "Instructions",
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",
+        .section = "About",
+    },
+    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
-        .label = "Discord",
-        .section = "Links",
+        .label = "HDR Den Discord",
+        .section = "About",
         .group = "button-line-1",
         .tint = 0x5865F2,
         .on_change = []() {
@@ -459,16 +473,31 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
         .label = "Github",
-        .section = "Links",
+        .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/NotVoosh/renodx");
+          system("start https://github.com/clshortfuse/renodx");
         },
     },
     new renodx::utils::settings::Setting{
-        .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation aswell). Render Sampling should be Native. ",
-        .section = "Instructions",
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "ShortFuse's Ko-Fi",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0xFF5F5F,
+        .on_change = []() {
+          system("start https://ko-fi.com/shortfuse");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "HDR Den's Ko-Fi",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0xFF5F5F,
+        .on_change = []() {
+          system("start https://ko-fi.com/hdrden");
+        },
     },
 };
 
