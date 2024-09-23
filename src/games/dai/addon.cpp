@@ -256,9 +256,14 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",
+        .section = "About",
+    },
+    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
-        .label = "Discord",
-        .section = "Links",
+        .label = "HDR Den Discord",
+        .section = "About",
         .group = "button-line-1",
         .tint = 0x5865F2,
         .on_change = []() {
@@ -268,10 +273,30 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
         .label = "Github",
-        .section = "Links",
+        .section = "About",
         .group = "button-line-1",
         .on_change = []() {
           system("start https://github.com/clshortfuse/renodx");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "ShortFuse's Ko-Fi",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0xFF5F5F,
+        .on_change = []() {
+          system("start https://ko-fi.com/shortfuse");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "HDR Den's Ko-Fi",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0xFF5F5F,
+        .on_change = []() {
+          system("start https://ko-fi.com/hdrden");
         },
     },
 };
@@ -295,9 +320,9 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
-  renodx::utils::settings::UpdateSetting("miscWindowBox", 1);
 }
 auto start = std::chrono::steady_clock::now();
+
 bool HandlePreDraw(reshade::api::command_list* cmd_list, bool is_dispatch = false) {
   const auto& shader_state = cmd_list->get_private_data<renodx::utils::shader::CommandListData>();
 
@@ -305,16 +330,9 @@ bool HandlePreDraw(reshade::api::command_list* cmd_list, bool is_dispatch = fals
   auto vertex_shader_hash = shader_state.GetCurrentVertexShaderHash();
   if (
       !is_dispatch
-      && (pixel_shader_hash == 0x39c155aa // t
-       || pixel_shader_hash == 0x59d67072 //  o
-       || pixel_shader_hash == 0xa6483dbe //   n
-       || pixel_shader_hash == 0x4a22ebe7 //    e
-       || pixel_shader_hash == 0xb3b5916c //     m
-       || pixel_shader_hash == 0x298147dd //      a
-       || pixel_shader_hash == 0xee7dea72 //       p
-       || pixel_shader_hash == 0xe30ce1fb //        s
-       || pixel_shader_hash == 0xc372881a // FXAA
-       || pixel_shader_hash == 0x79766f9d // Resolution Scaling (1st pass only, as 2nd draws on swapchain)
+      && (vertex_shader_hash == 0x6c88a1d7 // tonemaps
+       || pixel_shader_hash == 0xc372881a  // FXAA
+       || pixel_shader_hash == 0x79766f9d  // Resolution Scaling (1st pass only, as 2nd draws on swapchain)
           )) {
     auto& swapchain_state = cmd_list->get_private_data<renodx::utils::swapchain::CommandListData>();
 
