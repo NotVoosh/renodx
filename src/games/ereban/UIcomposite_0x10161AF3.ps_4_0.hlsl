@@ -24,7 +24,6 @@ void main(
   r0.xy = v1.xy;
   r0.z = 0;
   o0.xyzw = t0.SampleLevel(s0_s, r0.xyz, 0).xyzw;
-    
-        o0.rgb *= injectedData.toneMapUINits / 80.f;
+    o0.rgb = renodx::color::grade::Saturation(o0.rgb, 2 - injectedData.colorGradeSaturation);
   return;
 }

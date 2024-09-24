@@ -56,12 +56,7 @@ void main(
   r1.xyzw = t1.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
     
-            if(injectedData.toneMapGammaCorrection == 1){
-        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-        o0.rgb *= injectedData.toneMapGameNits / 80.f;
-        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-        } else {
-        o0.rgb *= injectedData.toneMapGameNits / 80.f;
-        }
+        o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+
   return;
 }

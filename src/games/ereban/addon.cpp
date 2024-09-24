@@ -14,8 +14,9 @@
 #include <embed/0x02AB22C6.h>   // HDRP (title menu)
 #include <embed/0x0FA783B7.h>   // HDRP2 (title menu)
 #include <embed/0xCF6A37F9.h>   // HDRP final (DLSS/TAAU)
-#include <embed/0x066C98CB.h>   // loading screen/video
+//#include <embed/0x066C98CB.h>   // loading screen/video
 #include <embed/0x10161AF3.h>   // UI composite
+#include <embed/0x20133A8B.h>   // Final
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -35,8 +36,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x02AB22C6),  // HDRPfinal (title menu)
     CustomShaderEntry(0x0FA783B7),  // HDRPfinal2 (title menu)
     CustomShaderEntry(0xCF6A37F9),  // HDRPfinal (DLSS/TAAU)
-    CustomShaderEntry(0x066C98CB),  // loading screen/video
+    //CustomShaderEntry(0x066C98CB),  // loading screen/video
     CustomShaderEntry(0x10161AF3),  // UI composite
+    CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -220,8 +222,52 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Upscaler Mode: EdgeAdaptiveScalingUpres, is not supported. Game brightness setting is disabled on purpose, use dedicated setting above.",
+        .label = "Upscaler Mode: EdgeAdaptiveScalingUpres, is not supported. In-game brightness setting is disabled on purpose.",
         .section = "Instructions",
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",
+        .section = "About",
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "HDR Den Discord",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0x5865F2,
+        .on_change = []() {
+          system("start https://discord.gg/5WZXDpmbpP");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Github",
+        .section = "About",
+        .group = "button-line-1",
+        .on_change = []() {
+          system("start https://github.com/clshortfuse/renodx");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "ShortFuse's Ko-Fi",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0xFF5F5F,
+        .on_change = []() {
+          system("start https://ko-fi.com/shortfuse");
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "HDR Den's Ko-Fi",
+        .section = "About",
+        .group = "button-line-1",
+        .tint = 0xFF5F5F,
+        .on_change = []() {
+          system("start https://ko-fi.com/hdrden");
+        },
     },
 };
 
@@ -262,6 +308,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::prevent_full_screen = false;
       renodx::mods::swapchain::use_resize_buffer = false;
       // renodx::mods::shader::expected_constant_buffer_index = 8;
+
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,

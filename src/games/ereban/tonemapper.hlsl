@@ -17,9 +17,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
-				if(injectedData.toneMapType <= 3){
-			config.saturation = injectedData.colorGradeSaturation;
-			}
+		//		if(injectedData.toneMapType <= 3){
+		//	config.saturation = injectedData.colorGradeSaturation;
+		//	}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
 			config.mid_gray_value = 0.18f;
@@ -33,14 +33,16 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::LINEAR,
 			32.f);
 			
-			config.reno_drt_highlights = 0.9f;
 			config.reno_drt_saturation = 1.04f;
-			
+
 				if(injectedData.toneMapType == 2){															// ACES default
-			config.highlights -= 0.3;
 			config.shadows += 0.2;
-			config.contrast -= 0.1;
+			config.contrast -= 0.2;
 			config.saturation -= 0.3;
+			}
+			
+				if(injectedData.toneMapGammaCorrection == 1) {
+			outputColor = renodx::color::correct::GammaSafe(outputColor);
 			}
 	
 			if (injectedData.toneMapType == 4){																// Frostbite
@@ -54,9 +56,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 				
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																injectedData.colorGradeSaturation,
-																0.f, 0.f);
+		//	outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
+		//														injectedData.colorGradeSaturation,
+		//														0.f, 0.f);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
