@@ -18,7 +18,7 @@ void main(
   o0.xyzw = BlitTexture.Sample(BlitSampler_s, v0.xy).xyzw;
   
   		  	if(injectedData.toneMapGammaCorrection == 1) {
-		o0.rgb = renodx::color::correct::Gamma(o0.rgb);
+		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
 		}
 		o0.rgb *= injectedData.toneMapUINits / 80.f;
   return;
