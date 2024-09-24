@@ -7,7 +7,8 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x0EBC87AB.h>   // screenLUT
+#include <embed/0x8A6BCB4C.h>   // videos
+#include <embed/0x0EBC87AB.h>   // screenLUT (game brightness)
 #include <embed/0xE363E5C8.h>   // uberpost
 #include <embed/0x3BD8B8FD.h>   // uberpost (title menu)
 #include <embed/0x192EEB27.h>   // HDRP final
@@ -29,7 +30,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-    CustomShaderEntry(0x0EBC87AB),  // screenLUT (game brightness)
+    CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
+    CustomShaderEntry(0x0EBC87AB),  // screenLUT (game brightness setting)
     CustomShaderEntry(0xE363E5C8),  // uberpost = tonemap/LUT/postprocess
     CustomShaderEntry(0x3BD8B8FD),  // uberpost (title menu)
     CustomShaderEntry(0x192EEB27),  // HDRPfinal
@@ -199,6 +201,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom",
         .section = "Effects",
+        .tooltip = "Scales game original Bloom.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -208,6 +211,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
+        .tooltip = "Scales game original Vignette.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -217,6 +221,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Film Grain",
         .section = "Effects",
+        .tooltip = "Scales game original Film Grain when used, or custom.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -291,6 +296,19 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 50.f);
 }
 
+auto start = std::chrono::steady_clock::now();
+
+void OnPresent(
+    reshade::api::command_queue* queue,
+    reshade::api::swapchain* swapchain,
+    const reshade::api::rect* source_rect,
+    const reshade::api::rect* dest_rect,
+    uint32_t dirty_rect_count,
+    const reshade::api::rect* dirty_rects) {
+  auto end = std::chrono::steady_clock::now();
+  shader_injection.elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+}
+
 }  // namespace
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -316,54 +334,9 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           //.index = 0,
           .ignore_size = false,
       });
-      /*
-      // RGBA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          //.index = -1,
-          .ignore_size = false,
-      });
-      // RGBA8_unorm_srgb
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_unorm_srgb,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          //.index = 0,
-          .ignore_size = false,
-      });
 
-      // BGRA8_typeless
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_typeless,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 8,
-          .ignore_size = false,
-      });
+      reshade::register_event<reshade::addon_event::present>(OnPresent);
 
-      // BGRA8_unorm_srgb
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm_srgb,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          //.index = 0,
-          .ignore_size = false,
-      });
-      // BGRA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          //.index = 0,
-          .ignore_size = false,
-      });
-
-      // RGB10A2_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r10g10b10a2_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .ignore_size = false,
-      });
-      
-      
-      */
       break;
     case DLL_PROCESS_DETACH:
       reshade::unregister_addon(h_module);

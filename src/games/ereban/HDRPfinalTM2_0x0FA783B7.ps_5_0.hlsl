@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./tonemapper.hlsl"
 
 // ---- Created with 3Dmigoto v1.3.16 on Sat Sep 21 23:25:40 2024
 Texture2DArray<float4> t2 : register(t2);
@@ -56,6 +57,7 @@ void main(
   r1.xyzw = t1.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
     
+        o0.rgb = applyFilmGrain(o0.rgb, v1.xy);
         o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
 
   return;

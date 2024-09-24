@@ -24,6 +24,9 @@ void main(
   r0.xy = v1.xy;
   r0.z = 0;
   o0.xyzw = t0.SampleLevel(s0_s, r0.xyz, 0).xyzw;
-    o0.rgb = renodx::color::grade::Saturation(o0.rgb, 2 - injectedData.colorGradeSaturation);
+    float3 lch = renodx::color::oklch::from::BT709(o0.rgb);
+    lch[1] /= max(0.1f, injectedData.colorGradeSaturation);
+    float3 color = renodx::color::bt709::from::OkLCh(lch);
+    o0.rgb = color;
   return;
 }

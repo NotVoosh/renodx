@@ -16,6 +16,7 @@ void main(
   out float4 o0 : SV_Target0)
 {
   o0.xyzw = BlitTexture.Sample(BlitSampler_s, v0.xy).xyzw;
+    
     o0.rgb = renodx::color::grade::Saturation(o0.rgb, injectedData.colorGradeSaturation);
     o0.rgb *= injectedData.toneMapUINits / 80.f;
   return;
