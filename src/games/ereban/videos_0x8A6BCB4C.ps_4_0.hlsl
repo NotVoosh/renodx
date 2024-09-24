@@ -37,8 +37,7 @@ void main(
     o0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(o0.rgb, 100.f, videoPeak);
     
     o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
-    o0.rgb /= injectedData.toneMapUINits;
-    o0.rgb = sign(o0.rgb) * pow(abs(o0.rgb), 1 / 2.2f);
-
+    o0.rgb /= injectedData.toneMapUINits;    
+    
   return;
 }

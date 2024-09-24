@@ -2,6 +2,17 @@
 
 #include "./shared.h"
 
+float3 applyFilmGrain(float3 outputColor, float2 screen)
+{
+    float3 grainedColor = renodx::effects::ApplyFilmGrain(
+			outputColor,
+			screen,
+			frac(injectedData.elapsedTime / 1000.f),
+			injectedData.fxFilmGrain * 0.03f,
+			1.f);
+    return grainedColor;
+}
+
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 vanilla){
 		
 		float3 outputColor = untonemapped.rgb;
