@@ -54,7 +54,13 @@ void main(
   //o0.xyz = exp2(r0.yzw);														//
     o0.rgb = renodx::color::grade::Saturation(r1.rgb, injectedData.colorGradeSaturation);
 		o0.rgb = applyFilmGrain(o0.rgb, v1.xy);
+		  	if(injectedData.toneMapGammaCorrection == 1) {
+		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
 		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+            } else {
+        o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+        }
   r0.y = cmp(cb0[8].x == 1.000000);
   o0.w = r0.y ? r0.x : 1;
   return;

@@ -43,10 +43,14 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::LINEAR,
 			32.f);
 			
+			//config.reno_drt_highlights = 1.1f;
+			//config.reno_drt_shadows = 1.08f;
+			//config.reno_drt_contrast = 1.1f;
+	
 				if (injectedData.toneMapType == 2) {													// ACES default config
-			config.shadows += 0.2;
-			config.contrast -= 0.16;
-			config.saturation -= 0.28;
+			config.shadows += 0.24;
+			config.contrast -= 0.2;
+			config.saturation -= 0.3;
 			}
 	
 				if (injectedData.toneMapType == 4){																// Frostbite
@@ -69,7 +73,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
-			outputColor = renodx::color::correct::Hue(outputColor, vanilla, injectedData.toneMapHueCorrection);			
-			
+			outputColor = renodx::color::correct::Hue(outputColor, vanilla, injectedData.toneMapHueCorrection);
+	
 	return outputColor;
 }
