@@ -7,12 +7,16 @@
 
 #define DEBUG_LEVEL_0
 
+#include <embed/0x8A6BCB4C.h>   // videos
+
 #include <embed/0xE6B97032.h>   // uberpost
 #include <embed/0x8FEBA362.h>   // uberpost (title menu)
 //#include <embed/0xE59F5A45.h>   // uberpost (FSR)
+
 #include <embed/0x6D3B4FF0.h>   // HDRP final
 #include <embed/0xBBC1FA0B.h>   // HDRP final (FXAA)
 //#include <embed/0xB0B50F1F.h>   // HDRP final (FSR)
+
 #include <embed/0x20133A8B.h>   // final
 
 #include <deps/imgui/imgui.h>
@@ -26,12 +30,16 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-	CustomShaderEntry(0xE6B97032),  // uberpost = tonemap/LUT/postprocess
+  CustomShaderEntry(0x8A6BCB4C),  // videos
+
+  CustomShaderEntry(0xE6B97032),  // uberpost = tonemap/LUT/postprocess
   CustomShaderEntry(0x8FEBA362),  // uberpost (title menu)
   //CustomShaderEntry(0xE59F5A45),  // uberpost (FSR)
+
   CustomShaderEntry(0x6D3B4FF0),  // HDRP final
   CustomShaderEntry(0xBBC1FA0B),  // HDRP final (FXAA)
   //CustomShaderEntry(0xB0B50F1F),  // HDRP final (FSR)
+
 	CustomShaderEntry(0x20133A8B),  // Final
 };
 

@@ -113,7 +113,7 @@ cbuffer cb0 : register(b0)
     }
   }
     
-        float3 untonemapped = r2.rgb;
+        //float3 untonemapped = r2.rgb;
     
   r0.x = cmp(0 != cb1[12].x);
   if (r0.x != 0) {
@@ -136,9 +136,9 @@ cbuffer cb0 : register(b0)
     }
   }
     
-		float3 vanilla = r2.rgb;
+		//float3 vanilla = r2.rgb;
 	
-	r2.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
+	//r2.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
     
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r2.xyzx
