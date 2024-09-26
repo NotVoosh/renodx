@@ -30,14 +30,11 @@ void main(
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
     
-    o0.rgb = injectedData.toneMapGammaCorrection ? pow(o0.rgb, 2.2f)
-												 : renodx::color::bt709::from::SRGB(o0.rgb);
     float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
     
     o0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(o0.rgb, 100.f, videoPeak);
-    
     o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
     o0.rgb /= injectedData.toneMapUINits;    
-    
+      	
   return;
 }
