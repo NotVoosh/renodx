@@ -93,12 +93,12 @@ void main(
   r0.xyz = r0.xyz * float3(0.774596989,0.774596989,0.774596989) + float3(1.24270999,1.24270999,1.24270999);
   r0.xyz = r2.xyz * r0.xyz;
   r0.xyz = r1.xyz / r0.xyz;
+	
+		float3 LUTless = r0.xyz;
+	
   r0.xyz = log2(r0.xyz);
   r0.xyz = float3(0.454545468,0.454545468,0.454545468) * r0.xyz; 
-  r0.xyz = exp2(r0.xyz);
-  
-		float3 LUTless = r0.xyz;
-		
+  r0.xyz = exp2(r0.xyz);		
   r0.xyz = r0.xyz * float3(0.96875,0.96875,0.96875) + float3(0.015625,0.015625,0.015625);
   r0.xyz = colorGradingTexture.Sample(colorGradingTextureSampler_s, r0.xyz).xyz;							// OG LUT
   o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));

@@ -15,7 +15,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float3 vanilla, float2 screenXY){
 		
-		float3 outputColor = untonemapped.rgb;
+		float3 outputColor = max(0, untonemapped.rgb);
 		float3 hueCorrectionColor = injectedData.toneMapGammaCorrection ? pow(vanilla, 2.2f)
 																		: renodx::color::bt709::from::SRGB(vanilla);
 	
@@ -51,24 +51,22 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			
 			config.reno_drt_contrast = 1.145f;
 			config.reno_drt_saturation = 1.09f;
-	
-				if (injectedData.toneMapType == 2) {													// ACES default config
-			config.shadows += 0.025;
-			config.contrast -= 0.19;
-			config.saturation -= 0.12;
-			}
 			
 		if (injectedData.toneMapGammaCorrection == 0) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 		}
 		
 		if (injectedData.toneMapType == 4){																// Frostbite
-			config.contrast += 0.13;
+			config.highlights -= 0.1;
+			config.shadows -= 0.35;
+			config.contrast += 0.2;
+			config.saturation += 0.05;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		
 				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
-		
-			outputColor = renodx::tonemap::frostbite::BT709(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits);
+				float frostbitePeak = injectedData.toneMapGammaCorrection ? injectedData.toneMapPeakNits / injectedData.toneMapGameNits
+																		  : renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true);
+			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 				
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 				

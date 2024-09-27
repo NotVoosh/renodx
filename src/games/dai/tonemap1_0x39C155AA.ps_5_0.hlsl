@@ -81,12 +81,15 @@ void main(
   r0.yzw = mainTexture.Sample(mainTextureSampler_s, v2.xy).xyz;
   r1.xyz = tonemapBloomTexture.Sample(tonemapBloomTextureSampler_s, v2.xy).xyz;
   r0.yzw = r1.xyz * bloomScale.xyz * injectedData.fxBloom + r0.yzw;											// Bloom slider
-  r0.yzw = colorScale.xyz * r0.yzw;
-  r0.xyz = r0.yzw * r0.xxx + float3(-0.00400000019,-0.00400000019,-0.00400000019);
-  r0.xyz = max(float3(0,0,0), r0.xyz);
+//	if(injectedData.toneMapType == 0){
+	r0.yzw = colorScale.xyz * r0.yzw;
+//	}
+  r0.xyz = r0.yzw * r0.xxx;
 
-    	float3 untonemapped = r0.xyz;
-    
+		float3 untonemapped = r0.xyz;
+	
+  r0.xyz += float3(-0.00400000019,-0.00400000019,-0.00400000019);
+  r0.xyz = max(float3(0,0,0), r0.xyz);
   r1.xyz = r0.xyz * float3(6.19999981,6.19999981,6.19999981) + float3(0.5,0.5,0.5);							// OG tonemapper start ???
   r1.xyz = r1.xyz * r0.xyz;
   r2.xyz = r0.xyz * float3(6.19999981,6.19999981,6.19999981) + float3(1.70000005,1.70000005,1.70000005);
