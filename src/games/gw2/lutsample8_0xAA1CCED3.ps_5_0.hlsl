@@ -55,7 +55,7 @@ void main(
   r1.xyz = cb0[0].xyz * r1.xyz * injectedData.fxBloom;						// bloom
   r1.xyz = -r1.xyz * float3(2,2,2) + float3(1,1,1);
     
-   		r1.rgb = max(0, r1.rgb);				// highlight color fix
+   		//r1.rgb = max(0, r1.rgb);				// highlight color fix
 
   r0.xyz = -r0.xyz * r1.xyz + float3(1,1,1);
   r0.w = r0.w * 2 + -1;
@@ -93,10 +93,7 @@ void main(
     }
   }
   //r1.yzw = saturate(r1.yzw);
-  
-     	if (injectedData.toneMapType == 0) {
-		r1.yzw = saturate(r1.yzw);
-	    }
+
   		float3 LUTless = r1.gba;
 
   r0.zw = float2(0.9375,15) * r1.zw;

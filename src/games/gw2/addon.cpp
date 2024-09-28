@@ -30,7 +30,6 @@
 #include <embed/0x3BC05D0D.h>      // water 1
 #include <embed/0x6C5C7797.h>      // water 2
 #include <embed/0x98553490.h>      // no AO
-#include <embed/0x66130D94.h>      // slideshow cutscenes
 #include <embed/0xDF711B8B.h>      // PoA
 #include <embed/0x38A5D61E.h>      // Mesmer 1
 #include <embed/0x46E87959.h>      // Mesmer 2
@@ -52,6 +51,7 @@
 #include <embed/0x9CAD85A7.h>	     // sb fc
 #include <embed/0x70EC17AE.h>	     // sg bp / if ss
 #include <embed/0xB0009D2C.h>	     // if ss 2
+#include <embed/0x881B1931.h>	     // foxfire
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -129,7 +129,6 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x6C5C7797),      // Underwater fog kinda 2                                     //
     CustomShaderEntry(0x98553490),      // no AO (Crystal Oasis, maybe other)                         //
 
-    CustomShaderEntry(0x66130D94),      // Slideshow cutscenes                          remove negative colors to fix stuff
     CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate
     CustomShaderEntry(0x38A5D61E),      // Mesmer spell 1                                             //
     CustomShaderEntry(0x46E87959),      // Mesmer spell 2                                             //
@@ -151,6 +150,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x9CAD85A7),      // sb fc                                                      //   (VS wtf)
     CustomShaderEntry(0x70EC17AE),      // if ss / sg bp                                              //
     CustomShaderEntry(0xB0009D2C),      // if ss  2                                                   //
+    CustomShaderEntry(0x881B1931),      // foxfire                                                    //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -339,6 +339,18 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "colorGradeFlare",
+        .binding = &shader_injection.colorGradeFlare,
+        .default_value = 0.f,
+        .label = "Flare",
+        .section = "Color Grading",
+        .tooltip = "Embrace the darkness... (Gently.)",
+        .tint = 0x3A5953,
+        .max = 0.05f,
+        .format = "%.4f",
+        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "colorGradeLUTStrength",
         .binding = &shader_injection.colorGradeLUTStrength,
         .default_value = 100.f,
@@ -452,7 +464,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation aswell).",
+        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation aswell). Sub-sampling is not supported.",
         .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
@@ -515,6 +527,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
+  renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeColorSpace", 1.f);

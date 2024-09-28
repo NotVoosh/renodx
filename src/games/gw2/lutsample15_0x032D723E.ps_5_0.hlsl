@@ -54,10 +54,7 @@ void main(
   r1.xyz = cb0[0].xyz * r1.xyz * injectedData.fxBloom;			// Bloom
   //r0.xyz = saturate(r1.xyz * float3(2,2,2) + r0.xyz);
 	r0.xyz = r1.xyz * float3(2,2,2) + r0.xyz;
-		
-		if (injectedData.toneMapType == 0) {
-		r0.rgb = saturate(r0.rgb);
-		}
+
    		float3 LUTless = r0.rgb;
 
   r0.x = r0.x * 0.05859375 + 0.001953125;

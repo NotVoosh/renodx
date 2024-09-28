@@ -27,11 +27,11 @@ void main(
   float4 fDest;
 
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
-  r0.xyzw = cb0[0].xxxx * r0.xyzw;					// in-game "Gamma" (brightness) setting
+  //r0.xyzw = cb0[0].xxxx * r0.xyzw;					// in-game "Gamma" (brightness) setting
   o0.xyzw = r0.xyzw;
-
-		//o0.rgba = sign(o0.rgba) * pow(abs(o0.rgba), 2.2f);
-		o0.rgb = sign(renodx::color::bt709::from::SRGB(o0.rgb)) * pow(renodx::color::srgb::from::BT709(abs(renodx::color::bt709::from::SRGB(o0.rgb))), 2.2f);
+  
+		o0.rgb = injectedData.toneMapGammaCorrection ? sign(o0.rgb) * pow(abs(o0.rgb), 2.2f)
+													 : renodx::color::bt709::from::SRGB(o0.rgb);
 		
     		if (injectedData.colorGradeColorSpace == 1) {
 		o0.rgb = renodx::color::bt709::clamp::BT709(o0.rgb);
@@ -40,13 +40,11 @@ void main(
 		} else if (injectedData.colorGradeColorSpace == 3) {
 		o0.rgb = renodx::color::bt709::clamp::AP1(o0.rgb);
 		}
-	
+		
 	o0.rgb *= injectedData.toneMapUINits / 80.f;
-
-		if (injectedData.toneMapType == 0) {
-	o0.rgb = min(o0.rgb, injectedData.toneMapGameNits / 80.f);	// vanilla isn't clamped
-	} else if (injectedData.toneMapType != 1) {
-	o0.rgb = min(o0.rgb, injectedData.toneMapPeakNits / 80.f);	// this is for CEF (TP) zzzzzz
+	
+		if(injectedData.toneMapType > 1){							// if not "untonemapped"
+	o0.rgb = min(o0.rgb, injectedData.toneMapPeakNits / 80.f);		// catch peak from preview windows that are running freeeeeee (CEF)
 	}
   return;
 }

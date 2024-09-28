@@ -39,7 +39,7 @@ void main(
   r0.xyz = cb0[0].xyz * r0.xyz * injectedData.fxBloom;						// Bloom
   r0.xyz = -r0.xyz * float3(2,2,2) + float3(1,1,1);
 	
-		r0.rgb = max(0, r0.rgb);				// highlight color fix
+		//r0.rgb = max(0, r0.rgb);				// highlight color fix
 
   r1.xyz = t0.Sample(s0_s, v0.xy).xyz;
   r1.xyz = float3(1,1,1) + -r1.xyz;
@@ -47,9 +47,6 @@ void main(
   //r0.xyz = saturate(-r1.xyz * r0.xyz + float3(1,1,1));
 	r0.xyz = -r1.xyz * r0.xyz + float3(1,1,1);
 	
-		if (injectedData.toneMapType == 0) {
-		r0.rgb = saturate(r0.rgb);											// saturate if vanilla
-		}
 		float3 LUTless = r0.rgb;
 		
   r0.x = r0.x * 0.05859375 + 0.001953125;

@@ -88,10 +88,7 @@ void main(
     }
   }
   //r1.yzw = saturate(r1.yzw);
-		
-        if (injectedData.toneMapType == 0) {
-		r1.yzw = saturate(r1.yzw);
-	    }
+
 	   	float3 LUTless = r1.gba;	
 	
   r0.zw = float2(0.9375,15) * r1.zw;

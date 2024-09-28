@@ -35,7 +35,7 @@ void main(
   r0.xyz = cb0[0].xyz * r0.xyz * injectedData.fxBloom;									// Bloom
   r0.xyz = -r0.xyz * float3(2,2,2) + float3(1,1,1);
   
-  		r0.rgb = max(0, r0.rgb);					// fix highlights colors
+  		//r0.rgb = max(0, r0.rgb);					// fix highlights colors
 
   r1.xyz = t0.Sample(s0_s, v0.xy).xyz;
   r1.xyz = float3(1,1,1) + -r1.xyz;		
