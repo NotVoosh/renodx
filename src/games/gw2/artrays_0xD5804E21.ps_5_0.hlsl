@@ -35,15 +35,14 @@ void main(
   r1.xyzw = t0.Sample(s0_s, v0.xy).xyzw;
   r2.xyzw = r1.xyzw;
   r3.xy = v0.xy;
-  r0.w = 0;
+  r0.w = 1;
   r3.z = 0;
   while (true) {
     r3.w = cmp((int)r3.z >= 32);
     if (r3.w != 0) break;
     r3.xy = -r0.xy * r0.zz + r3.xy;
     r4.xyzw = t0.Sample(s0_s, r3.xy).xyzw;
-		
-		r4.rgb = max(0, r4.rgb);				// should avoid leaky rays
+		r4.rgb = max(0, r4.rgb);					// temporarily catching leaky rays
     r3.w = t1.Sample(s1_s, r3.xy).w;
     r4.xyzw = r4.xyzw * r3.wwww;
     r4.xyzw = r4.xyzw * r0.wwww;
