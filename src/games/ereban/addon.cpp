@@ -9,13 +9,15 @@
 
 #include <embed/0x8A6BCB4C.h>   // videos
 #include <embed/0x0EBC87AB.h>   // screenLUT (game brightness)
+
 #include <embed/0xE363E5C8.h>   // uberpost
 #include <embed/0x3BD8B8FD.h>   // uberpost (title menu)
+
 #include <embed/0x192EEB27.h>   // HDRP final
 #include <embed/0x02AB22C6.h>   // HDRP (title menu)
 #include <embed/0x0FA783B7.h>   // HDRP2 (title menu)
 #include <embed/0xCF6A37F9.h>   // HDRP final (DLSS/TAAU)
-//#include <embed/0x066C98CB.h>   // loading screen/video
+
 #include <embed/0x10161AF3.h>   // UI composite
 #include <embed/0x20133A8B.h>   // Final
 
@@ -32,13 +34,15 @@ namespace {
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
     CustomShaderEntry(0x0EBC87AB),  // screenLUT (game brightness setting)
+
     CustomShaderEntry(0xE363E5C8),  // uberpost = tonemap/LUT/postprocess
     CustomShaderEntry(0x3BD8B8FD),  // uberpost (title menu)
+
     CustomShaderEntry(0x192EEB27),  // HDRPfinal
     CustomShaderEntry(0x02AB22C6),  // HDRPfinal (title menu)
     CustomShaderEntry(0x0FA783B7),  // HDRPfinal2 (title menu)
     CustomShaderEntry(0xCF6A37F9),  // HDRPfinal (DLSS/TAAU)
-    //CustomShaderEntry(0x066C98CB),  // loading screen/video
+
     CustomShaderEntry(0x10161AF3),  // UI composite
     CustomShaderEntry(0x20133A8B),  // Final
 };
@@ -92,7 +96,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapGammaCorrection",
         .binding = &shader_injection.toneMapGammaCorrection,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
+        .default_value = 0,
         .can_reset = false,
         .label = "Gamma Correction",
         .section = "Tone Mapping",
@@ -208,12 +212,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxVignette",
         .binding = &shader_injection.fxVignette,
-        .default_value = 50.f,
+        .default_value = 5.f,
         .label = "Vignette",
         .section = "Effects",
         .tooltip = "Scales game original Vignette.",
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.02f; },
+        .max = 20.f,
+        .parse = [](float value) { return value * 0.2f; },
     },
     new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
@@ -282,6 +286,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0);
+  renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -292,7 +297,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
-  renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
+  renodx::utils::settings::UpdateSetting("fxVignette", 5.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 50.f);
 }
 

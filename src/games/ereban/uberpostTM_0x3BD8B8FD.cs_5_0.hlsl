@@ -204,13 +204,13 @@ cbuffer cb0 : register(b0)
       r1.xyz = cb1[6].yyy * r1.xyz;
       r0.w = 0.5 * cb1[6].x;
       r1.xyz = r1.xyz * cb1[6].xxx + r0.www;
-      r0.xyz = t4.SampleLevel(s2_s, r1.xyz, 0).xyz;
-	  
-            float3 vanilla = r0.rgb;
-		  
-      r0.rgb = applyUserTonemap(untonemapped, t4, s2_s, vanilla);
+      r0.xyz = t4.SampleLevel(s2_s, r1.xyz, 0).xyz;	  
     }
   }
+        float3 vanilla = r0.rgb;
+    
+    r0.rgb = applyUserTonemap(untonemapped, t4, s2_s, vanilla);
+    r0.rgb = renodx::color::ap1::from::BT709(r0.rgb);
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
 	u0[vThreadID.xyz] = r0.xyzw;

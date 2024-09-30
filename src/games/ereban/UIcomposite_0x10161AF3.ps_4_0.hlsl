@@ -24,9 +24,6 @@ void main(
   r0.xy = v1.xy;
   r0.z = 0;
   o0.xyzw = t0.SampleLevel(s0_s, r0.xyz, 0).xyzw;
-    float3 lch = renodx::color::oklch::from::BT709(o0.rgb);
-    lch[1] /= max(0.1f, injectedData.colorGradeSaturation);
-    float3 color = renodx::color::bt709::from::OkLCh(lch);
-    o0.rgb = renodx::color::bt709::clamp::BT2020(color);
+    o0.rgb = renodx::color::ap1::from::BT709(o0.rgb);
   return;
 }

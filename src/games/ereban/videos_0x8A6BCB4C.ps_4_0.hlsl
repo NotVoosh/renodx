@@ -32,9 +32,17 @@ void main(
     
     float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
     
+        if(injectedData.toneMapGammaCorrection == 1) {
+        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
     o0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(o0.rgb, 100.f, videoPeak);
-    o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
-    o0.rgb /= injectedData.toneMapUINits;    
+	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
+    o0.rgb /= injectedData.toneMapUINits;
+        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+        } else {
+    o0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(o0.rgb, 100.f, videoPeak);
+	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
+    o0.rgb /= injectedData.toneMapUINits;
+    } 
       	
   return;
 }
