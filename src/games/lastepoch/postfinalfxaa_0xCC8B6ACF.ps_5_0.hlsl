@@ -413,7 +413,7 @@ void main(
   //r2.xyz = exp2(r2.xyz);
   //r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
   //o0.xyz = r0.xyz ? r1.xyz : r2.xyz;
-    r1.rgb = applyFilmGrain(r1.gba, screen);
+    r1.rgb = applyFilmGrain(r1.rgb, screen);
 		if (injectedData.toneMapGammaCorrection == 1){
     r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
     r1.rgb *= injectedData.toneMapGameNits / 80.f;
