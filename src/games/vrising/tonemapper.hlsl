@@ -73,7 +73,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
+				if (injectedData.toneMapType >= 2){
 			outputColor = renodx::color::correct::Hue(outputColor, vanilla, injectedData.toneMapHueCorrection);
-	
+			}
 	return outputColor;
 }
