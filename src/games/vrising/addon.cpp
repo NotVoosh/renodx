@@ -206,11 +206,11 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxVignette",
         .binding = &shader_injection.fxVignette,
-        .default_value = 100.f,
+        .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
         .max = 100.f,
-        .parse = [](float value) { return value * 0.01f; },
+        .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
@@ -289,7 +289,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
-  renodx::utils::settings::UpdateSetting("fxVignette", 100.f);
+  renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
 }
 
@@ -321,8 +321,6 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
-      renodx::mods::swapchain::use_resize_buffer = false;
-      //renodx::mods::shader::expected_constant_buffer_index = 8;
       
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({

@@ -86,10 +86,8 @@ void main(
   r4.xyzw = min(float4(8,8,8,8), r4.xyzw);
   r4.xyzw = cb1[48].zwzw * r4.xyzw;
   r5.xyzw = v1.xyxy * cb0[6].xyxy + cb0[6].zwzw;
-  //r6.xyzw = saturate(r4.zwzw * float4(-0.5,-0.5,-0.166666672,-0.166666672) + r5.zwzw);
-    r6.xyzw = r4.zwzw * float4(-0.5, -0.5, -0.166666672, -0.166666672) + r5.zwzw;
-  //r4.xyzw = saturate(r4.xyzw * float4(0.166666672,0.166666672,0.5,0.5) + r5.xyzw);
-    r4.xyzw = r4.xyzw * float4(0.166666672, 0.166666672, 0.5, 0.5) + r5.xyzw;
+  r6.xyzw = saturate(r4.zwzw * float4(-0.5,-0.5,-0.166666672,-0.166666672) + r5.zwzw);
+  r4.xyzw = saturate(r4.xyzw * float4(0.166666672,0.166666672,0.5,0.5) + r5.xyzw);
   r4.xyzw = cb1[51].xyxy * r4.xyzw;
   r5.xyzw = cb1[51].xyxy * r6.zwxy;
   r6.xy = r5.zw;
@@ -139,7 +137,7 @@ void main(
   //r0.yzw = log2(r0.yzw);                                              //
   //r0.yzw = cb0[8].yyy * r0.yzw;                                       // pow(r0.yzw, cb0[8].y) => 2.2
   //o0.xyz = exp2(r0.yzw);                                              //
-    o0.xyz = renodx::color::grade::Saturation(r0.gba, injectedData.colorGradeSaturation);
+    o0.rgb = renodx::color::bt709::from::AP1(r0.gba);
         o0.rgb = applyFilmGrain(o0.rgb, v1.xy);
           	if(injectedData.toneMapGammaCorrection == 1) {
 		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);

@@ -138,7 +138,6 @@ cbuffer cb0 : register(b0)
     r0.yzw = float3(1,1,1) + -cb1[3].xyz;
     r0.xyz = r0.xxx * r0.yzw + cb1[3].xyz;
     r0.xyz = r2.xyz * r0.xyz;
-        //r0.xyz = r2.xyz * lerp(1, r0.xyz, injectedData.fxVignette);
     } else {
     r0.w = t4.SampleLevel(s2_s, r1.zw, 0).w;
     r1.x = r0.w * 0.305306017 + 0.682171106;
@@ -176,7 +175,7 @@ cbuffer cb0 : register(b0)
 		float3 vanilla = r0.rgb;
 	
 	r0.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
-    
+    r0.rgb = renodx::color::ap1::from::BT709(r0.rgb);
 // No code for instruction (needs manual fix):
 // store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
 	u0[vThreadID.xyz] = r0.xyzw;
