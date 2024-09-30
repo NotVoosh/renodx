@@ -31,6 +31,7 @@ void main(
 
   r0.xy = saturate(v1.xy);
   r0.xy = cb0[26].xx * r0.xy;
+    float2 screen = r0.xy;
   r1.xyzw = t1.SampleLevel(s1_s, r0.xy, 0).xyzw;
   r0.z = t1.SampleLevel(s1_s, r0.xy, 0, int2(0, 1)).w;
   r0.w = t1.SampleLevel(s1_s, r0.xy, 0, int2(1, 0)).w;
@@ -409,6 +410,14 @@ void main(
   //r2.xyz = exp2(r2.xyz);
   //r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
   //o0.xyz = r0.xyz ? r1.xyz : r2.xyz;
+    r1.rgb = applyFilmGrain(r1.gba, screen);
+		if (injectedData.toneMapGammaCorrection == 1){
+    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
+    r1.rgb *= injectedData.toneMapGameNits / 80.f;
+    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb, true);
+    } else {
+    r1.rgb *= injectedData.toneMapGameNits / 80.f;
+    }
     o0.rgb = r1.rgb;
   o0.w = r1.w;
   return;

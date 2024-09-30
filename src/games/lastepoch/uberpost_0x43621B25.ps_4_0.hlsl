@@ -151,14 +151,6 @@ void main(
   }
 		float3 vanilla = r1.gba;
 	r1.gba = applyUserTonemap(untonemapped, t4, s4_s, vanilla);
-    r1.gba = applyFilmGrain(r1.gba, w1.xy);
-		if (injectedData.toneMapGammaCorrection == 1){
-    r1.gba = renodx::color::correct::GammaSafe(r1.gba);
-    r1.gba *= injectedData.toneMapGameNits / 80.f;
-    r1.gba = renodx::color::correct::GammaSafe(r1.gba, true);
-    } else {
-    r1.gba *= injectedData.toneMapGameNits / 80.f;
-    }
   o0.xyzw = r1.yzwx;
   return;
 }

@@ -15,7 +15,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 vanilla){
 		
-		float3 outputColor = untonemapped;
+		float3 outputColor = max(0, untonemapped);
 	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -46,7 +46,11 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.reno_drt_highlights = 1.2f;
 			config.reno_drt_saturation = 1.08f;
 			
-			
+				if (injectedData.toneMapType == 2) {													// ACES default config
+			config.shadows += 0.1;
+			config.contrast -= 0.3;
+			config.saturation -= 0.2;
+			}
 	
 				if (injectedData.toneMapType == 4){												// Frostbite
 			config.highlights += 0.1f;

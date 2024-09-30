@@ -48,20 +48,20 @@ void main(
   r0.x = v4.w * r0.x;
   r0.yzw = r1.xyz * float3(10,10,10) + float3(-1,-1,-1);
   r0.yzw = w2.yyy * r0.yzw + float3(1,1,1);
-  o0.xyz = r0.xxx * r0.yzw + r1.xyz;
-    
-         	if(injectedData.toneMapGammaCorrection == 1) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-        o0.rgb *= injectedData.toneMapUINits / 80.f;
-        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+             	if(injectedData.toneMapGammaCorrection == 1) {
+		r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
+        r1.rgb *= injectedData.toneMapUINits / 80.f;
+        r1.rgb = renodx::color::correct::GammaSafe(r1.rgb, true);
         } else {
-        o0.rgb *= injectedData.toneMapUINits / 80.f;
+        r1.rgb *= injectedData.toneMapUINits / 80.f;
         }
+  o0.xyz = r0.xxx * r0.yzw + r1.xyz;
   r0.xy = cmp(v3.xy >= cb0[4].xy);
   r0.zw = cmp(cb0[4].zw >= v3.xy);
   r0.xyzw = r0.xyzw ? float4(1,1,1,1) : 0;
   r0.xy = r0.xy * r0.zw;
   r0.x = r0.x * r0.y;
-  o0.w = r1.w * r0.x;
+  //o0.w = r1.w * r0.x;
+    o0.w = saturate(r1.w * r0.x);
   return;
 }

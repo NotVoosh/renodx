@@ -89,7 +89,7 @@ void main(
   r0.xyzw = r4.xyzw + r1.xyzw;
   r0.xyzw = r2.xyzw * r3.xyzw + r0.xyzw;
 		
-		float3 untonemapped = max(0, r0.rgb);
+		float3 untonemapped = r0.rgb;
 		
   r0.xyzw = cb0[36].zzzz * r0.xyzw;
   r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
@@ -108,14 +108,6 @@ void main(
   }
 		float3 vanilla = r1.yzw;
 	r1.gba = applyUserTonemap(untonemapped, t4, s4_s, vanilla);
-    r1.gba = applyFilmGrain(r1.gba, w1.xy);
-		if (injectedData.toneMapGammaCorrection == 1){
-    r1.gba = renodx::color::correct::GammaSafe(r1.gba);
-    r1.gba *= injectedData.toneMapGameNits / 80.f;
-    r1.gba = renodx::color::correct::GammaSafe(r1.gba, true);
-    } else {
-    r1.gba *= injectedData.toneMapGameNits / 80.f;
-    }
   o0.xyzw = r1.yzwx;
   return;
 }
