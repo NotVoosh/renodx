@@ -24,7 +24,8 @@ void main(
 
   r0.xyzw = mainTexture.Sample(mainTextureSampler_s, v1.xy).xyzw;
   o0.xyzw = v2.xyzw * r0.xyzw;
-		
-		o0.rgb = renodx::color::correct::Gamma(o0.rgb, true);
+        if(injectedData.toneMapGammaCorrection == 0){
+    o0.rgb = renodx::color::correct::Gamma(o0.rgb, true);
+    }
   return;
 }

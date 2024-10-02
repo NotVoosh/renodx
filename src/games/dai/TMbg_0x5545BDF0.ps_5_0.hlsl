@@ -37,13 +37,14 @@ void main(
   o0.xyzw = v1.xyzw * r0.xyzw;
   
   	o0.rgba = saturate(r0.rgba);									// clean invalid colors
-    o0.rgba = injectedData.toneMapGammaCorrection ? pow(o0.rgba, 2.2f)
-												 : renodx::color::bt709::from::SRGBA(o0.rgba);
+    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(o0.rgb)
+												 : renodx::color::srgb::Decode(o0.rgb);
 		float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
 	o0.rgb = renodx::tonemap::inverse::bt2446a::BT709(o0.rgb, 100.f, videoPeak);
 	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
 	o0.rgb /= injectedData.toneMapUINits;
-    o0.rgb = sign(o0.rgb) * pow(abs(o0.rgb), 1 / 2.2f);
+    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(o0.rgb)
+												 : renodx::color::srgb::EncodeSafe(o0.rgb);
 	
   return;
 }

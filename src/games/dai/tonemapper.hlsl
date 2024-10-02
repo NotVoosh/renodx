@@ -16,8 +16,8 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float3 vanilla, float2 screenXY){
 		
 		float3 outputColor = max(0, untonemapped.rgb);
-		float3 hueCorrectionColor = injectedData.toneMapGammaCorrection ? pow(vanilla, 2.2f)
-																		: renodx::color::bt709::from::SRGB(vanilla);
+		float3 hueCorrectionColor = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(vanilla)
+																		: renodx::color::srgb::Decode(vanilla);
 	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -34,11 +34,11 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
-			config.mid_gray_value = 0.2176f;
-			config.mid_gray_nits = 21.76f;
+			config.mid_gray_value = 0.202699565614f;
+			config.mid_gray_nits = 20.2699565614f;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = injectedData.toneMapGammaCorrection ? pow(LUTless, 2.2f)
-																		: renodx::color::bt709::from::SRGB(LUTless);	
+			config.hue_correction_color = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(LUTless)
+																		  	  : renodx::color::srgb::Decode(LUTless);	
 			config.hue_correction_strength = injectedData.toneMapHueCorrection / 3;
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
@@ -49,8 +49,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::GAMMA_2_2,
 			32.f);
 			
-			config.reno_drt_contrast = 1.145f;
-			config.reno_drt_saturation = 1.09f;
+			config.reno_drt_saturation = 1.4f;
 			
 		if(injectedData.toneMapType == 2){				// ACES default config
 		config.contrast -= 0.14f;
@@ -85,8 +84,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 	
 		if (injectedData.toneMapType == 0) {
 			outputColor = lerp(LUTless, vanilla, injectedData.colorGradeLUTStrength);
-			outputColor = injectedData.toneMapGammaCorrection ? pow(outputColor, 2.2f)
-															  :renodx::color::bt709::from::SRGB(outputColor);
+			outputColor = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(outputColor)
+															  :renodx::color::srgb::Decode(outputColor);
 		}
 		
 		if (injectedData.fxFilmGrain) {
@@ -94,7 +93,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 		}
 	
 			outputColor *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-			outputColor = sign(outputColor) * pow(abs(outputColor), 1 / 2.2f);
+			outputColor = renodx::color::gamma::EncodeSafe(outputColor);
 	
 	return outputColor;
 }
