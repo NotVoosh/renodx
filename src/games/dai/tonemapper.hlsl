@@ -34,8 +34,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
-			config.mid_gray_value = 0.18f;
-			config.mid_gray_nits = 18.f;
+			config.mid_gray_value = 0.2176f;
+			config.mid_gray_nits = 21.76f;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
 			config.hue_correction_color = injectedData.toneMapGammaCorrection ? pow(LUTless, 2.2f)
 																		: renodx::color::bt709::from::SRGB(LUTless);	
@@ -44,23 +44,24 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
 			injectedData.colorGradeLUTStrength,
-			injectedData.colorGradeLUTScaling,															// doesn't seem to be doing anything but could depend on the scene...
-			renodx::lut::config::type::GAMMA_2_2,														// not sure
-			renodx::lut::config::type::GAMMA_2_2,														//           about this
+			injectedData.colorGradeLUTScaling,
+			renodx::lut::config::type::GAMMA_2_2,
+			renodx::lut::config::type::GAMMA_2_2,
 			32.f);
 			
 			config.reno_drt_contrast = 1.145f;
 			config.reno_drt_saturation = 1.09f;
 			
+		if(injectedData.toneMapType == 2){				// ACES default config
+		config.contrast -= 0.14f;
+		}
 		if (injectedData.toneMapGammaCorrection == 0) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 		}
 		
 		if (injectedData.toneMapType == 4){																// Frostbite
-			config.highlights -= 0.1;
-			config.shadows -= 0.35;
+			config.shadows -= 0.1;
 			config.contrast += 0.2;
-			config.saturation += 0.05;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		
 				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
@@ -70,11 +71,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 				
-			
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																injectedData.colorGradeSaturation + 0.07,
+																injectedData.colorGradeSaturation + 0.3,
 																0.f, 0.f);
 		} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);

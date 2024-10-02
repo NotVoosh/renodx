@@ -191,12 +191,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.0125f,
+        .default_value = 0.02f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
         .tint = 0x3A5953,
-        .max = 0.025f,
+        .max = 0.05f,
         .format = "%.4f",
         .is_enabled = []() { return shader_injection.toneMapType == 3; },
     },
@@ -342,14 +342,6 @@ bool HandlePreDraw(reshade::api::command_list* cmd_list, bool is_dispatch = fals
       auto render_target = swapchain_state.current_render_targets[i];
       if (render_target.handle == 0) continue;
       if (renodx::mods::swapchain::ActivateCloneHotSwap(cmd_list->get_device(), render_target)) {
-        std::stringstream s;
-        s << "Upgrading RTV: ";
-        s << reinterpret_cast<void*>(render_target.handle);
-        s << ", shader: ";
-        s << PRINT_CRC32(pixel_shader_hash);
-        s << ")";
-        reshade::log::message(reshade::log::level::debug, s.str().c_str());
-
         changed = true;
       }
     }
@@ -606,9 +598,9 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
-      renodx::mods::swapchain::prevent_full_screen = false;
+      renodx::mods::swapchain::prevent_full_screen = true;
       renodx::mods::swapchain::use_resource_cloning = true;
-      renodx::mods::shader::trace_unmodified_shaders = true;
+      //renodx::mods::shader::trace_unmodified_shaders = true;
       
       //  final shader copy pasta start
       reshade::register_event<reshade::addon_event::init_device>(OnInitDevice);
