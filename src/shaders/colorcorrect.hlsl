@@ -1,7 +1,8 @@
-#ifndef SRC_SHADERS_COLOR_CORRECT_HLSL_
-#define SRC_SHADERS_COLOR_CORRECT_HLSL_
+#ifndef SRC_SHADERS_COLORCORRECT_HLSL_
+#define SRC_SHADERS_COLORCORRECT_HLSL_
 
 #include "./color.hlsl"
+#include "./math.hlsl"
 
 namespace renodx {
 namespace color {
@@ -9,16 +10,17 @@ namespace correct {
 
 float Gamma(float x, bool pow_to_srgb = false) {
   if (pow_to_srgb) {
-    return renodx::color::bt709::from::SRGB(pow(x, 1.f / 2.2f));
-  }  // srgb2pow
-  return pow(renodx::color::srgb::from::BT709(x), 2.2f);
+    return srgb::Decode(gamma::Encode(x));
+  }
+  // srgb2pow
+  return gamma::Decode(srgb::Encode(x));
 }
 
 float GammaSafe(float x, bool pow_to_srgb = false) {
   if (pow_to_srgb) {
-    return sign(x) * renodx::color::bt709::from::SRGB(pow(abs(x), 1.f / 2.2f));
+    return renodx::math::Sign(x) * srgb::Decode(gamma::Encode(abs(x)));
   }
-  return sign(x) * pow(renodx::color::srgb::from::BT709(abs(x)), 2.2f);
+  return renodx::math::Sign(x) * gamma::Decode(srgb::Encode(abs(x)));
 }
 
 float3 Gamma(float3 color, bool pow_to_srgb = false) {
@@ -33,7 +35,7 @@ float4 Gamma(float4 color, bool pow2srgb = false) {
 }
 
 float3 GammaSafe(float3 color, bool pow2srgb = false) {
-  float3 signs = sign(color);
+  float3 signs = renodx::math::Sign(color);
   color = abs(color);
   color = float3(
       Gamma(color.r, pow2srgb),
@@ -73,4 +75,5 @@ float3 Hue(float3 incorrect_color, float3 correct_color, float strength = 1.f) {
 }  // namespace correct
 }  // namespace color
 }  // namespace renodx
-#endif  // SRC_SHADERS_COLOR_CORRECT_HLSL_
+
+#endif  // SRC_SHADERS_COLORCORRECT_HLSL_

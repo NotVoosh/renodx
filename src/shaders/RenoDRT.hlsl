@@ -1,7 +1,8 @@
-#ifndef SRC_COMMON_RENODRT_HLSL_
-#define SRC_COMMON_RENODRT_HLSL_
+#ifndef SRC_SHADERS_RENODRT_HLSL_
+#define SRC_SHADERS_RENODRT_HLSL_
 
 #include "./color.hlsl"
+#include "./math.hlsl"
 
 namespace renodx {
 namespace tonemap {
@@ -47,7 +48,11 @@ float3 BT709(
   n = nits_peak;
   t_1 = flare;
 
-  float y_original = renodx::color::y::from::BT709(abs(bt709));
+  float3 signs = renodx::math::Sign(bt709);
+
+  bt709 = abs(bt709);
+
+  float y_original = renodx::color::y::from::BT709(bt709);
 
   float3 restore_lab = (hue_correction_strength == 0)
                            ? 0
@@ -89,7 +94,7 @@ float3 BT709(
 
   float y_new = clamp(flared, 0, m_0);
 
-  float3 color_output = bt709 * (y_original > 0 ? (y_new / y_original) : 0);
+  float3 color_output = signs * bt709 * (y_original > 0 ? (y_new / y_original) : 0);
   float3 color = color_output;
 
   if (dechroma != 0.f || saturation != 1.f || hue_correction_strength != 0.f) {
@@ -103,7 +108,7 @@ float3 BT709(
         float old_chroma = lch_new[1];  // Store old chroma
         lab_new.yz = lerp(lab_new.yz, restore_lab.yz, hue_correction_strength);
         lch_new = renodx::color::oklch::from::OkLab(lab_new);
-        lch_new[1] = old_chroma; // chroma restore
+        lch_new[1] = old_chroma;  // chroma restore
       }
     }
 
@@ -153,4 +158,4 @@ float3 BT709(
 }  // namespace tonemap
 }  // namespace renodx
 
-#endif  // SRC_COMMON_RENODRT_HLSL_
+#endif  // SRC_SHADERS_RENODRT_HLSL_

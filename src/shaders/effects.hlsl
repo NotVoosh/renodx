@@ -1,7 +1,8 @@
-#ifndef SRC_SHADERS_EFFECTS_FILM_GRAIN_HLSL_
-#define SRC_SHADERS_EFFECTS_FILM_GRAIN_HLSL_
+#ifndef SRC_SHADERS_EFFECTS_HLSL_
+#define SRC_SHADERS_EFFECTS_HLSL_
 
 #include "./color.hlsl"
+#include "./math.hlsl"
 #include "./random.hlsl"
 
 namespace renodx {
@@ -43,7 +44,7 @@ float3 ApplyFilmGrain(float3 color, float2 xy, float seed, float strength, float
 
   // Scaling is not not linear
 
-  const float3 signs = sign(color);
+  const float3 signs = renodx::math::Sign(color);
   color = abs(color);
   float color_y = renodx::color::y::from::BT709(color);
 
@@ -73,4 +74,4 @@ float3 ApplyFilmGrain(float3 color, float2 xy, float seed, float strength, float
 }  // namespace effects
 }  // namespace renodx
 
-#endif  // SRC_SHADERS_EFFECTS_FILM_GRAIN_HLSL_
+#endif  // SRC_SHADERS_EFFECTS_HLSL_
