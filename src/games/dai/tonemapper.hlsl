@@ -49,7 +49,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::GAMMA_2_2,
 			32.f);
 			
-			config.reno_drt_saturation = 1.4f;
+			config.reno_drt_saturation = 1.2f;
 			
 		if(injectedData.toneMapType == 2){				// ACES default config
 		config.contrast -= 0.14f;
