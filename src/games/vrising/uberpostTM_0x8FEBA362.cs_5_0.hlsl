@@ -111,10 +111,7 @@ cbuffer cb0 : register(b0)
       r0.xyz = r1.xyz * r0.xyz;
       r2.xyz = r0.xyz * cb1[7].yyy + r2.xyz;
     }
-  }
-    
-        //float3 untonemapped = r2.rgb;
-    
+  } 
   r0.x = cmp(0 != cb1[12].x);
   if (r0.x != 0) {
     r0.xyz = r2.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
@@ -136,10 +133,6 @@ cbuffer cb0 : register(b0)
     }
   }
     
-		//float3 vanilla = r2.rgb;
-	
-	//r2.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
-    r2.rgb = renodx::color::ap1::from::BT709(r2.rgb);
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r2.xyzx
     u0[vThreadID.xyz] = float4(r2.xyz, 1);
