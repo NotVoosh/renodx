@@ -27,12 +27,10 @@ void main(
   float4 fDest;
 
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
-    float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
-    r0.rgb = saturate(r0.rgb);
-    r0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(r0.rgb, 100.f, videoPeak);
-    r0.rgb *= injectedData.toneMapPeakNits / videoPeak;
-    r0.rgb /= injectedData.toneMapUINits;
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
+    
+	o0.rgb *= injectedData.toneMapPeakNits / injectedData.toneMapUINits;
+
   return;
 }

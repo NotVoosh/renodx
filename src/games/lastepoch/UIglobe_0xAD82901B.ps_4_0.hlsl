@@ -1,4 +1,6 @@
-// ---- Created with 3Dmigoto v1.3.16 on Fri Sep 27 05:56:07 2024
+#include "./shared.h"
+
+// ---- Created with 3Dmigoto v1.3.16 on Sun Sep 29 06:14:17 2024
 Texture2D<float4> t5 : register(t5);
 
 Texture2D<float4> t4 : register(t4);
@@ -30,7 +32,7 @@ cbuffer cb1 : register(b1)
 
 cbuffer cb0 : register(b0)
 {
-  float4 cb0[8];
+  float4 cb0[12];
 }
 
 
@@ -54,10 +56,10 @@ void main(
   uint4 bitmask, uiDest;
   float4 fDest;
 
-  r0.xy = cb1[0].yy * cb0[4].zy + v1.zw;
+  r0.xy = cb1[0].yy * cb0[8].zy + v1.zw;
   r0.xyzw = t0.Sample(s1_s, r0.xy).xyzw;
-  r1.w = cb1[0].y * cb0[4].w + v2.y;
-  r1.xyz = cb1[0].yyy * cb0[5].xzy + v2.xzw;
+  r1.w = cb1[0].y * cb0[8].w + v2.y;
+  r1.xyz = cb1[0].yyy * cb0[9].xzy + v2.xzw;
   r2.xyzw = t1.Sample(s2_s, r1.xw).xyzw;
   r1.xw = float2(0.300000012,0.300000012) + r1.xw;
   r3.xyzw = t2.Sample(s3_s, r1.yz).xyzw;
@@ -65,30 +67,35 @@ void main(
   r0.xyzw = r2.xyzw * r0.xyzw;
   r0.xyzw = r0.xyzw * r1.xyzw;
   r0.xyzw = r0.xyzw * r3.xyzw;
-  r0.xyzw = cb0[6].xyzw * r0.xyzw;
-  r1.x = -cb0[4].x + v1.y;
+  r0.xyzw = cb0[10].xyzw * r0.xyzw;
+  r1.x = -cb0[8].x + v1.y;
   r1.y = cmp(r1.x >= 0.800000012);
   r1.y = r1.y ? 0.449999988 : r1.x;
   r1.x = v1.x;
   r1.xyzw = t3.Sample(s0_s, r1.xy).xyzw;
   r0.xyzw = r1.xyzw * r0.xyzw;
-  r0.xyzw = float4(3,3,3,3) * r0.xyzw;		// no HDR alpha pls thanks. saturated below
-  r1.x = -cb0[4].x + v3.y;
+  r0.xyzw = float4(3,3,3,3) * r0.xyzw;
+  r1.x = -cb0[8].x + v3.y;
   r1.y = cmp(r1.x >= 0.800000012);
   r1.y = r1.y ? 0.5 : r1.x;
   r1.x = v3.x;
   r1.xyzw = t4.Sample(s4_s, r1.xy).xyzw;
-  r1.xyzw = cb0[7].xyzw * r1.xyzw;
+  r1.xyzw = cb0[11].xyzw * r1.xyzw;
   r2.xyzw = r1.xyzw * r0.xyzw;
   r2.xyzw = r2.xyzw * float4(5,5,5,5) + r1.xyzw;
   r1.xyzw = r2.xyzw * r1.wwww;
-  r1.xyzw = cb0[7].wwww * r1.xyzw;
+  r1.xyzw = cb0[11].wwww * r1.xyzw;
   r0.xyzw = r1.xyzw * float4(2,2,2,2) + r0.xyzw;
   r1.xyzw = t5.Sample(s5_s, v3.zw).xyzw;
-  r0.w = r1.w * r0.w;
-  r1.xyz = v6.xyz * r0.xyz;
-  r1.w = 0;
-  o0.xyzw = r1.xyzw + r0.xyzw;
-    o0.w = saturate(o0.w);
+  o0.w = r1.w * r0.w;
+  o0.xyz = r0.xyz;
+    
+           	if(injectedData.toneMapGammaCorrection == 1) {
+		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
+        o0.rgb *= injectedData.toneMapUINits / 80.f;
+        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+        } else {
+        o0.rgb *= injectedData.toneMapUINits / 80.f;
+        }
   return;
 }

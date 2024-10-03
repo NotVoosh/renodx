@@ -7,6 +7,8 @@
 
 #define DEBUG_LEVEL_0
 
+#include <embed/0x900045BA.h>   // camera light
+
 #include <embed/0x43621B25.h>   // uberpost
 #include <embed/0xFF4E4EF2.h>   // uberpost (title menu)
 
@@ -17,11 +19,10 @@
 #include <embed/0x4B83BA2B.h>   // SMAA 2
 #include <embed/0xB5EA3401.h>   // TAA
 
-//#include <embed/0xC32E5F94.h>   // annoying stuff
-
 #include <embed/0xB11B9B50.h>   // UI alpha
 #include <embed/0x5CC882AB.h>   // UI cutout 1
 #include <embed/0xA4CF5BB8.h>   // UI cutout 2
+#include <embed/0xAD82901B.h>   // UI cutout globe
 #include <embed/0x2B868B21.h>   // UI default 1
 #include <embed/0x5A045DE6.h>   // UI default 2
 #include <embed/0xAB67D6D3.h>   // UI default 3
@@ -30,8 +31,9 @@
 #include <embed/0x55B0DCB7.h>   // UI text 1
 #include <embed/0x915C6643.h>   // UI text 2
 #include <embed/0xB4EB8715.h>   // UI text 3
-#include <embed/0x67B5C47D.h>   // worldmap
 
+#include <embed/0x67B5C47D.h>   // worldmap
+#include <embed/0xD8EECF85.h>   // time travel
 #include <embed/0x8A6BCB4C.h>   // pre-rendered cutscenes
 #include <embed/0x20133A8B.h>   // Final
 
@@ -46,6 +48,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
+    CustomShaderEntry(0x900045BA),  // camera light
+
     CustomShaderEntry(0x43621B25),  // uberpost
     CustomShaderEntry(0xFF4E4EF2),  // uberpost (title menu)
 
@@ -56,11 +60,10 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x4B83BA2B),  // SMAA 2
     CustomShaderEntry(0xB5EA3401),  // TAA
 
-    //CustomShaderEntry(0xC32E5F94),  // annoying stuff
-
     CustomShaderEntry(0xB11B9B50),  // UI alpha
     CustomShaderEntry(0x5CC882AB),  // UI cutout 1
     CustomShaderEntry(0xA4CF5BB8),  // UI cutout 2
+    CustomShaderEntry(0xAD82901B),  // UI cutout globe
     CustomShaderEntry(0x2B868B21),  // UI default 1
     CustomShaderEntry(0x5A045DE6),  // UI default 2
     CustomShaderEntry(0xAB67D6D3),  // UI default 3
@@ -69,10 +72,11 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x55B0DCB7),  // UI text 1
     CustomShaderEntry(0x915C6643),  // UI text 2
     CustomShaderEntry(0xB4EB8715),  // UI text 3
-    CustomShaderEntry(0x67B5C47D),  // worldmap
 
+    CustomShaderEntry(0x67B5C47D),  // worldmap
+    CustomShaderEntry(0xD8EECF85),  // time travel
     CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
-    CustomShaderEntry(0x20133A8B),  // Final
+    CustomSwapchainShader(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -179,7 +183,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
@@ -190,7 +194,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.0f,
+        .default_value = 0.0025f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -230,12 +234,23 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxVignette",
         .binding = &shader_injection.fxVignette,
-        .default_value = 5.f,
+        .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
         .tooltip = "Scales game original Vignette.",
-        .max = 20.f,
-        .parse = [](float value) { return value * 0.2f; },
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "fxCameraLight",
+        .binding = &shader_injection.fxCameraLight,
+        .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
+        .default_value = 1,
+        .can_reset = false,
+        .label = "Camera Light",
+        .section = "Effects",
+        .tooltip = "Toggles camera's fake light (when possible).",
+        .labels = {"Off", "On"},
     },
     new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
@@ -249,7 +264,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Cutscenes may be locked to UI brightness, turn it up when they play.",
+        .label = "Cutscenes are clamped to UI brightness, turn it up when they play. SMAA & TAA can reduce Peak.",
         .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
@@ -314,7 +329,8 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
-  renodx::utils::settings::UpdateSetting("fxVignette", 5.f);
+  renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
+  renodx::utils::settings::UpdateSetting("fxCameraLight", 1);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
 }
 
@@ -346,15 +362,19 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
-      renodx::mods::swapchain::use_resize_buffer = false;
-      // renodx::mods::shader::expected_constant_buffer_index = 8;
 
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          //.index = 0,
           .ignore_size = false,
+      });
+      //  pre-rendered video
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r8g8b8a8_typeless,
+          .new_format = reshade::api::format::r16g16b16a16_typeless,
+          .ignore_size = true,
+          .dimensions = {2560, 1440},
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);
