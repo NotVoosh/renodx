@@ -33,8 +33,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
-			config.mid_gray_value = 0.18f;
-			config.mid_gray_nits = 18.f;	
+			config.mid_gray_value = 0.10f;
+			config.mid_gray_nits = 10.f;	
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -43,8 +43,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::ARRI_C1000_NO_CUT,
 			renodx::lut::config::type::LINEAR,
 			32.f);
-			
-			config.reno_drt_saturation = 1.04f;
 
 				if(injectedData.toneMapType == 2){															// ACES default
 			config.shadows += 0.2;

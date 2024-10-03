@@ -8,7 +8,6 @@
 #define DEBUG_LEVEL_0
 
 #include <embed/0x8A6BCB4C.h>   // videos
-#include <embed/0x0EBC87AB.h>   // screenLUT (game brightness)
 
 #include <embed/0xE363E5C8.h>   // uberpost
 #include <embed/0x3BD8B8FD.h>   // uberpost (title menu)
@@ -17,8 +16,8 @@
 #include <embed/0x02AB22C6.h>   // HDRP (title menu)
 #include <embed/0x0FA783B7.h>   // HDRP2 (title menu)
 #include <embed/0xCF6A37F9.h>   // HDRP final (DLSS/TAAU)
+#include <embed/0x9A3E0141.h>   // HDRP final (FXAA)
 
-#include <embed/0x10161AF3.h>   // UI composite
 #include <embed/0x20133A8B.h>   // Final
 
 #include <deps/imgui/imgui.h>
@@ -33,7 +32,6 @@ namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
-    CustomShaderEntry(0x0EBC87AB),  // screenLUT (game brightness setting)
 
     CustomShaderEntry(0xE363E5C8),  // uberpost = tonemap/LUT/postprocess
     CustomShaderEntry(0x3BD8B8FD),  // uberpost (title menu)
@@ -42,9 +40,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x02AB22C6),  // HDRPfinal (title menu)
     CustomShaderEntry(0x0FA783B7),  // HDRPfinal2 (title menu)
     CustomShaderEntry(0xCF6A37F9),  // HDRPfinal (DLSS/TAAU)
+    CustomShaderEntry(0x9A3E0141),  // HDRPfinal (FXAA)
 
-    CustomShaderEntry(0x10161AF3),  // UI composite
-    CustomShaderEntry(0x20133A8B),  // Final
+    CustomSwapchainShader(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -176,7 +174,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
-        .max = 0.025f,
+        .max = 0.05f,
         .format = "%.4f",
         .is_enabled = []() { return shader_injection.toneMapType == 3; },
     },
@@ -212,12 +210,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxVignette",
         .binding = &shader_injection.fxVignette,
-        .default_value = 5.f,
+        .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
         .tooltip = "Scales game original Vignette.",
-        .max = 20.f,
-        .parse = [](float value) { return value * 0.2f; },
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
@@ -230,8 +228,18 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxFilmGrainType",
+        .binding = &shader_injection.fxFilmGrainType,
+        .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
+        .default_value = 0,
+        .can_reset = false,
+        .label = "Custom Film Grain",
+        .section = "Effects",
+        .tooltip = "Replace game original film grain (when used) with custom one.",
+    },
+    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Upscaler Mode: EdgeAdaptiveScalingUpres, is not supported. In-game brightness setting is disabled on purpose.",
+        .label = "Upscaler Mode: EdgeAdaptiveScalingUpres, is not currently supported.",
         .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
@@ -297,8 +305,9 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
-  renodx::utils::settings::UpdateSetting("fxVignette", 5.f);
+  renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 50.f);
+  renodx::utils::settings::UpdateSetting("fxFilmGrainType", 0);
 }
 
 auto start = std::chrono::steady_clock::now();
@@ -329,14 +338,87 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
-      renodx::mods::swapchain::use_resize_buffer = false;
-      // renodx::mods::shader::expected_constant_buffer_index = 8;
+
+      //  RG10B10_float (UAV stuff)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 7,
+          .ignore_size = false,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
+      });
+
+      //  RG10B10_float (UAV stuff)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 9,
+          .ignore_size = false,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
+      });
+
+      //  RG10B10_float (UAV stuff)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 10,
+          .ignore_size = false,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
+      });
+
+            //  RG10B10_float (UAV stuff)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 11,
+          .ignore_size = false,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
+      });
 
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          //.index = 0,
           .ignore_size = false,
       });
 

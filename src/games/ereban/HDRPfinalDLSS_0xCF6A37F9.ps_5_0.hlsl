@@ -56,12 +56,13 @@ void main(
   r0.z = dot(r0.xyw, float3(0.212672904,0.715152204,0.0721750036));
   r0.z = sqrt(r0.z);
   r0.z = cb0[0].y * -r0.z + 1;
-  r0.xyz = r1.xyz * r0.zzz * 0 + r0.xyw;        // remove vanilla grain
+  r0.xyz = injectedData.fxFilmGrainType ? r0.xyw : r1.xyz * r0.zzz * injectedData.fxFilmGrain + r0.xyw;        // vanilla grain
   r2.z = 0;
   r1.xyzw = t2.SampleLevel(s0_s, r2.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
-        
+            if(injectedData.fxFilmGrainType == 1){
         o0.rgb = applyFilmGrain(o0.rgb, v1);
+        }
 		  	if(injectedData.toneMapGammaCorrection == 1) {
 		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
 		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;

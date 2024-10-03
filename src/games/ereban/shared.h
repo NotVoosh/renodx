@@ -26,6 +26,7 @@ struct ShaderInjectData {
   float fxBloom;
   float fxVignette;
   float fxFilmGrain;
+  float fxFilmGrainType;
   float elapsedTime;
 };
 

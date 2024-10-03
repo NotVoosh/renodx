@@ -174,7 +174,6 @@ cbuffer cb0 : register(b0)
             float3 vanilla = r0.rgb;
 		  
 	  r0.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
-      r0.rgb = renodx::color::ap1::from::BT709(r0.rgb);
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
 	u0[vThreadID.xyz] = r0.xyzw;
