@@ -30,7 +30,7 @@ void main(
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
     
-	o0.rgb *= injectedData.toneMapPeakNits / injectedData.toneMapUINits;
+	o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
 
   return;
 }
