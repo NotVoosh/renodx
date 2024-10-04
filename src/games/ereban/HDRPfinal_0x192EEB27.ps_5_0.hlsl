@@ -62,7 +62,7 @@ void main(
   r0.x = dot(r0.yzw, float3(0.212672904,0.715152204,0.0721750036));
   r0.x = sqrt(r0.x);
   r0.x = cb0[0].y * -r0.x + 1;
-  r0.xyz = r2.xyz * r0.xxx * 0 + r0.yzw;                // remove vanilla grain
+  r0.xyz = injectedData.fxFilmGrainType ? r0.yzw : r2.xyz * r0.xxx * injectedData.fxFilmGrain + r0.yzw;                // vanilla grain
   r1.z = 0;
   r2.xyzw = t2.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r2.www * r0.xyz + r2.xyz;
