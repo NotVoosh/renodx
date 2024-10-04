@@ -8,6 +8,7 @@
 #define DEBUG_LEVEL_0
 
 #include <embed/0x8A6BCB4C.h>   // videos
+#include <embed/0x0EBC87AB.h>   // screenLUT (game brightness)
 
 #include <embed/0xE363E5C8.h>   // uberpost
 #include <embed/0x3BD8B8FD.h>   // uberpost (title menu)
@@ -32,6 +33,7 @@ namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
+    CustomShaderEntry(0x0EBC87AB),  // screenLUT (game brightness)
 
     CustomShaderEntry(0xE363E5C8),  // uberpost = tonemap/LUT/postprocess
     CustomShaderEntry(0x3BD8B8FD),  // uberpost (title menu)
