@@ -540,6 +540,12 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       reshade::register_event<reshade::addon_event::present>(OnPresent);
       // final shader copy pasta end
 
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r8g8b8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .ignore_size = false,
+      });
+
       //  shader_hash based upgrade (supersampling support)
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_unorm,
@@ -548,7 +554,8 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .use_resource_view_cloning = true,
           .use_resource_view_hot_swap = true,
       });
-            
+
+
       reshade::register_event<reshade::addon_event::draw>(OnDraw);
       reshade::register_event<reshade::addon_event::draw_indexed>(OnDrawIndexed);
       reshade::register_event<reshade::addon_event::draw_or_dispatch_indirect>(OnDrawOrDispatchIndirect);
