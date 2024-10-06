@@ -237,7 +237,7 @@ renodx::utils::settings::Settings settings = {
         .can_reset = false,
         .label = "Custom Film Grain",
         .section = "Effects",
-        .tooltip = "Replace game original film grain (when used) with custom one.",
+        .tooltip = "Enable custom Film Grain (also replaces game's one when used).",
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
@@ -340,6 +340,25 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
+
+      //  RG10B10_float (UAV stuff)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 4,
+          .ignore_size = false,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
+      });
 
       //  RG10B10_float (UAV stuff)
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
