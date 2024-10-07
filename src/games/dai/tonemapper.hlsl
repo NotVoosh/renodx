@@ -18,6 +18,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 		float3 outputColor = max(0, untonemapped.rgb);
 		float3 hueCorrectionColor = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(vanilla)
 																		: renodx::color::srgb::Decode(vanilla);
+		midGray = renodx::color::y::from::BT709(midGray);
 	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 

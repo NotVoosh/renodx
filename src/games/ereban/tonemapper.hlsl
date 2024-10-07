@@ -13,9 +13,10 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float vanilla){
+float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float midGray){
 		
 		float3 outputColor = untonemapped.rgb;
+		midGray = renodx::color::y::from::BT709(midGray);
 	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -32,8 +33,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
-			config.mid_gray_value = vanilla;
-			config.mid_gray_nits = vanilla * 100;	
+			config.mid_gray_value = midGray;
+			config.mid_gray_nits = midGray * 100;	
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -50,7 +51,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			
 				if (injectedData.toneMapType == 4){															// Frostbite
-			config.highlights += 0.14;
+			//config.highlights += 0.14;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		
 				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);

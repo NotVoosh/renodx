@@ -22,7 +22,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			outputColor = max(0, untonemapped);
 			}
 			outputColor = renodx::color::srgb::Decode(outputColor);
-			
+		midGray = renodx::color::y::from::BT709(midGray);
+	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
 			config.type = injectedData.toneMapType;
