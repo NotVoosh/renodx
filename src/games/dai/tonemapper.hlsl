@@ -13,7 +13,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float3 vanilla, float2 screenXY){
+float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float3 vanilla, float2 screenXY, float midGray){
 		
 		float3 outputColor = max(0, untonemapped.rgb);
 		float3 hueCorrectionColor = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(vanilla)
@@ -34,8 +34,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
-			config.mid_gray_value = 0.202699565614f;
-			config.mid_gray_nits = 20.2699565614f;
+			config.mid_gray_value = midGray;
+			config.mid_gray_nits = midGray * 100;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
 			config.hue_correction_color = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(LUTless)
 																		  	  : renodx::color::srgb::Decode(LUTless);	

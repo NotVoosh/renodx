@@ -101,7 +101,8 @@ void main(
   r2.xyz = r0.xyz * float3(6.19999981,6.19999981,6.19999981) + float3(1.70000005,1.70000005,1.70000005);
   r0.xyz = r0.xyz * r2.xyz + float3(0.0599999987,0.0599999987,0.0599999987);
   r0.xyz = r1.xyz / r0.xyz;
-	
+		
+		float vanillaGray = 0.225399712683f;
 	    float3 LUTless = r0.xyz;
 
   r0.xyz = r0.xyz * float3(0.96875,0.96875,0.96875) + float3(0.015625,0.015625,0.015625);
@@ -111,6 +112,6 @@ void main(
 	
 		float3 vanilla = o0.rgb;
 		
-	o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, screen.xy);
+	o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, screen.xy, vanillaGray);
   return;
 }
