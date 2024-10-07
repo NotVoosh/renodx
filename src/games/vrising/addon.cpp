@@ -99,16 +99,6 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
     },
     new renodx::utils::settings::Setting{
-        .key = "toneMapHueCorrection",
-        .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 50.f,
-        .label = "Hue Correction",
-        .section = "Tone Mapping",
-        .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2; },
-        .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
         .binding = &shader_injection.colorGradeExposure,
         .default_value = 1.f,
@@ -278,7 +268,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
-  renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -344,7 +333,6 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          //.index = 0,
           .ignore_size = false,
       });
 

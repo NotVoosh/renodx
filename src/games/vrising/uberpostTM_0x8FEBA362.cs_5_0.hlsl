@@ -112,6 +112,7 @@ cbuffer cb0 : register(b0)
       r2.xyz = r0.xyz * cb1[7].yyy + r2.xyz;
     }
   } 
+        float3 untonemapped = r2.rgb;
   r0.x = cmp(0 != cb1[12].x);
   if (r0.x != 0) {
     r0.xyz = r2.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
@@ -132,7 +133,7 @@ cbuffer cb0 : register(b0)
       r2.xyz = t3.SampleLevel(s1_s, r0.xyz, 0).xyz;
     }
   }
-    
+        r2.rgb = untonemapped;
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r2.xyzx
     u0[vThreadID.xyz] = float4(r2.xyz, 1);

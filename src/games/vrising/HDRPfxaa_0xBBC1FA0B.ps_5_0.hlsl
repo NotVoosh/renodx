@@ -127,16 +127,16 @@ void main(
   r0.z = cmp(r3.z < r0.z);
   r0.y = (int)r0.y | (int)r0.z;
   r0.yzw = r0.yyy ? r2.yzw : r1.yzw;
-  //r1.xyz = log2(r0.yzw);                                              //
-  //r1.xyz = float3(0.416666657,0.416666657,0.416666657) * r1.xyz;      // pow(r0.yzw, 1 / 2.4f);
-  //r1.xyz = exp2(r1.xyz);                                              //
+  //r1.xyz = log2(r0.yzw);
+  //r1.xyz = float3(0.416666657,0.416666657,0.416666657) * r1.xyz;
+  //r1.xyz = exp2(r1.xyz);
   //r1.xyz = r1.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
   //r2.xyz = cmp(float3(0.00313080009,0.00313080009,0.00313080009) >= r0.yzw);
   //r0.yzw = float3(12.9232101,12.9232101,12.9232101) * r0.yzw;
   //r0.yzw = r2.xyz ? r0.yzw : r1.xyz;
-  //r0.yzw = log2(r0.yzw);                                              //
-  //r0.yzw = cb0[8].yyy * r0.yzw;                                       // pow(r0.yzw, cb0[8].y) => 2.2
-  //o0.xyz = exp2(r0.yzw);                                              //
+  //r0.yzw = log2(r0.yzw);
+  //r0.yzw = cb0[8].yyy * r0.yzw;
+  //o0.xyz = exp2(r0.yzw);
         o0.rgb = applyFilmGrain(r0.gba, v1.xy);
           	if(injectedData.toneMapGammaCorrection == 1) {
 		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
