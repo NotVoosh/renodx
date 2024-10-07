@@ -16,8 +16,8 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float3 vanilla, float2 screenXY, float midGray){
 		
 		float3 outputColor = max(0, untonemapped.rgb);
-		float3 hueCorrectionColor = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(vanilla)
-																		: renodx::color::srgb::Decode(vanilla);
+		float3 hueCorrectionColor = renodx::color::gamma::Decode(vanilla);
+	
 		midGray = renodx::color::y::from::BT709(midGray);
 	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
@@ -38,9 +38,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(LUTless)
-																		  	  : renodx::color::srgb::Decode(LUTless);	
-			config.hue_correction_strength = injectedData.toneMapHueCorrection / 3;
+			config.hue_correction_color = renodx::color::gamma::Decode(LUTless);
+			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -86,7 +85,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 		if (injectedData.toneMapType == 0) {
 			outputColor = lerp(LUTless, vanilla, injectedData.colorGradeLUTStrength);
 			outputColor = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(outputColor)
-															  :renodx::color::srgb::Decode(outputColor);
+															  : renodx::color::srgb::Decode(outputColor);
 		}
 		
 		if (injectedData.fxFilmGrain) {
