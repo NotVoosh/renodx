@@ -150,7 +150,7 @@ cbuffer cb0 : register(b0)
   }
     
         float3 untonemapped = r0.rgb;
-    
+        r0.rgb = float3(0.18f,0.18f,0.18f);
   r0.w = cmp(0 != cb1[12].x);		
   if (r0.w != 0) {
     r1.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
@@ -171,9 +171,9 @@ cbuffer cb0 : register(b0)
       r0.xyz = t3.SampleLevel(s1_s, r1.xyz, 0).xyz;
     }
   }
-            float3 vanilla = r0.rgb;
+            float vanillaGray = renodx::color::y::from::BT709(r0.rgb);
 		  
-	  r0.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
+	  r0.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanillaGray);
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
 	u0[vThreadID.xyz] = r0.xyzw;
