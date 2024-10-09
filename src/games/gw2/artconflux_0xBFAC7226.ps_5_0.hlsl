@@ -281,8 +281,6 @@ void main(
   r0.xzw = cb0[14].xxx * r0.xxx + -r3.xyz;
   r0.xyz = r0.yyy * r0.xzw + r3.xyz;
   o0.w = r3.w;
-  
-		o0.a = saturate(o0.a);
   r1.xyzw = cmp(float4(9.99999991e-38,0,9.99999991e-38,0) < abs(r7.zzww));
   r1.yw = (int2)-r1.yw;
   r2.xy = cmp(r1.yw != float2(0,0));
@@ -304,5 +302,6 @@ void main(
   r0.xyz = r0.www * r1.xyz + r0.xyz;
   r0.w = 1 + -v8.w;
   o0.xyz = r0.xyz * r0.www + v8.xyz;
+		o0.a = saturate(o0.a);
   return;
 }

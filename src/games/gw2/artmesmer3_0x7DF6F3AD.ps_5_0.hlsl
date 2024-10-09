@@ -244,7 +244,6 @@ void main(
   r0.xyz = r1.xyz * r0.wxy;
   r1.x = 1 + -v5.w;
   o0.xyzw = r1.xxxx * r0.xyzw;
-  
-	o0.a = saturate(o0.a);
+		o0.a = saturate(o0.a);
   return;
 }

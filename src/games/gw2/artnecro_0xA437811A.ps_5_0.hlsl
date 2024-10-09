@@ -113,9 +113,7 @@ void main(
   r0.y = cb0[11].x * r0.y;
   r1.z = r0.y * r0.x + -cb0[2].x;
   r0.x = r0.y * r0.x;
-  //o0.w = r0.x;
-  
-	o0.w = saturate(r0.x);					// saturate artifacts
+  o0.w = r0.x;
   r0.x = cmp(r1.z < 0);
   if (r0.x != 0) discard;
   r0.xy = r1.xy * float2(0.238532007,0.238532007) + -r2.xy;
@@ -190,5 +188,6 @@ void main(
   r0.xyz = r1.xyz + r0.xyz;
   r0.w = 1 + -v7.w;
   o0.xyz = r0.xyz * r0.www + v7.xyz;
+        o0.a = saturate(o0.a);
   return;
 }

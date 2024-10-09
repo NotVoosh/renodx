@@ -36,8 +36,6 @@ void main(
   r0.x = saturate(r0.x + r0.x);
   r0.x = cb0[3].w * r0.x;
   o0.w = cb0[0].z * r0.x;
-  
-	o0.w = saturate(o0.w);
   r0.x = -0.5 + r0.y;
   r0.x = cmp(r0.x < 0);
   if (r0.x != 0) discard;
@@ -64,5 +62,6 @@ void main(
   r0.w = r1.x ? r0.w : r1.y;
   r0.xyz = r0.xyz / r0.www;
   o0.xyz = r0.xyz * float3(0.5,0.5,0.5) + float3(0.5,0.5,0.5);
+        o0.a = saturate(o0.a);
   return;
 }

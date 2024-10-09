@@ -61,8 +61,7 @@ void main(
   r2.xyzw = t0.Sample(s0_s, r2.xz).xyzw;
   r0.xyzw = r2.xyzw * r0.xyzw;
   r0.xyzw = r0.xyzw * r1.xyzw;
-  //r0.xyzw = float4(4,4,4,4) * r0.xyzw;
-	r0.xyzw = float4(4,4,4,1) * r0.xyzw;
+  r0.xyzw = float4(4,4,4,4) * r0.xyzw;
   r1.xyzw = cmp(float4(9.99999991e-38,0,9.99999991e-38,0) < abs(r0.yyww));
   r1.yw = (int2)-r1.yw;
   r2.xy = cmp(r1.yw != float2(0,0));
@@ -76,9 +75,8 @@ void main(
   r1.x = exp2(r1.x);
   r3.xyzw = cb0[5].xyzw + -cb0[4].xyzw;
   r1.xyzw = r1.xxxx * r3.xyzw + cb0[4].xyzw;
-  //r1.xyz = saturate(r1.xyz * r0.xyz);
-	r1.xyz = r1.xyz * r0.xyz;
-  //r1.w = saturate(r1.w);
+  r1.xyz = saturate(r1.xyz * r0.xyz);
+  r1.w = saturate(r1.w);
   r0.x = dot(r0.ww, cb0[14].xx);
   r2.xyz = r1.xyz;
   r1.xyzw = r1.xyzw + -r2.xyzw;
@@ -100,5 +98,6 @@ void main(
   r0.xyzw = r1.xxxx * r0.xyzw;
   r1.x = 1 + -v2.w;
   o0.xyzw = r1.xxxx * r0.xyzw;
+		o0.a = saturate(o0.a);
   return;
 }

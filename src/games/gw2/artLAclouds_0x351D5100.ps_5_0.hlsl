@@ -51,6 +51,6 @@ void main(
   r0.w = cb0[12].x * r0.w;
   o0.w = r0.w;
   o0.xyz = r0.xyz * cb0[12].yyy + cb0[1].xyz;
-	o0.rgb = saturate(o0.rgb);
+		o0.rgb = saturate(o0.rgb);
   return;
 }

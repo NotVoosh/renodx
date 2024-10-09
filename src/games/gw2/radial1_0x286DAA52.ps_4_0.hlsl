@@ -139,7 +139,8 @@ void main(
   o0.xyz = globalOpacity * r0.xyz;
   o0.w = 0;
   
-	o0.rgb = renodx::color::bt709::from::SRGB(o0.rgb);
+    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(o0.rgb)
+												 : renodx::color::srgb::Decode(o0.rgb);
 	o0.rgb *= injectedData.toneMapAddonNits / 80.f;
   return;
 }

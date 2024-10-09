@@ -30,8 +30,8 @@ void main(
   //r0.xyzw = cb0[0].xxxx * r0.xyzw;					// in-game "Gamma" (brightness) setting
   o0.xyzw = r0.xyzw;
   
-		o0.rgb = injectedData.toneMapGammaCorrection ? sign(o0.rgb) * pow(abs(o0.rgb), 2.2f)
-													 : renodx::color::bt709::from::SRGB(o0.rgb);
+		o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::DecodeSafe(o0.rgb)
+													 : renodx::color::srgb::DecodeSafe(o0.rgb);
 		
     		if (injectedData.colorGradeColorSpace == 1) {
 		o0.rgb = renodx::color::bt709::clamp::BT709(o0.rgb);
@@ -44,7 +44,9 @@ void main(
 	o0.rgb *= injectedData.toneMapUINits / 80.f;
 	
 		if(injectedData.toneMapType > 1){							// if not "untonemapped"
+			if(renodx::color::y::from::BT709(o0.rgb) > injectedData.toneMapPeakNits / 80.f) {
 	o0.rgb = min(o0.rgb, injectedData.toneMapPeakNits / 80.f);		// catch peak from preview windows that are running freeeeeee (CEF)
+		}
 	}
   return;
 }

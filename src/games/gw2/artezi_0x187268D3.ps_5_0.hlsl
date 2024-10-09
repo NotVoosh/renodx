@@ -68,7 +68,6 @@ void main(
   r1.xyz = cb0[0].xyz + -r0.xyz;
   r0.xyz = v2.yyy * r1.xyz + r0.xyz;
   o0.xyz = cb0[7].www * r0.xyz;
-		o0.rgb = max(0, o0.rgb);
   r0.x = cb0[8].y * v2.x;
   r0.x = r2.w * r0.x;
   r0.yz = cb0[5].xx + v3.xy;
@@ -82,7 +81,6 @@ void main(
   r0.y = r0.z * r0.y;
   r0.x = r0.x * r0.y;
   o0.w = w0.y * r0.x;
-		
-		o0.w = saturate(o0.w);			// Environment Zone Intensity goes weird sometimes, seems to be better
+		o0 = saturate(o0);
   return;
 }

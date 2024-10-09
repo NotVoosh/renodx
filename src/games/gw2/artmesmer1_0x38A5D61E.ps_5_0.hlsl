@@ -36,8 +36,8 @@ void main(
   if (r1.x != 0) discard;
   r0.xyz = r0.xyz + r0.xyz;
   r0.w = cb0[3].x * r0.w;
-  //o0.w = r0.w;
-	o0.w = saturate(r0.w);				// saturate artifacts
+  o0.w = r0.w;
   o0.xyz = cb0[2].xxx * r0.xyz;
+		o0.a = saturate(o0.a);
   return;
 }

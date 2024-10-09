@@ -35,7 +35,6 @@ void main(
   r0.yzw = saturate(cb0[1].xyz * r1.xyz + r0.yzw);
   o0.xyz = r0.yzw * r0.xxx;
   o0.w = r0.x;
-  
-		o0.rgb = saturate(o0.rgb);			// green artifacting on Kralkatorrik (Dragonfall)
+		o0.rgb = max(0, o0.rgb);
   return;
 }

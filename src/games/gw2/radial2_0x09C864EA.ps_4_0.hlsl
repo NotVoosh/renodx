@@ -293,7 +293,8 @@ void main(
   r1.w = 1.20000005;
   o0.xyzw = r1.xxxw * r0.xyzw;
   
-	o0.rgb = renodx::color::bt709::from::SRGB(o0.rgb);
+    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(o0.rgb)
+												 : renodx::color::srgb::Decode(o0.rgb);
 	o0.w = saturate(o0.w);
 	o0.rgb *= injectedData.toneMapAddonNits / 80.f;
   return;

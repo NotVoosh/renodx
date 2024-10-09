@@ -66,8 +66,7 @@ void main(
   r0.y = r1.w * r0.y;
   r0.y = r0.z * r0.y;
   //r0.y = cb0[5].x * r0.y;
-	
-	r0.y = saturate(cb0[5].x * r0.y);			// saturate artifacts
+		r0.y = saturate(cb0[5].x * r0.y);
   r0.x = r0.y * r0.x;
   r0.yzw = r1.xyz * r0.xxx;
   o0.w = r0.x;

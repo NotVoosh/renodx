@@ -53,7 +53,8 @@ void main(
   r0.xyzw = wheelFadeIn * r1.xyzw;
   o0.xyzw = globalOpacity * r0.xyzw;
   
-  	o0.rgb = renodx::color::bt709::from::SRGB(o0.rgb);
+    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(o0.rgb)
+												 : renodx::color::srgb::Decode(o0.rgb);
 	o0.w = saturate(o0.w);
 	o0.rgb *= injectedData.toneMapAddonNits / 80.f;
 	

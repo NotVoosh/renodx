@@ -14,8 +14,8 @@ float3 applyFilmGrain(float3 outputColor, float2 screen){
 
 float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSampler, float3 vanilla, float2 screenXY){
 		
-		float3 outputColor = renodx::color::bt709::from::SRGB(LUTless);
-		float3 hueCorrectionColor = outputColor;
+		float3 outputColor = renodx::color::srgb::Decode(LUTless);
+		float3 hueCorrectionColor = renodx::tonemap::Reinhard(outputColor);
 			
 				if(injectedData.toneMapType == 0) {
 			outputColor = saturate(outputColor);
@@ -87,18 +87,17 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			} else {
 			outputColor *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
 			}
-			outputColor = renodx::color::srgb::from::BT709(outputColor);
+			outputColor = renodx::color::srgb::EncodeSafe(outputColor);
 			
 	return outputColor;
 }
 
 float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 		
-		float3 outputColor = renodx::color::bt709::from::SRGB(vanilla);
-			float3 hueCorrectionColor = saturate(outputColor);
-			
+		float3 outputColor = renodx::color::srgb::Decode(vanilla);
+		float3 hueCorrectionColor = renodx::tonemap::Reinhard(outputColor);	
 				if(injectedData.toneMapType == 0) {
-			outputColor = hueCorrectionColor;
+			outputColor = saturate(outputColor);
 			}
 	
 			renodx::tonemap::Config config = renodx::tonemap::config::Create();
@@ -116,7 +115,10 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = injectedData.colorGradeFlare;
-	
+			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
+			config.hue_correction_color = hueCorrectionColor;
+			config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			
 			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_saturation = 1.04f;
 
@@ -134,11 +136,12 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 				float frostbitePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																	  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
 																		injectedData.colorGradeSaturation + 0.04,
 																		0.f, 0.f);
 			}
-			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);	
+				
 			
 			    if (injectedData.fxFilmGrain) {
 			outputColor = applyFilmGrain(outputColor, screenXY);
@@ -151,7 +154,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			} else {
 			outputColor *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
 			}
-			outputColor = renodx::color::srgb::from::BT709(outputColor);
+			outputColor = renodx::color::srgb::EncodeSafe(outputColor);
 			
 	return outputColor;
 }

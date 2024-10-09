@@ -1,7 +1,4 @@
-// Artifacts. Bloom negative colors?
-// To investigate later, maybe
-
-// ---- Created with 3Dmigoto v1.3.16 on Thu Aug 22 01:14:22 2024
+// ---- Created with 3Dmigoto v1.3.16 on Mon Sep 30 02:39:07 2024
 Texture2D<float4> t6 : register(t6);
 
 Texture2D<float4> t5 : register(t5);
@@ -183,6 +180,6 @@ void main(
   r0.x = min(r0.x, r0.y);
   r1.w = 0;
   o0.xyzw = r1.xyzw * r0.xxxx;
-	o0.rgb = max(0, o0.rgb);							// remove negative colors, seems to work
+		o0.rgb = max(0, o0.rgb);
   return;
 }

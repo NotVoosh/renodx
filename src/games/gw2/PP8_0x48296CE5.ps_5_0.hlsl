@@ -42,13 +42,14 @@ void main(
 	
 	    r0.rgb = lerp(tintless, r0.rgb, injectedData.colorGradeColorTint);
 	
-  r0.xyz = float3(1,1,1) + -r0.xyz;
   r1.xyz = cb0[0].xyz * r1.xyz * injectedData.fxBloom;				// Bloom
+    if (injectedData.toneMapType == 0) {
+  r0.xyz = float3(1,1,1) + -r0.xyz;
   r1.xyz = -r1.xyz * float3(2,2,2) + float3(1,1,1);
-    
-  		//r1.rgb = max(0, r1.rgb);				// highlight color fix
-
   r0.xyz = -r0.xyz * r1.xyz + float3(1,1,1);
+    } else {
+    r0.rgb = r0.rgb + r1.rgb * float3(2,2,2);
+  }
   r0.w = r0.w * 2 + -1;
   r1.x = cmp(r0.w < -0.00999999978);
   if (r1.x != 0) {

@@ -139,7 +139,6 @@ void main(
   r0.xyzw = r1.xxxx * r0.xyzw;
   r1.x = 1 + -v4.w;
   o0.xyzw = r1.xxxx * r0.xyzw;
-  
-	o0.w = saturate(o0.w);
+		o0.a = saturate(o0.a);
   return;
 }

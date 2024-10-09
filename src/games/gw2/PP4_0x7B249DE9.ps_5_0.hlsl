@@ -45,15 +45,16 @@ void main(
   r0.w = cb0[2].w * r0.w;
   r1.x = dot(r0.xyz, float3(0.212500006,0.715399981,0.0720999986));
   r1.xyz = cb0[2].xyz * r1.xxx + -r0.xyz;
-  r0.xyz = r0.www * r1.xyz * injectedData.colorGradeColorTint + r0.xyz;			// Color Tint
-  r0.xyz = float3(1,1,1) + -r0.xyz;		
+  r0.xyz = r0.www * r1.xyz * injectedData.colorGradeColorTint + r0.xyz;			// Color Tint		
   r1.xyz = t1.Sample(s1_s, w0.xy).xyz;
   r1.xyz = cb0[0].xyz * r1.xyz * injectedData.fxBloom;							// Bloom
+    if (injectedData.toneMapType == 0) {
+  r0.xyz = float3(1,1,1) + -r0.xyz;
   r1.xyz = -r1.xyz * float3(2,2,2) + float3(1,1,1);
-	
-		//r1.rgb = max(0, r1.rgb);				// highlight color fix
-
   o0.xyz = -r0.xyz * r1.xyz + float3(1,1,1);
+	} else {
+    o0.rgb = r0.rgb + r1.rgb * float3(2,2,2);
+  }
 		
 		float3 vanilla = o0.rgb;
 		o0.rgb = applyUserTonemap(vanilla, v0.xy);

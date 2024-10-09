@@ -20,7 +20,8 @@
 #include <embed/0x115840E1.h>      // DE malice 2
 
 #include <embed/0xED61CCE3.h>      // bloom-ish
-#include <embed/0xB47204C8.h>      // SSR
+#include <embed/0xB47204C8.h>      // D'sE 1
+#include <embed/0xEE78FE89.h>      // D'sE 2
 #include <embed/0xD5804E21.h>      // Light Rays
 #include <embed/0x88DE9EDE.h>      // Mistlock 1
 #include <embed/0x24CE1FCB.h>      // Mistlock 2
@@ -30,6 +31,8 @@
 #include <embed/0x3BC05D0D.h>      // water 1
 #include <embed/0x6C5C7797.h>      // water 2
 #include <embed/0x98553490.h>      // no AO
+#include <embed/0x8CFDCBEF.h>	     // SoC
+
 #include <embed/0xDF711B8B.h>      // PoA
 #include <embed/0x38A5D61E.h>      // Mesmer 1
 #include <embed/0x46E87959.h>      // Mesmer 2
@@ -52,6 +55,10 @@
 #include <embed/0x70EC17AE.h>	     // sg bp / if ss
 #include <embed/0xB0009D2C.h>	     // if ss 2
 #include <embed/0x881B1931.h>	     // foxfire
+#include <embed/0x75F10B02.h>	     // gourd
+#include <embed/0xB5A234AE.h>	     // starborn cape
+#include <embed/0xA4C910A5.h>	     // mystic forge
+#include <embed/0x0D1308E2.h>	     // dremwalkr daggr
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -118,7 +125,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x115840E1),      // DE malice2
 	
     CustomShaderEntry(0xED61CCE3),      // bloom                               artifacts under specific circumstances, removed negative colors
-    CustomShaderEntry(0xB47204C8),      // SSR                                                           //
+    CustomShaderEntry(0xB47204C8),      // D'SE                                                          //
+    CustomShaderEntry(0xEE78FE89),      // D'SE 2                                                        //
     CustomShaderEntry(0xD5804E21),      // Light rays                                                    // (to prevent leaks)
     CustomShaderEntry(0x88DE9EDE),      // Mistlock 1                                        dirty fix for artifacts
     CustomShaderEntry(0x24CE1FCB),      // Mistlock 2                                   same here, no clue what's going on
@@ -128,6 +136,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x3BC05D0D),      // Underwater fog kinda 1                           cleared negative colors
     CustomShaderEntry(0x6C5C7797),      // Underwater fog kinda 2                                     //
     CustomShaderEntry(0x98553490),      // no AO (Crystal Oasis, maybe other)                         //
+	  CustomShaderEntry(0x8CFDCBEF),      // SoC								                                        //
 
     CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate
     CustomShaderEntry(0x38A5D61E),      // Mesmer spell 1                                             //
@@ -151,6 +160,10 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x70EC17AE),      // if ss / sg bp                                              //
     CustomShaderEntry(0xB0009D2C),      // if ss  2                                                   //
     CustomShaderEntry(0x881B1931),      // foxfire                                                    //
+    CustomShaderEntry(0x75F10B02),      // gourd                                                      //
+    CustomShaderEntry(0xB5A234AE),      // starborn cape                                              //
+    CustomShaderEntry(0xA4C910A5),      // mystic forge                                               //
+    CustomShaderEntry(0x0D1308E2),      // dremwalkr daggr                                            //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
@@ -464,7 +477,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation aswell). Sub-sampling is not supported.",
+        .label = "Render Sampling should be native. Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation & Depth Blur aswell).",
         .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
@@ -568,7 +581,6 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
-      renodx::mods::swapchain::use_resize_buffer = false;
       //renodx::mods::shader::trace_unmodified_shaders = true;
       // copy / UI things
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
@@ -577,75 +589,13 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .index = 6,
           .ignore_size = true,
       });
+
       // pretty much everything else
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
         .old_format = reshade::api::format::b8g8r8a8_unorm,
         .new_format = reshade::api::format::r16g16b16a16_float,
       });
-      /*
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 4,
-      });
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 5,
-      });
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 6,
-      });
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 16,
-          .ignore_size = true,
-      });
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 17,
-          .ignore_size = true,
-      });
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 18,
-          .ignore_size = true,
-      });
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 999,
-          .ignore_size = true,
-      });
-      
-      // RGBA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .ignore_size = false,
-      });
 
-      // BGRA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = -1,
-          .ignore_size = false,
-      });
-
-      // BGRA8_unorm
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::b8g8r8a8_unorm,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 6,
-          .ignore_size = true,
-      });
-      */
       reshade::register_event<reshade::addon_event::present>(OnPresent);
 
       break;

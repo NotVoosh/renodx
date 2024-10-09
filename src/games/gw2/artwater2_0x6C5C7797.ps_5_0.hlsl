@@ -141,7 +141,6 @@ void main(
   if (r0.x != 0) discard;
   r0.x = 1 + -v6.w;
   o0.xyz = r1.xyz * r0.xxx + v6.xyz;
-    
-    o0.rgb = max(0, o0.rgb);
+		o0.rgb = max(0, o0.rgb);
   return;
 }

@@ -171,8 +171,8 @@ void main(
   r0.yzw = r1.xyz * r0.yyy;
   r0.yzw = cb0[10].www * r0.yzw;
   r0.yzw = cb0[0].xxx * r0.yzw;
-	r0.x = max(0, r0.x);
   o0.xyz = r0.yzw * r0.xxx;
+		o0.rgb = max(0, o0.rgb);
   o0.w = 0;
   return;
 }

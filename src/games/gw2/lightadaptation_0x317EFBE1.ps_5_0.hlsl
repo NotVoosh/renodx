@@ -83,6 +83,6 @@ void main(
 	o0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) + r1.xyz;
 	
 		o0.rgb = lerp(preLA, o0.rgb, injectedData.fxLightAdaptation);
-	
+		o0.rgb = max(0, o0.rgb);			// clear NaNs from Depth Blur
   return;
 }

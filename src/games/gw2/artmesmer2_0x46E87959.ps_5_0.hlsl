@@ -98,7 +98,7 @@ void main(
   r0.xyz = r0.xyz * r0.www;
   o0.w = r0.w;
   r0.w = 1 + -v4.w;
-  //o0.xyz = r0.xyz * r0.www;
-	o0.xyz = saturate(r0.xyz * r0.www);
+  o0.xyz = r0.xyz * r0.www;
+		o0.rgb = saturate(o0.rgb);
   return;
 }

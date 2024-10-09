@@ -292,7 +292,6 @@ void main(
   r1.w = r1.w * r0.x;
   r0.x = 1 + -v1.w;
   o0.xyzw = r1.xyzw * r0.xxxx;
-  
-	o0.a = saturate(o0.a);
+		o0.a = saturate(o0.a);
   return;
 }

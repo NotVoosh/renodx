@@ -144,8 +144,7 @@ void main(
   r0.w = exp2(r0.w);
   r1.y = r0.x * r0.w + -cb0[1].x;
   r0.w = r0.x * r0.w;
-  //o0.w = r0.w;
-	o0.w = saturate(r0.w);									// saturate artifacts
+  o0.w = r0.w;
   r0.w = cmp(r1.y < 0);
   if (r0.w != 0) discard;
   r1.yz = cmp(float2(9.99999991e-38,0) < abs(r1.xx));
@@ -209,5 +208,6 @@ void main(
   r0.xyz = r1.xyz * r0.xyz;
   r0.w = 1 + -v3.w;
   o0.xyz = r0.xyz * r0.www + v3.xyz;
+        o0.a = saturate(o0.a);
   return;
 }

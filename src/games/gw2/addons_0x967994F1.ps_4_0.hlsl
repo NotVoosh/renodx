@@ -24,8 +24,10 @@ void main(
 
   r0.xyzw = texture0.Sample(sampler0_s, v2.xy).xyzw;
   o0.xyzw = v1.xyzw * r0.xyzw;
-	o0.rgb = renodx::color::bt709::from::SRGB(o0.rgb);
-	o0.w = renodx::color::srgb::from::BT709(o0.w);						// dunno, this kinda works.
+    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(o0.rgb)
+												 : renodx::color::srgb::Decode(o0.rgb);
+	o0.w = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Encode(o0.w)
+											   : renodx::color::srgb::Encode(o0.w);						// dunno, this kinda works.
 	o0.rgb *= injectedData.toneMapAddonNits / 80.f;
   return;
 }

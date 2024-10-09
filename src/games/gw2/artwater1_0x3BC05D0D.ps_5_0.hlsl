@@ -130,7 +130,6 @@ void main(
   if (r0.w != 0) discard;
   r0.w = 1 + -v5.w;
   o0.xyz = r0.xyz * r0.www + v5.xyz;
-    
-    o0.rgb = max(0, o0.rgb);
+		o0.rgb = max(0, o0.rgb);
   return;
 }
