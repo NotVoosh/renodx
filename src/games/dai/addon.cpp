@@ -12,7 +12,6 @@
 
 #include <embed/0x5545BDF0.h>     // Title Menu background video / pre-rendered cutscenes
 #include <embed/0xE8AAA41F.h>     // UI alpha
-#include <embed/0xA13A374B.h>     // loading screen
 
 #include <embed/0x39C155AA.h>     // tonemapper 1
 #include <embed/0x59D67072.h>     // tonemapper 2
@@ -38,8 +37,7 @@ namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x5545BDF0),      // Title Menu background video, pre-rendered cutscenes
-    CustomShaderEntry(0xE8AAA41F),      // UI alpha                                               saturated
-    CustomShaderEntry(0xA13A374B),      // loading screen                                         gamma thing
+    CustomShaderEntry(0xE8AAA41F),      // UI alpha
 
     CustomShaderEntry(0x39C155AA),      // tonemapper 1                                          basic gameplay
     CustomShaderEntry(0x59D67072),      // tonemapper 2                                          same here
@@ -191,14 +189,14 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.06f,
+        .default_value = 43.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
         .tint = 0x3A5953,
-        .max = 0.1f,
-        .format = "%.4f",
+        .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeLUTStrength",
@@ -703,7 +701,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .index = 28,
           .ignore_size = true,
       });
-      
+
       // shader_hash based upgrade
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_unorm,

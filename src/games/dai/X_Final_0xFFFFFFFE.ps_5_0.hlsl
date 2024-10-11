@@ -15,7 +15,8 @@ void main(
     //    color = saturate(color);
     //}
 
-    color.rgb = renodx::color::gamma::DecodeSafe(color.rgb);
+    color.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::DecodeSafe(color.rgb)
+                                                    : renodx::color::srgb::DecodeSafe(color.rgb);
     
     if (injectedData.toneMapType == 0) {
       color.rgb = saturate(color.rgb);

@@ -102,7 +102,7 @@ void main(
   r0.xyz = r0.xyz * r2.xyz + float3(0.0599999987,0.0599999987,0.0599999987);
   r0.xyz = r1.xyz / r0.xyz;
 		
-		float vanillaGray = 0.225399712683f;
+		float vanillaGray = renodx::tonemap::HejlDawson(0.18f);
 	    float3 LUTless = r0.xyz;
 
   r0.xyz = r0.xyz * float3(0.96875,0.96875,0.96875) + float3(0.015625,0.015625,0.015625);
@@ -111,7 +111,6 @@ void main(
   o0.xyz = r0.xyz;																							// vanilla output
 	
 		float3 vanilla = o0.rgb;
-		
-	o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, screen.xy, vanillaGray);
+    o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, screen.xy, vanillaGray);
   return;
 }

@@ -1,6 +1,8 @@
-// UI core stuff, icons and buttons and all, only saturating alpha here
+// UI core stuff, icons and buttons and all
 
-// ---- Created with 3Dmigoto v1.3.16 on Wed Jul 31 02:04:32 2024
+#include "./shared.h"
+
+// ---- Created with 3Dmigoto v1.3.16 on Tue Sep 17 22:32:09 2024
 
 cbuffer _Globals : register(b0)
 {
@@ -59,6 +61,6 @@ void main(
   r0.xyzw = r0.xyzw * cxmul.xyzw + cxadd.xyzw;
   o0.w = v2.w * r0.w;
   o0.xyz = r0.xyz;
-    o0.w = max(0, o0.w);
+	o0.a = max(0, o0.a);
   return;
 }
