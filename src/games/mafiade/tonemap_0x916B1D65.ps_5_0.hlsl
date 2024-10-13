@@ -113,6 +113,7 @@ void main(
         float3 untonemapped;
         float3 vanillaTM;
         float3 preLUT;
+        float linearWhite;
   if (r2.w != 0) {
     switch (r0.x) {
       case 0 :
@@ -127,27 +128,47 @@ void main(
       break;
       case 1 :
       r0.w = r0.y * r0.z;
+      // r0.w = W (r0.y is something about exposure)
+          linearWhite = r0.w;
       r1.w = cb1[5].y / cb1[5].z;                               // 0.01     0.3
+      // r1.w = E / F
       r2.x = cb1[4].z * cb1[4].y;                               // 0.1      0.3
+      // r2.x = C * B
       r2.y = cb1[4].x * r0.w + r2.x;                            // 0.22
+      // r2.y = A * W + C * B
       r2.zw = cb1[5].xx * cb1[5].yz;                            // 0.2      0.01    0.3
+      // r2.z = D * E
+      // r2.w = D * F
       r2.y = r0.w * r2.y + r2.z;
+      // r2.y = W * (A * W + C * B) + D * E
       r3.x = cb1[4].x * r0.w + cb1[4].y;                        // 0.22      0.3
+      // r3.x = A * W + B
       r0.w = r0.w * r3.x + r2.w;
+      // r0.w = W * (A * W + B) + D * F
       r0.w = r2.y / r0.w;
+      // r0.w = (W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)
       r0.w = r0.w + -r1.w;
+      // r0.w = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F
       r0.w = 1 / r0.w;
+      // r0.w = 1 / r0.w
       r4.xyz = r1.xyz * r0.yyy;                                 // exposure
             
             untonemapped = r4.rgb;
             
       r5.xyz = cb1[4].xxx * r4.xyz + r2.xxx;                    // 0.22
+      // r5 = A * x + C * B
       r2.xyz = r4.xyz * r5.xyz + r2.zzz;
+      // r2 = x * (A * x + C * B) + D * E
       r5.xyz = cb1[4].xxx * r4.xyz + cb1[4].yyy;                // 0.22         0.3
+      // r5 = A * x + B
       r4.xyz = r4.xyz * r5.xyz + r2.www;
+      // r4 = x * (A * x + B) + D * F
       r2.xyz = r2.xyz / r4.xyz;
+      // r2 = (x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)
       r2.xyz = r2.xyz + -r1.www;
+      // r2 = ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F
       r2.xyz = saturate(r2.xyz * r0.www);
+      // r2 = (((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F) / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F)
       r2.xyz = log2(r2.xyz);
       r2.xyz = cb0[2].xxx * r2.xyz;                             // 1 (game brightness)
       r2.xyz = exp2(r2.xyz);
@@ -350,7 +371,7 @@ void main(
                  if(injectedData.toneMapType == 0){
             r0.rgb = lerp(preLUT, r0.rgb, injectedData.colorGradeLUTStrength);
             } else {
-            r0.rgb = applyUserTonemap(untonemapped, t9, s2_s);
+            r0.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
             }
       r1.xyz = r0.xyz / r2.xyz;
     } else {
@@ -373,7 +394,7 @@ void main(
             r1.rgb = lerp(preLUT, r1.rgb, injectedData.colorGradeLUTStrength);
             r1.rgb = saturate(r1.rgb);
             } else {
-            r1.rgb = applyUserTonemap(untonemapped, t9, s2_s);
+            r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
             }
     }
   }

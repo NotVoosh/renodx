@@ -9,8 +9,7 @@ void main(
     out float4 output : SV_Target0)
 {
     float4 color = sourceTexture.Sample(sourceSampler_s, texcoord.xy);
-
-        color.a = saturate(color.a);
+    
         color.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::DecodeSafe(color.rgb)
                                                         : renodx::color::srgb::DecodeSafe(color.rgb);
         color.rgb *= injectedData.toneMapUINits / 80.f;

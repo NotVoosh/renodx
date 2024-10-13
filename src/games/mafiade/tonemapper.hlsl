@@ -2,11 +2,11 @@
 
 #include "./shared.h"
 
-float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler){
+float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float linearWhite){
 		
 		float3 outputColor = max(0, untonemapped);
-		float3 vanillaGray = renodx::tonemap::uncharted2::BT709(float3(0.18f,0.18f,0.18f));
-		float3 hueCorrectionColor = renodx::tonemap::uncharted2::BT709(outputColor);
+		float3 vanillaGray = renodx::tonemap::uncharted2::BT709(float3(0.18f,0.18f,0.18f), linearWhite);
+		float3 hueCorrectionColor = renodx::tonemap::uncharted2::BT709(outputColor, linearWhite);
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
 			config.type = injectedData.toneMapType;
