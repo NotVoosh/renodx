@@ -190,6 +190,15 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxLensDirt",
+        .binding = &shader_injection.fxLensDirt,
+        .default_value = 50.f,
+        .label = "Lens Dirt",
+        .section = "Effects",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxBloom",
         .binding = &shader_injection.fxBloom,
         .default_value = 50.f,
@@ -307,6 +316,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
+  renodx::utils::settings::UpdateSetting("fxLensDirt", 50.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 50.f);
@@ -532,6 +542,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
+      renodx::mods::shader::force_pipeline_cloning = true;
       
       // final shader copy pasta start
       reshade::register_event<reshade::addon_event::init_device>(OnInitDevice);
@@ -547,11 +558,18 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .new_format = reshade::api::format::r16g16b16a16_typeless,
           .dimensions = {3840, 2160},
       });
-      
-      //  RG11B10_float (annoying "cutscenes" DoF)
+
+      // not required
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::b8g8r8a8_typeless,
+          .new_format = reshade::api::format::r16g16b16a16_typeless,
+      });
+
+      //  RG11B10_float ("cutscenes" DoF)
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r11g11b10_float,
           .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 3,
           .ignore_size = false,
           .view_upgrades = {
           {{reshade::api::resource_usage::shader_resource,
@@ -565,7 +583,26 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           reshade::api::format::r16g16b16a16_float},
           }
       });
-     
+
+      //  RG11B10_float ("cutscenes" DoF 2)
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .index = 4,
+          .ignore_size = false,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
+      });
+
       break;
     case DLL_PROCESS_DETACH:
       // Final shader copy pasta start

@@ -39,7 +39,7 @@ cbuffer cb0 : register(b0)
 }
 
 
-
+// https://www.elopezr.com/the-rendering-of-mafia-definitive-edition/
 
 // 3Dmigoto declarations
 #define cmp -
@@ -79,7 +79,7 @@ void main(
     r1.xz = float2(0.5,0.5) * r3.xy;
   }
     
-// 
+// Lens dirt
   if (r2.y != 0) {
     r3.xyz = t7.Sample(s2_s, v1.yz).xyz;
     r0.w = t3.Sample(s2_s, v1.yz).x;
@@ -90,7 +90,7 @@ void main(
     r0.w = r2.x * 100 + 5;
     r3.xyz = r3.xyz * r0.www;
     r1.w = r1.y;
-    r1.xyz = r3.xyz * cb1[0].zzz + r1.xwz;
+    r1.xyz = r3.xyz * cb1[0].zzz * injectedData.fxLensDirt + r1.xwz;
   }
     
  // bloom
