@@ -353,7 +353,7 @@ void main(
           }
         }
       }
-      // color grading color
+      // seemingly not used?
       r0.xyz = r2.xyz * r1.xyz;
             r0.rgb = renodx::color::grade::UserColorGrading(r1.rgb, injectedData.colorGradeExposure,
                      injectedData.colorGradeHighlights, injectedData.colorGradeShadows,
@@ -375,7 +375,7 @@ void main(
             }
       r1.xyz = r0.xyz / r2.xyz;
     } else {
-      // color grading "Noir Mode"
+      // color grading LUT
             preLUT = r1.rgb;
       r0.xyz = max(float3(9.99999975e-06,9.99999975e-06,9.99999975e-06), r1.xyz);
       r0.xyz = log2(r0.xyz);
@@ -390,8 +390,10 @@ void main(
                  if(injectedData.toneMapType == 0){
             r1.rgb = lerp(preLUT, r1.rgb, injectedData.colorGradeLUTStrength);
             r1.rgb = saturate(r1.rgb);
-            } else {
+            } else if (cb1[6].y == 1.f) {
             r1.rgb = applyUserTonemapNoir(untonemapped, t9, s2_s, linearWhite);
+            } else {
+            r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
             }
     }
   }
