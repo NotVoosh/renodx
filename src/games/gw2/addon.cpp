@@ -242,7 +242,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 203.f,
         .label = "Game Brightness",
         .section = "Tone Mapping",
-        .tooltip = "Sets the value of 100%% white in nits",
+        .tooltip = "Sets the value of 100% white in nits",
         .tint = 0xCAAA2A,
         .min = 48.f,
         .max = 500.f,
@@ -283,7 +283,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 50.f,
+        .default_value = 75.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x87581D,
@@ -356,14 +356,14 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.f,
+        .default_value = 27.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
         .tint = 0x3A5953,
-        .max = 0.05f,
-        .format = "%.4f",
+        .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeLUTStrength",
@@ -386,19 +386,6 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x2C9D5D,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "colorGradeColorSpace",
-        .binding = &shader_injection.colorGradeColorSpace,
-        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 2.f,
-        .can_reset = false,
-        .label = "Color Space",
-        .section = "Color Grading",
-        .tooltip = "Selects color space gamut when clamping.",
-        .labels = {"None", "BT709", "BT2020", "AP1"},
-        .tint = 0x2C9D5D,
-        .is_enabled = []() { return shader_injection.toneMapType != 0; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeColorTint",
@@ -545,7 +532,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
-  renodx::utils::settings::UpdateSetting("colorGradeColorSpace", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeColorTint", 100.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 100.f);
   renodx::utils::settings::UpdateSetting("fxLightAdaptation", 100.f);

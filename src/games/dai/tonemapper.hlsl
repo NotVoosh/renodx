@@ -33,13 +33,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				if(injectedData.toneMapType <= 3){
 			config.saturation = injectedData.colorGradeSaturation;
 			}
-			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			//config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			//config.hue_correction_color = renodx::color::gamma::DecodeSafe(LUTless);
-			//config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
+			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -50,10 +47,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			32.f);
 			
 			config.reno_drt_saturation = 1.2f;
-			
-			if (injectedData.toneMapType == 2.f) {					// ACES default config
-			config.shadows += 0.1f;
-			}
 
 		if (injectedData.toneMapGammaCorrection == 0) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);

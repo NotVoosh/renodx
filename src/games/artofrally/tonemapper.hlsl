@@ -19,10 +19,11 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				if(injectedData.toneMapType <= 3){
 			config.saturation = injectedData.colorGradeSaturation;
 			}
-			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = injectedData.colorGradeFlare;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
+			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
+			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -33,10 +34,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			33.f);
 			
 			config.reno_drt_saturation = 1.09f;
-	
-				if (injectedData.toneMapType == 2) {													// ACES default config
-			config.saturation -= 0.1;
-			}
 	
 				if (injectedData.toneMapType == 4){																// Frostbite
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);

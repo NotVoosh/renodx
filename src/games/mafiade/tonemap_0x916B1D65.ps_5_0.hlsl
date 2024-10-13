@@ -355,9 +355,6 @@ void main(
       }
       // seemingly not used?
       r0.xyz = r2.xyz * r1.xyz;
-            r0.rgb = renodx::color::grade::UserColorGrading(r1.rgb, injectedData.colorGradeExposure,
-                     injectedData.colorGradeHighlights, injectedData.colorGradeShadows,
-                     injectedData.colorGradeContrast, injectedData.colorGradeSaturation, 0.f);
             preLUT = r0.rgb;
       r4.xyz = max(float3(9.99999975e-06,9.99999975e-06,9.99999975e-06), r0.xyz);
       r4.xyz = log2(r4.xyz);

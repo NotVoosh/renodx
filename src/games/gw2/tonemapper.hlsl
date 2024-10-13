@@ -35,19 +35,12 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = injectedData.colorGradeFlare;
+			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
 			config.hue_correction_color = hueCorrectionColor;
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_saturation = 1.04f;
-			
-			
-				if (injectedData.toneMapType == 2) {							// ACES default config
-			config.shadows += 0.24;
-			config.contrast -= 0.2;
-			config.saturation -= 0.17;
-			}
 			
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -71,7 +64,7 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);	
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																injectedData.colorGradeSaturation + 0.04,
+																injectedData.colorGradeSaturation,
 																0.f, 0.f);
 				} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
@@ -114,19 +107,13 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = injectedData.colorGradeFlare;
+			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
 			config.hue_correction_color = hueCorrectionColor;
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 			
 			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_saturation = 1.04f;
-
-				if (injectedData.toneMapType == 2) {									// ACES default config
-			config.shadows += 0.24;
-			config.contrast -= 0.2;
-			config.saturation -= 0.17;
-			}
 						
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			
@@ -138,7 +125,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																		injectedData.colorGradeSaturation + 0.04,
+																		injectedData.colorGradeSaturation,
 																		0.f, 0.f);
 			}
 				

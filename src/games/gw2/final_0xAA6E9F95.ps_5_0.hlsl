@@ -29,24 +29,22 @@ void main(
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
   //r0.xyzw = cb0[0].xxxx * r0.xyzw;					// in-game "Gamma" (brightness) setting
   o0.xyzw = r0.xyzw;
-  
+			if(injectedData.toneMapType == 0.f){
+		o0.rgb = saturate(o0.rgb);
+		}
+			
 		o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::DecodeSafe(o0.rgb)
 													 : renodx::color::srgb::DecodeSafe(o0.rgb);
 		
-    		if (injectedData.colorGradeColorSpace == 1) {
-		o0.rgb = renodx::color::bt709::clamp::BT709(o0.rgb);
-		} else if (injectedData.colorGradeColorSpace == 2) {
-		o0.rgb = renodx::color::bt709::clamp::BT2020(o0.rgb);
-		} else if (injectedData.colorGradeColorSpace == 3) {
-		o0.rgb = renodx::color::bt709::clamp::AP1(o0.rgb);
-		}
-		
-	o0.rgb *= injectedData.toneMapUINits / 80.f;
+	o0.rgb *= injectedData.toneMapUINits;
 	
 		if(injectedData.toneMapType > 1){							// if not "untonemapped"
-			if(renodx::color::y::from::BT709(o0.rgb) > injectedData.toneMapPeakNits / 80.f) {
-	o0.rgb = min(o0.rgb, injectedData.toneMapPeakNits / 80.f);		// catch peak from preview windows that are running freeeeeee (CEF)
+	float y_max = injectedData.toneMapPeakNits;
+	float y = renodx::color::y::from::BT709(abs(o0.rgb));
+			if (y > y_max) {
+		o0.rgb *= y_max / y;
 		}
 	}
+    o0.rgb /= 80.f;
   return;
 }
