@@ -540,7 +540,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
-      renodx::mods::swapchain::force_borderless = false;
+      renodx::mods::swapchain::force_borderless = true;
       renodx::mods::swapchain::prevent_full_screen = false;
       renodx::mods::shader::force_pipeline_cloning = true;
       

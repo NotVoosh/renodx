@@ -150,7 +150,6 @@ void main(
       r0.w = r0.w + -r1.w;
       // r0.w = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F
       r0.w = 1 / r0.w;
-      // r0.w = 1 / r0.w
       r4.xyz = r1.xyz * r0.yyy;                                 // exposure
             
             untonemapped = r4.rgb;
