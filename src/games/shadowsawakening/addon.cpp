@@ -13,8 +13,9 @@
 #include <embed/0xF9B0D779.h>   // uberpost
 #include <embed/0xFE41EA26.h>   // uberpost (title menu)
 
-#include <embed/0x244A72BB.h>   // postfx
-#include <embed/0x0D4651C9.h>   // postfx 2
+#include <embed/0x244A72BB.h>   // postfx (gameplay)
+#include <embed/0x0D4651C9.h>   // postfx 2 (rendered cutscenes)
+#include <embed/0x0299214E.h>   // postfx 3 (low HP vignette)
 
 #include <embed/0x85463CFA.h>   // UI default
 #include <embed/0x31102333.h>   // UI default 2
@@ -38,8 +39,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xF9B0D779),  // uberpost
   CustomShaderEntry(0xFE41EA26),  // uberpost (title menu)
 
-  CustomShaderEntry(0x244A72BB),  // postfx
-  CustomShaderEntry(0x0D4651C9),  // postfx 2
+  CustomShaderEntry(0x244A72BB),  // postfx (gameplay)
+  CustomShaderEntry(0x0D4651C9),  // postfx 2 (rendered cutscenes)
+  CustomShaderEntry(0x0299214E),  // postfx 3 (low HP vignette)
 
   CustomSwapchainShader(0x85463CFA),  // UI default
   CustomSwapchainShader(0x31102333),  // UI default 2
@@ -96,7 +98,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapGammaCorrection",
         .binding = &shader_injection.toneMapGammaCorrection,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
+        .default_value = 1.f,
         .can_reset = false,
         .label = "Gamma Correction",
         .section = "Tone Mapping",
@@ -282,7 +284,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0);
+  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
