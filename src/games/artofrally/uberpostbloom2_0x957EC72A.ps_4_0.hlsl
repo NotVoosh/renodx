@@ -116,7 +116,6 @@ void main(
     r2.w = r1.x * r0.x + 1;
   }
     float3 untonemapped = r2.rgb;
-    r2.rgb = float3(0.18f, 0.18f, 0.18f);
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
   r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
   r0.xyz = log2(r0.xyz);
@@ -132,8 +131,7 @@ void main(
   } else {
     r1.x = r0.w;
   }
-    float vanillaGray = renodx::color::y::from::BT709(r1.gba);
-    r1.gba = applyUserTonemap(untonemapped, t4, s4_s, vanillaGray);
+    r1.gba = applyUserTonemap(untonemapped, t4, s4_s);
   o0.xyzw = r1.yzwx;
   return;
 }

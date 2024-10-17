@@ -20,6 +20,5 @@ void main(
   		  	if(injectedData.toneMapGammaCorrection == 1) {
 		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
 		}
-		//o0.rgb *= injectedData.toneMapUINits / 80.f;
   return;
 }

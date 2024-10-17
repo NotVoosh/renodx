@@ -7,6 +7,8 @@
 
 #define DEBUG_LEVEL_0
 
+#include <embed/0x6EA48EC8.h>   // LUT3DBaker
+
 #include <embed/0x6BE60185.h>   // uberpost (FXAA/SMAA)
 #include <embed/0x728A5929.h>   // uberpost (title menu)
 #include <embed/0x6D14F22A.h>   // uberpost (no AA/TAA)
@@ -35,6 +37,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
+  CustomShaderEntry(0x6EA48EC8),  // LUT3DBaker
+
   CustomShaderEntry(0x6BE60185),  // uberpost (FXAA/SMAA)
   CustomShaderEntry(0x728A5929),  // uberpost (title menu)
   CustomShaderEntry(0x6D14F22A),  // uberpost (no AA/TAA)
@@ -50,7 +54,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
   CustomShaderEntry(0x2B868B21),  // UI default
   CustomShaderEntry(0xD0559BEE),  // UI default 2
-	CustomSwapchainShader(0x20133A8B),  // Final
+  CustomSwapchainShader(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -107,6 +111,16 @@ renodx::utils::settings::Settings settings = {
         .label = "Gamma Correction",
         .section = "Tone Mapping",
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 100.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3; },
+        .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -278,6 +292,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0);
+  renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -296,8 +311,8 @@ void OnPresetOff() {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-extern "C" __declspec(dllexport) const char* NAME = "RenoDX";
-extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for art of rally";
+extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
+extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for art of rally";
 
 // NOLINTEND(readability-identifier-naming)
 

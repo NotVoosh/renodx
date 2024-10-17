@@ -89,7 +89,6 @@ void main(
     r2.w = r0.w * r0.x + 1;
   }
     float3 untonemapped = r2.rgb;
-    r2.rgb = float3(0.18f, 0.18f, 0.18f);
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
   r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
   r0.xyz = log2(r0.xyz);
@@ -99,8 +98,7 @@ void main(
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t3.Sample(s3_s, r0.xyz).xyzw;
     
-    float vanillaGray = renodx::color::y::from::BT709(r1.rgb);
-    r1.rgb = applyUserTonemap(untonemapped, t3, s3_s, vanillaGray);
+    r1.rgb = applyUserTonemap(untonemapped, t3, s3_s);
     
   r0.xy = v1.xy * cb0[30].xy + cb0[30].zw;
   r2.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
