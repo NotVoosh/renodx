@@ -9,6 +9,8 @@
 
 #include <embed/0x900045BA.h>   // camera light
 
+#include <embed/0x6EA48EC8.h>   // LUT3DBaker
+
 #include <embed/0x43621B25.h>   // uberpost
 #include <embed/0xFF4E4EF2.h>   // uberpost (title menu)
 
@@ -50,6 +52,8 @@ namespace {
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x900045BA),  // camera light
 
+    CustomShaderEntry(0x6EA48EC8),  // LUT3DBaker
+
     CustomShaderEntry(0x43621B25),  // uberpost
     CustomShaderEntry(0xFF4E4EF2),  // uberpost (title menu)
 
@@ -86,12 +90,12 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 3.f,
+        .default_value = 2.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Vanilla+"},
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapPeakNits",
@@ -134,6 +138,16 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
         .labels = {"Off", "On"},
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 100.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -194,7 +208,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 37.f,
+        .default_value = 50.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -264,7 +278,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Cutscenes are clamped to UI brightness, turn it up when they play. SMAA & TAA can reduce Peak.",
+        .label = "Cutscenes are clamped to UI brightness, turn it up when they play. TAA can reduce Peak.",
         .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
@@ -319,6 +333,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
+  renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -351,8 +366,8 @@ void OnPresent(
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-extern "C" __declspec(dllexport) const char* NAME = "RenoDX";
-extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for Last Epoch";
+extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
+extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Last Epoch";
 
 // NOLINTEND(readability-identifier-naming)
 
