@@ -13,7 +13,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float midGray){
+float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 vanilla){
 		
 		float3 outputColor = untonemapped;
 	
@@ -30,8 +30,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				if(injectedData.toneMapType <= 3){
 			config.saturation = injectedData.colorGradeSaturation;
 			}
-			config.mid_gray_value = midGray;
-			config.mid_gray_nits = midGray * 100;
+			config.mid_gray_value = 0.18f;
+			config.mid_gray_nits = 18.f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 

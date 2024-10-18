@@ -162,7 +162,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.f,
+        .default_value = 40.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -327,7 +327,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
-      renodx::mods::swapchain::force_borderless = false;
+      renodx::mods::swapchain::force_borderless = true;
       renodx::mods::swapchain::prevent_full_screen = false;
 
       //  RG10B10_float (UAV stuff)
