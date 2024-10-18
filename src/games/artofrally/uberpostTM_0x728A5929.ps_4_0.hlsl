@@ -88,7 +88,7 @@ void main(
   } else {
     r1.x = r0.w;
   }
-        r1.gba = applyUserTonemap(untonemapped, t4, s4_s);
+        r1.gba = applyUserTonemapNeutral(untonemapped, t4, s4_s);
   o0.xyzw = r1.yzwx;
   return;
 }

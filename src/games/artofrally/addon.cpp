@@ -7,7 +7,8 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x6EA48EC8.h>   // LUT3DBaker
+#include <embed/0xBE750C14.h>   // LUT3DBaker (neutral)
+#include <embed/0x6EA48EC8.h>   // LUT3DBaker (ACES)
 
 #include <embed/0x6BE60185.h>   // uberpost (FXAA/SMAA)
 #include <embed/0x728A5929.h>   // uberpost (title menu)
@@ -37,7 +38,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-  CustomShaderEntry(0x6EA48EC8),  // LUT3DBaker
+  CustomShaderEntry(0xBE750C14),  // LUT3DBaker (neutral)
+  CustomShaderEntry(0x6EA48EC8),  // LUT3DBaker (neutral)
 
   CustomShaderEntry(0x6BE60185),  // uberpost (FXAA/SMAA)
   CustomShaderEntry(0x728A5929),  // uberpost (title menu)
@@ -170,7 +172,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 50.f,
+        .default_value = 66.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
@@ -181,7 +183,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
