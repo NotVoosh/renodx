@@ -24,7 +24,7 @@ float3 applyUserTonemapNeutral(float3 untonemapped, Texture3D lutTexture, Sample
 			config.mid_gray_value = renodx::color::y::from::BT709(vanillaGray);
 			config.mid_gray_nits = renodx::color::y::from::BT709(vanillaGray) * 100;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_flare = 0.01f * pow(injectedData.colorGradeFlare, 10.f);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
 			config.hue_correction_color = hueCorrectionColor;
 			config.hue_correction_strength = injectedData.toneMapHueCorrection;
@@ -37,7 +37,7 @@ float3 applyUserTonemapNeutral(float3 untonemapped, Texture3D lutTexture, Sample
 			renodx::lut::config::type::LINEAR,
 			33.f);
 			
-			config.reno_drt_saturation = 1.09f;
+			config.reno_drt_saturation = 1.2f;
 	
 				if (injectedData.toneMapType == 4){																// Frostbite
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
@@ -96,10 +96,8 @@ float3 applyUserTonemapACES(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			renodx::lut::config::type::ARRI_C1000_NO_CUT,
 			renodx::lut::config::type::LINEAR,
 			33.f);
-
-
 			
-			config.reno_drt_saturation = 1.43f;
+			config.reno_drt_saturation = 1.3f;
 	
 				if (injectedData.toneMapType == 4){																// Frostbite
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
