@@ -105,9 +105,7 @@ void main(
   } else {
     r1.x = r0.w;
   }
-    if(injectedData.toneMapType != 0.f){
 	r1.gba = applyUserTonemap(untonemapped, t4, s4_s);
-    }
   o0.xyzw = r1.yzwx;
   return;
 }
