@@ -15,7 +15,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 		
 		float3 outputColor = max(0, untonemapped);
 		float3 vanillaGray = renodx::tonemap::ACESFittedAP1(float3(0.18f,0.18f,0.18f));
-		float3 hueCorrectionColor = renodx::tonemap::ACESFittedBT709(outputColor);
+		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(outputColor);
 
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
