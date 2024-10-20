@@ -133,8 +133,8 @@ void main(
     r0.x = -1 + r0.w;
     r2.w = r1.x * r0.x + 1;
   }
-		float3 untonemapped = r2.rgb;
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
+		  float3 untonemapped = r0.rgb;
   r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
   r0.xyz = log2(r0.xyz);
   r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
@@ -142,6 +142,7 @@ void main(
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t4.Sample(s4_s, r0.xyz).wxyz;
+      r1.gba = applyUserTonemap(untonemapped, t4, s4_s);
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {
     r0.xyz = saturate(r1.yzw);
@@ -149,7 +150,6 @@ void main(
   } else {
     r1.x = r0.w;
   }
-	r1.gba = applyUserTonemap(untonemapped, t4, s4_s);
   o0.xyzw = r1.yzwx;
   return;
 }

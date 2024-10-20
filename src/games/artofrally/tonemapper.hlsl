@@ -25,9 +25,6 @@ float3 applyUserTonemapNeutral(float3 untonemapped, Texture3D lutTexture, Sample
 			config.mid_gray_nits = renodx::color::y::from::BT709(vanillaGray) * 100;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.01f * pow(injectedData.colorGradeFlare, 10.f);
-			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = hueCorrectionColor;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -38,7 +35,10 @@ float3 applyUserTonemapNeutral(float3 untonemapped, Texture3D lutTexture, Sample
 			33.f);
 			
 			config.reno_drt_saturation = 1.2f;
-	
+			
+				if (injectedData.toneMapType == 3.f){
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
+				}
 				if (injectedData.toneMapType == 4){																// Frostbite
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		
@@ -65,7 +65,6 @@ float3 applyUserTonemapNeutral(float3 untonemapped, Texture3D lutTexture, Sample
 float3 applyUserTonemapACES(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler){
 		
 		float3 outputColor = untonemapped;
-		float3 vanillaGray = renodx::tonemap::ACESFittedAP1(float3(0.18f,0.18f,0.18f));
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(outputColor);
 
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
@@ -81,8 +80,8 @@ float3 applyUserTonemapACES(float3 untonemapped, Texture3D lutTexture, SamplerSt
 				if(injectedData.toneMapType <= 3){
 			config.saturation = injectedData.colorGradeSaturation;
 			}
-			config.mid_gray_value = renodx::color::y::from::BT709(vanillaGray);
-			config.mid_gray_nits = renodx::color::y::from::BT709(vanillaGray) * 100;
+			config.mid_gray_value = renodx::color::arri::logc::c1000::Decode(0.4135884);
+			config.mid_gray_nits = renodx::color::arri::logc::c1000::Decode(0.4135884) * 100;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
@@ -97,8 +96,11 @@ float3 applyUserTonemapACES(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			renodx::lut::config::type::LINEAR,
 			33.f);
 			
-			config.reno_drt_saturation = 1.3f;
-	
+			config.reno_drt_saturation = 1.45f;
+
+				if (injectedData.toneMapType == 3.f){
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
+				}
 				if (injectedData.toneMapType == 4){																// Frostbite
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		

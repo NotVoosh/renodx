@@ -61,13 +61,12 @@ void main(
   //r2.xyz = float3(0.0773993805,0.0773993805,0.0773993805) * r0.xyz;
   //r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
   //o0.xyz = r0.xyz ? r2.xyz : r1.xyz;
-        if (injectedData.toneMapType == 0){
+      if(injectedData.fxFilmGrain != 0.f){
+    r1.rgb = applyFilmGrain(r1.rgb, w1.xy);
+    }
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
     r1.rgb = r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886) + r1.rgb;         // LDR LLL (?)
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.rgb);
-    } else {
-    r1.rgb = applyFilmGrain(r1.rgb, w1.xy);
-    }
 		if (injectedData.toneMapGammaCorrection == 1){
     r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
     r1.rgb *= injectedData.toneMapGameNits / 80.f;

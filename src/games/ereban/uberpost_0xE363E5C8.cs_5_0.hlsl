@@ -148,7 +148,7 @@ cbuffer cb0 : register(b0)
     r1.xyz = r2.xyz * r1.xyz + -r2.xyz;
     r0.xyz = cb1[3].www * r1.xyz + r2.xyz;
   }
-        float3 untonemapped = r0.rgb;
+        float3 untonemapped;
   r0.w = cmp(0 != cb1[12].x);		
   if (r0.w != 0) {
     r1.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
@@ -159,6 +159,7 @@ cbuffer cb0 : register(b0)
     r0.w = cmp(0 != cb1[6].w);
     if (r0.w != 0) {
       r1.xyz = cb1[6].zzz * r0.xyz;
+          untonemapped = r1.rgb;
       r1.xyz = r1.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
       r1.xyz = max(float3(0,0,0), r1.xyz);
       r1.xyz = log2(r1.xyz);
@@ -167,11 +168,9 @@ cbuffer cb0 : register(b0)
       r0.w = 0.5 * cb1[6].x;
       r1.xyz = r1.xyz * cb1[6].xxx + r0.www;
       r0.xyz = t3.SampleLevel(s1_s, r1.xyz, 0).xyz;
+          r0.rgb = applyUserTonemap(untonemapped, t3, s1_s);
     }
   }
-            float3 vanilla = r0.rgb;
-		  
-	  r0.rgb = applyUserTonemap(untonemapped, t3, s1_s, vanilla);
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
 	u0[vThreadID.xyz] = r0.xyzw;

@@ -28,7 +28,7 @@ cbuffer cb0 : register(b0)
   r0.a = r1.b ? r0.a : 0;
   if (r0.a != 0) {
 // (start) ColorGrade  
-    if(injectedData.toneMapType == 0.f || injectedData.toneMapType == 4.f){
+    if(injectedData.toneMapType == 0.f){
     // LUT_SPACE_DECODE(r0.rgb)
     r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
     r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);
@@ -57,8 +57,8 @@ cbuffer cb0 : register(b0)
     
     // (start) LogGrade
     // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
-    r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);				// ACEScc_MIDGRAY = 0.4135884
-    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);	// midpoint
+    r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
+    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);
     
     // ACEScc_to_ACES(r0.rgb)
     r1.rgb = r0.rgb * float3(17.52,17.52,17.52) + float3(-9.72,-9.72,-9.72);
@@ -175,19 +175,52 @@ cbuffer cb0 : register(b0)
       r3.rgb = mul(renodx::color::D60_TO_D65_MAT, r3.rgb);
       r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r3.rgb);
       r0.rgb = max(0, r3.rgb);
-    } else {
+    } else {                // if(not vanilla){only do color grading, skip tonemapping}
   // (start) LogGrade
-	// Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
-  r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);				// ACEScc_MIDGRAY = 0.4135884
-  r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);	// midpoint
+    // LUT_SPACE_DECODE(r0.rgb)
+    r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
+    r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);
+    r0.rgb = exp2(r0.rgb);
+    r0.rgb = r0.rgb + float3(-0.047996,-0.047996,-0.047996);
+    r0.rgb = r0.rgb * float3(0.179999992,0.179999992,0.179999992);
 
-  // LUT_SPACE_DECODE(r0.rgb)
-  r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
-  r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);
-  r0.rgb = exp2(r0.rgb);
-  r0.rgb = r0.rgb + float3(-0.047996,-0.047996,-0.047996);
-  r0.rgb = r0.rgb * float3(0.179999992,0.179999992,0.179999992);
+    // unity_to_ACES(r0.rgb)
+    r1.r = dot(float3(0.439701, 0.382978, 0.177335), r0.rgb);
+    r1.g = dot(float3(0.0897922963, 0.813423, 0.0967615992), r0.rgb);
+    r1.b = dot(float3(0.017544, 0.111544, 0.870704), r0.rgb);
+    
+  // ACEScc (log) space
+    // ACES_to_ACEScc(r1.rgb)
+    r0.rgb = max(0, r1.rgb);
+    r0.rgb = min(r0.rgb, 65504);
+    r1.rgb = cmp(r0.rgb < float3(0.0000305175708, 0.0000305175708, 0.0000305175708));
+    r2.rgb = r0.rgb * float3(0.5,0.5,0.5) + float3(0.0000152587800,0.0000152587800,0.0000152587800);
+    r2.rgb = log2(r2.rgb);
+    r2.rgb = r2.rgb + float3(9.72,9.72,9.72);
+    r2.rgb = r2.rgb * float3(0.0570776239,0.0570776239,0.0570776239);
+    r0.rgb = log2(r0.rgb);
+    r0.rgb = r0.rgb + float3(9.72,9.72,9.72);
+    r0.rgb = r0.rgb * float3(0.0570776239,0.0570776239,0.0570776239);
+    r0.rgb = r1.rgb ? r2.rgb : r0.rgb;
+    
+    // (start) LogGrade
+    // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
+    r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
+    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);
+    
+    // ACEScc_to_ACES(r0.rgb)
+    r1.rgb = r0.rgb * float3(17.52,17.52,17.52) + float3(-9.72,-9.72,-9.72);
+    r1.rgb = exp2(r1.rgb);
+    r2.rgb = r1.rgb + float3(-0.0000152587891,-0.0000152587891,-0.0000152587891);
+    r2.rgb = r2.rgb + r2.rgb;
+    r3.rgba = cmp(r0.rrgg < float4(-0.301369876, 1.46799636, -0.301369876, 1.46799636));
+    r0.rg = r3.ga ? r1.rg : float2(65504,65504);
+    r3.rg = r3.rb ? r2.rg : r0.rg;
+    r0.rg = cmp(r0.bb < float2(-0.301369876, 1.46799636));
+    r0.g = r0.g ? r1.b : 65504;
+    r3.b = r0.r ? r2.b : r0.g;
 
+      r0.rgb = mul(renodx::color::AP0_TO_AP1_MAT, r3.rgb);
     // (start) LinearGrade
       // WhiteBalance(r0.rgb, cb0[1].rgb)
       r1.r = dot(float3(0.390405, 0.549941, 0.00892631989), r0.rgb);
@@ -274,6 +307,8 @@ cbuffer cb0 : register(b0)
       r0.gba = r1.rrr * r0.gba + -r1.ggg;
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
       // (end) LinearGrade
+      r0.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r0.rgb);
+      r0.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r0.rgb);
       r0.rgb = max(0, r0.rgb);
     }    
   r0.a = 1;

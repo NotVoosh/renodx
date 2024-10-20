@@ -241,7 +241,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom",
         .section = "Effects",
-        .tooltip = "Scales game original Bloom.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -251,7 +250,16 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
-        .tooltip = "Scales game original Vignette.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "fxNoise",
+        .binding = &shader_injection.fxNoise,
+        .default_value = 50.f,
+        .label = "Noise",
+        .section = "Effects",
+        .tooltip = "Scales game dithering noise.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -272,7 +280,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Film Grain",
         .section = "Effects",
-        .tooltip = "Scales game original Film Grain when used, or custom.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -345,6 +352,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
+  renodx::utils::settings::UpdateSetting("fxNoise", 50.f);
   renodx::utils::settings::UpdateSetting("fxCameraLight", 1);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
 }

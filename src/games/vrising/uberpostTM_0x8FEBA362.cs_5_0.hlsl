@@ -112,7 +112,7 @@ cbuffer cb0 : register(b0)
       r2.xyz = r0.xyz * cb1[7].yyy + r2.xyz;
     }
   } 
-        float3 untonemapped = r2.rgb;
+        float3 untonemapped;
   r0.x = cmp(0 != cb1[12].x);
   if (r0.x != 0) {
     r0.xyz = r2.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
@@ -123,6 +123,7 @@ cbuffer cb0 : register(b0)
     r0.x = cmp(0 != cb1[6].w);
     if (r0.x != 0) {
       r0.xyz = cb1[6].zzz * r2.xyz;
+          untonemapped = r0.rgb;
       r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
       r0.xyz = max(float3(0,0,0), r0.xyz);
       r0.xyz = log2(r0.xyz);

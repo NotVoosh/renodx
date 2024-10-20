@@ -51,14 +51,15 @@ void main(
   r2.xyz = t0.Load(r1.xyww).xyz;
   r1.x = t2.Load(r1.xyzw).x;
   o0.xyz = r0.www * r2.xyz + r0.xyz;
-        
-        o0.rgb = applyFilmGrain(o0.rgb, v1.xy);
+        if(injectedData.fxFilmGrainType == 1){
+    o0.rgb = applyFilmGrain(o0.rgb, v1.xy);
+        }
 		  	if(injectedData.toneMapGammaCorrection == 1) {
 		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
 		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-            } else {
-        o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+        } else {
+    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
         }
     
   r0.x = cmp(cb0[5].x == 1.000000);
