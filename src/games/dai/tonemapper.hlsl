@@ -25,7 +25,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.type = injectedData.toneMapType;
 			config.peak_nits = injectedData.toneMapPeakNits;
 			config.game_nits = injectedData.toneMapGameNits;
-			//config.gamma_correction = injectedData.toneMapGammaCorrection - 1;
 			config.exposure = injectedData.colorGradeExposure;
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
@@ -63,7 +62,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				float frostbitePeak = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 				
-				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
+				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, saturate(sdrColor));
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
 																injectedData.colorGradeSaturation + 0.25f,
