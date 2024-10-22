@@ -13,7 +13,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler, float3 preCompute){
+float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler){
 		
 		float3 outputColor = max(0, untonemapped);
 	
@@ -32,10 +32,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			}
 			config.mid_gray_value = 0.18f;
 			config.mid_gray_nits = 18.f;
+			config.reno_drt_saturation = 1.12f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
-
-			config.reno_drt_saturation = 1.12f;
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -43,9 +42,26 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			injectedData.colorGradeLUTScaling,
 			renodx::lut::config::type::ARRI_C1000_NO_CUT,
 			renodx::lut::config::type::LINEAR,
-			preCompute.xyz);
-	
+			32.f);
+			
+				if (injectedData.toneMapType == 4.f && any(outputColor > 0)){		// Frostbite
+			outputColor = renodx::tonemap::config::Apply(outputColor, config);
+		
+				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
+				float frostbitePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
+																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
+			
+			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
+			
+				float3 lutColor = min(1.f, renodx::lut::Sample(lutTexture, lut_config, outputColor));
+				
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
+																injectedData.colorGradeSaturation,
+																0.f, 0.f);
+			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
+			}
 
 	return outputColor;
 }

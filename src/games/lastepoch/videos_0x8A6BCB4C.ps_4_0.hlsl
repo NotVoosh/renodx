@@ -29,8 +29,12 @@ void main(
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
-    
-	o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-
+      if(injectedData.toneMapGammaCorrection == 1.f){
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
+	  o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+    } else {
+    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    }
   return;
 }

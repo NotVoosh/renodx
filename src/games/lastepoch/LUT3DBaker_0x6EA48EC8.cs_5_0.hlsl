@@ -28,7 +28,7 @@ cbuffer cb0 : register(b0)
   r0.a = r1.b ? r0.a : 0;
   if (r0.a != 0) {
 // (start) ColorGrade  
-    if(injectedData.toneMapType == 0.f){
+    if(injectedData.toneMapType == 0.f || injectedData.toneMapType == 4.f){
     // LUT_SPACE_DECODE(r0.rgb)
     r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
     r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);
@@ -175,7 +175,7 @@ cbuffer cb0 : register(b0)
       r3.rgb = mul(renodx::color::D60_TO_D65_MAT, r3.rgb);
       r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r3.rgb);
       r0.rgb = max(0, r3.rgb);
-    } else {                // if(not vanilla){only do color grading, skip tonemapping}
+    } else {                // if(not vanilla/vanilla+){only do color grading, skip tonemapping}
   // (start) LogGrade
     // LUT_SPACE_DECODE(r0.rgb)
     r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
