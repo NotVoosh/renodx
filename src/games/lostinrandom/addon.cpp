@@ -8,7 +8,8 @@
 #define DEBUG_LEVEL_0
 
 #include <embed/0xA9329B7F.h>   // uberpost
-#include <embed/0x4B92CD8E.h>   // uberpost (dice world)
+#include <embed/0x4B92CD8E.h>   // uberpost 2 (dice world)
+#include <embed/0x72D26F35.h>   // uberpost 3
 
 #include <embed/0x0D7738C5.h>   // post final
 
@@ -26,7 +27,8 @@ namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xA9329B7F),  // uberpost
-  CustomShaderEntry(0x4B92CD8E),  // uberpost (dice world)
+  CustomShaderEntry(0x4B92CD8E),  // uberpost 2 (dice world)
+  CustomShaderEntry(0x72D26F35),  // uberpost 3
 
   CustomShaderEntry(0x0D7738C5),  // post final
 
@@ -40,7 +42,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 3.f,
+        .default_value = 2.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
@@ -313,11 +315,11 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
       
-      //  RG11B10_float (UAV stuff)
+      //  Bloom
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r11g11b10_float,
           .new_format = reshade::api::format::r16g16b16a16_float,
-          .ignore_size = false,
+          .ignore_size = true,
           .view_upgrades = {
           {{reshade::api::resource_usage::shader_resource,
           reshade::api::format::r11g11b10_float},
@@ -336,7 +338,8 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .new_format = reshade::api::format::r16g16b16a16_typeless,
           .ignore_size = false,
       });
-      //  RGBA8_unorm
+      
+      //  LUT 
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,

@@ -38,7 +38,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			}
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_saturation = 1.5f;
+			config.reno_drt_saturation = 1.4f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 
@@ -76,6 +76,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}
+			float3 lutColor;
 				if(injectedData.colorGradeLUTExtrapolation == 1.f){
 		LUTExtrapolationData extrapolationData = DefaultLUTExtrapolationData();
     	extrapolationData.inputColor = outputColor.rgb;
@@ -92,9 +93,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
     	extrapolationSettings.lutInputLinear = true;
     	extrapolationSettings.lutOutputLinear = true;
     	extrapolationSettings.outputLinear = true;
-			outputColor = SampleLUTWithExtrapolation(lutTexture1, lutSampler, extrapolationData, extrapolationSettings);
+			lutColor = SampleLUTWithExtrapolation(lutTexture1, lutSampler, extrapolationData, extrapolationSettings);
+			outputColor = lutColor;
 			} else {
-				float3 lutColor = renodx::lut::Sample(saturate(outputColor), lut_config1, lutTexture1);
+			lutColor = renodx::lut::Sample(saturate(outputColor), lut_config1, lutTexture1);
 			outputColor = RestorePostProcess(outputColor, saturate(outputColor), lutColor);			
 			}
 			
