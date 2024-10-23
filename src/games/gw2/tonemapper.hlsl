@@ -1,6 +1,7 @@
 // Custom tonemapper
 
 #include "./shared.h"
+#include "./DICE.hlsl"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen){
     float3 grainedColor = renodx::effects::ApplyFilmGrain(
@@ -31,7 +32,7 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
-				if (injectedData.toneMapType <= 3){							// Frostbite gets that later
+				if (injectedData.toneMapType <= 3){							// DICE gets that later
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
@@ -53,11 +54,17 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			
 				if (injectedData.toneMapType == 4){
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
-						
-				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
-				float frostbitePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
-																	  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
+			DICESettings DICEconfig = DefaultDICESettings();
+			DICEconfig.Type = 3;
+			DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
+				float dicePaperWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapGameNits / 80.f, true)
+																		   : injectedData.toneMapGameNits / 80.f;
+				float dicePeakWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / 80.f, true)
+																		  : injectedData.toneMapPeakNits / 80.f;
+
+				float3 sdrColor = DICETonemap(outputColor * dicePaperWhite, dicePaperWhite, DICEconfig) / dicePaperWhite;
+
+			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
 					
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 						
@@ -103,7 +110,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
-				if (injectedData.toneMapType <= 3){							// Frostbite gets that later
+				if (injectedData.toneMapType <= 3){							// DICE gets that later
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
@@ -118,17 +125,20 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			
 				if (injectedData.toneMapType == 4){
-			config.highlights += 1.4f;
-			
-				float frostbitePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
-																	  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
+			DICESettings DICEconfig = DefaultDICESettings();
+			DICEconfig.Type = 3;
+        	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
+				float dicePaperWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapGameNits / 80.f, true)
+																		   : injectedData.toneMapGameNits / 80.f;
+				float dicePeakWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / 80.f, true)
+																		  : injectedData.toneMapPeakNits / 80.f;
+
+			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
 																		injectedData.colorGradeSaturation,
 																		0.f, 0.f);
 			}
-				
 			
 			    if (injectedData.fxFilmGrain) {
 			outputColor = applyFilmGrain(outputColor, screenXY);

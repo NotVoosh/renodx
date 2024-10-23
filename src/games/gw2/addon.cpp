@@ -292,6 +292,17 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "diceShoulderStart",
+        .binding = &shader_injection.diceShoulderStart,
+        .default_value = 0.33f,
+        .label = "DICE Shoulder Start",
+        .section = "Tone Mapping",
+        .tint = 0x87581D,
+        .max = 0.99f,
+        .format = "%.2f",
+        .is_enabled = []() { return shader_injection.toneMapType == 4.f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
         .binding = &shader_injection.colorGradeExposure,
         .default_value = 1.f,
@@ -558,8 +569,8 @@ void OnPresent(
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-extern "C" __declspec(dllexport) const char* NAME = "RenoDX";
-extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for Guild Wars 2";
+extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
+extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Guild Wars 2";
 
 // NOLINTEND(readability-identifier-naming)
 
