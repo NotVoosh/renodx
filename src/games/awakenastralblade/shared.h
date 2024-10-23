@@ -1,5 +1,5 @@
-#ifndef SRC_LOSTINRANDOM_SHARED_H_
-#define SRC_LOSTINRANDOM_SHARED_H_
+#ifndef SRC_AWAKENASTRALBLADE_SHARED_H_
+#define SRC_AWAKENASTRALBLADE_SHARED_H_
 
 #ifndef __cplusplus
 #include "../../shaders/renodx.hlsl"
@@ -23,9 +23,10 @@ struct ShaderInjectData {
   float colorGradeBlowout;
   float colorGradeFlare;
   float colorGradeLUTStrength;
-  float colorGradeLUTExtrapolation;
+  float colorGradeLUTScaling;
   float fxBloom;
   float fxVignette;
+  float fxNoise;
   float fxFilmGrain;
   float elapsedTime;
 };
@@ -36,4 +37,4 @@ cbuffer cb13 : register(b13) {
 }
 #endif
 
-#endif  // SRC_LOSTINRANDOM_SHARED_H_
+#endif  // SRC_AWAKENASTRALBLADE_SHARED_H_

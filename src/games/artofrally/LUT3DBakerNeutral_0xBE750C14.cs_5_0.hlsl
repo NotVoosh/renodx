@@ -126,7 +126,7 @@ cbuffer cb0 : register(b0)
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
       r0.rgb = max(0, r0.rgb);
 		
-		if(injectedData.toneMapType == 0.f){
+		if(injectedData.toneMapType == 0.f || injectedData.toneMapType == 4.f){
 	// Neutral Tonemap
 	  r1.rgb = r0.rgb * float3(1.31338608, 1.31338608, 1.31338608);
 	  r2.rgb = r0.rgb * float3(0.262677222, 0.262677222, 0.262677222) + float3(0.0695999935, 0.0695999935, 0.0695999935);

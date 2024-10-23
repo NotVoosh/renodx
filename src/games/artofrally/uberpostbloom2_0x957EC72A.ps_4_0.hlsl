@@ -78,7 +78,7 @@ void main(
   r1.x = cmp(cb0[40].y < 0.5);
   if (r1.x != 0) {
     r1.xy = -cb0[38].xy + v1.xy;
-    r1.yz = cb0[39].xx * abs(r1.yx);
+    r1.yz = cb0[39].xx * abs(r1.yx) * injectedData.fxVignette;    // vignette
     r1.w = cb0[22].x / cb0[22].y;
     r1.w = -1 + r1.w;
     r1.w = cb0[39].w * r1.w + 1;
@@ -91,7 +91,7 @@ void main(
     r1.x = 1 + -r1.x;
     r1.x = max(0, r1.x);
     r1.x = log2(r1.x);
-    r1.x = cb0[39].y * r1.x * injectedData.fxVignette;      // vignette
+    r1.x = cb0[39].y * r1.x;
     r1.x = exp2(r1.x);
     r1.yzw = float3(1,1,1) + -cb0[37].xyz;
     r1.yzw = r1.xxx * r1.yzw + cb0[37].xyz;

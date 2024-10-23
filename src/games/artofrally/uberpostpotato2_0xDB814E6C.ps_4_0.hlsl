@@ -46,7 +46,7 @@ void main(
   r0.w = cmp(cb0[40].y < 0.5);
   if (r0.w != 0) {
     r1.xy = -cb0[38].xy + v1.xy;
-    r1.yz = cb0[39].xx * abs(r1.yx);
+    r1.yz = cb0[39].xx * abs(r1.yx) * injectedData.fxVignette;  // vignette
     r0.w = cb0[22].x / cb0[22].y;
     r0.w = -1 + r0.w;
     r0.w = cb0[39].w * r0.w + 1;
@@ -59,7 +59,7 @@ void main(
     r0.w = 1 + -r0.w;
     r0.w = max(0, r0.w);
     r0.w = log2(r0.w);
-    r0.w = cb0[39].y * r0.w * injectedData.fxVignette;     // vignette
+    r0.w = cb0[39].y * r0.w;
     r0.w = exp2(r0.w);
     r1.xyz = float3(1,1,1) + -cb0[37].xyz;
     r1.xyz = r0.www * r1.xyz + cb0[37].xyz;

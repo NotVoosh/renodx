@@ -79,7 +79,7 @@ void main(
   r0.w = -1 + r0.w;
   r0.w = cb0[16].w * r0.w + 1;
   r1.xy = -cb0[15].xy + v1.xy;
-  r1.xy = cb0[16].xx * abs(r1.xy);
+  r1.xy = cb0[16].xx * abs(r1.xy) * injectedData.fxVignette;  // vignette
   r0.w = r1.x * r0.w;
   r1.y = log2(r1.y);
   r1.x = log2(r0.w);
@@ -89,7 +89,7 @@ void main(
   r0.w = 1 + -r0.w;
   r0.w = max(0, r0.w);
   r0.w = log2(r0.w);
-  r0.w = cb0[16].y * r0.w * injectedData.fxVignette;      // vignette
+  r0.w = cb0[16].y * r0.w;
   r0.w = exp2(r0.w);
   r1.xyz = float3(1,1,1) + -cb0[14].zxy;
   r1.xyz = r0.www * r1.xyz + cb0[14].zxy;

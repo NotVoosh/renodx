@@ -17,6 +17,8 @@
 #include <embed/0xBBC1FA0B.h>   // HDRP final (FXAA)
 //#include <embed/0xB0B50F1F.h>   // HDRP final (FSR)
 
+#include <embed/0xE52188B2.h>   // gamma
+
 #include <embed/0x20133A8B.h>   // final
 
 #include <deps/imgui/imgui.h>
@@ -40,7 +42,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xBBC1FA0B),  // HDRP final (FXAA)
   //CustomShaderEntry(0xB0B50F1F),  // HDRP final (FSR)
 
-	CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0xE52188B2),  // gamma
+
+  CustomSwapchainShader(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -56,6 +60,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
         .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
+        .tint = 0x610512,
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapPeakNits",
@@ -65,6 +70,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Peak Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the value of peak white in nits",
+        .tint = 0x182939,
         .min = 48.f,
         .max = 4000.f,
     },
@@ -75,6 +81,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Game Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the value of 100% white in nits",
+        .tint = 0x182939,
         .min = 48.f,
         .max = 500.f,
     },
@@ -85,6 +92,7 @@ renodx::utils::settings::Settings settings = {
         .label = "UI Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the brightness of UI and HUD elements in nits",
+        .tint = 0x182939,
         .min = 48.f,
         .max = 500.f,
     },
@@ -97,6 +105,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Gamma Correction",
         .section = "Tone Mapping",
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
+        .tint = 0x182939,
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -104,6 +113,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 1.f,
         .label = "Exposure",
         .section = "Color Grading",
+        .tint = 0x182939,
         .max = 10.f,
         .format = "%.2f",
     },
@@ -113,6 +123,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Highlights",
         .section = "Color Grading",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -122,6 +133,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Shadows",
         .section = "Color Grading",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -131,6 +143,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Contrast",
         .section = "Color Grading",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -140,6 +153,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Saturation",
         .section = "Color Grading",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -150,6 +164,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
+        .tint = 0x182939,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType == 3; },
         .parse = [](float value) { return value * 0.01f; },
@@ -161,6 +176,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
+        .tint = 0x182939,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType == 3; },
         .parse = [](float value) { return value * 0.02f; },
@@ -171,6 +187,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "LUT Strength",
         .section = "Color Grading",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
@@ -181,6 +198,7 @@ renodx::utils::settings::Settings settings = {
         .label = "LUT Scaling",
         .section = "Color Grading",
         .tooltip = "Scales the color grade LUT to full range when size is clamped.",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
@@ -190,6 +208,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom",
         .section = "Effects",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -199,6 +218,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
+        .tint = 0x182939,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -208,6 +228,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Film Grain",
         .section = "Effects",
+        .tint = 0x2F182C,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },

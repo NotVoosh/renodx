@@ -28,7 +28,7 @@ cbuffer cb0 : register(b0)
   r0.a = r1.b ? r0.a : 0;
   if (r0.a != 0) {
 // (start) ColorGrade  
-    if(injectedData.toneMapType == 0.f){
+    if(injectedData.toneMapType == 0.f || injectedData.toneMapType == 4.f){
     // LUT_SPACE_DECODE(r0.rgb)
     r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
     r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);

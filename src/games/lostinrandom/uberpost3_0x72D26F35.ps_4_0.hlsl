@@ -53,13 +53,13 @@ void main(
   r0.w = cmp(0 < cb0[135].z);
   if (r0.w != 0) {
     r1.xy = -cb0[135].xy + v1.xy;
-    r1.yz = cb0[135].zz * abs(r1.xy);
+    r1.yz = cb0[135].zz * abs(r1.xy) * injectedData.fxVignette; // vignette
     r1.x = cb0[134].w * r1.y;
     r0.w = dot(r1.xz, r1.xz);
     r0.w = 1 + -r0.w;
     r0.w = max(0, r0.w);
     r0.w = log2(r0.w);
-    r0.w = cb0[135].w * r0.w * injectedData.fxVignette;   // vignette
+    r0.w = cb0[135].w * r0.w;
     r0.w = exp2(r0.w);
     r1.xyz = float3(1,1,1) + -cb0[134].xyz;
     r1.xyz = r0.www * r1.xyz + cb0[134].xyz;

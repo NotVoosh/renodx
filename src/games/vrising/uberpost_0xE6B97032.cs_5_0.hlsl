@@ -120,7 +120,7 @@ cbuffer cb0 : register(b0)
   r0.x = (uint)cb1[1].z;
   if (r0.x == 0) {
     r0.xy = r1.xy * cb0[48].zw + -cb1[1].xy;
-    r0.yz = cb1[2].xx * abs(r0.yx);
+    r0.yz = cb1[2].xx * abs(r0.yx) * injectedData.fxVignette;   // vignette
     r0.w = cb0[48].x / cb0[48].y;
     r0.w = -1 + r0.w;
     r0.w = cb1[2].w * r0.w + 1;
@@ -133,7 +133,7 @@ cbuffer cb0 : register(b0)
     r0.x = 1 + -r0.x;
     r0.x = max(0, r0.x);
     r0.x = log2(r0.x);
-    r0.x = cb1[2].y * r0.x * injectedData.fxVignette;           // vignette
+    r0.x = cb1[2].y * r0.x;
     r0.x = exp2(r0.x);
     r0.yzw = float3(1,1,1) + -cb1[3].xyz;
     r0.xyz = r0.xxx * r0.yzw + cb1[3].xyz;
