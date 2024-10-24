@@ -34,8 +34,11 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			}
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_contrast = 1.5f;
-			config.reno_drt_saturation = 1.07f;
+			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CLAMPED;
+			config.hue_correction_color = hueCorrectionColor;
+			config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			config.reno_drt_contrast = 1.2f;
+			config.reno_drt_saturation = 1.23f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 
@@ -46,9 +49,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::GAMMA_2_2,
 			renodx::lut::config::type::GAMMA_2_2,
 			32.f);
-		if (injectedData.toneMapType >= 3.f){
-			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
-		}
+
 		if (injectedData.toneMapGammaCorrection == 0) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 		}
@@ -63,6 +64,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 				
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, saturate(sdrColor));
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
 																injectedData.colorGradeSaturation + 0.15f,
