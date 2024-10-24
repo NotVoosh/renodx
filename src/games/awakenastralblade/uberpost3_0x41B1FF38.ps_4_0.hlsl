@@ -95,13 +95,6 @@ void main(
   r0.w = r1.x * r0.w;
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
-      if(injectedData.toneMapGammaCorrection == 1.f){
-    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
-    r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb, true);
-    } else {
-    r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    }
     o0.rgb = r0.rgb;
   return;
 }
