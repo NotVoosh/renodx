@@ -182,7 +182,13 @@ void main(
       if(injectedData.fxFilmGrain){
     r1.rgb = applyFilmGrain(r1.rgb, w1);
     }
+      if(injectedData.toneMapGammaCorrection == 1.f){
+    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
     r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb, true);
+    } else {
+    r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    }
     o0.rgb = r1.rgb;
   o0.w = r0.w;
   return;
