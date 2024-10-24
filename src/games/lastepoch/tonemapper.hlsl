@@ -33,7 +33,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
 			config.reno_drt_contrast = 1.2f;
-			config.reno_drt_saturation = 1.8f;
+			config.reno_drt_saturation = 1.7f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 	
