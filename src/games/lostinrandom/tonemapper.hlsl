@@ -19,7 +19,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			if(toggle != 0){
 		outputColor = 0.f;
 		} else {
-		outputColor = max(0, untonemapped);
+		outputColor = untonemapped;
 		}
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(untonemapped);
 		float midGray = renodx::color::y::from::BT709(renodx::tonemap::ACESFittedAP1(0.18f));

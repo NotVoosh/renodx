@@ -15,7 +15,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 
 float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler){
 		
-		float3 outputColor = max(0, untonemapped);
+		float3 outputColor = untonemapped;
 	
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 

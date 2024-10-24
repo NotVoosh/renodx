@@ -15,7 +15,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float3 vanilla, float2 screenXY, float midGray){
 		
-		float3 outputColor = max(0, untonemapped.rgb);
+		float3 outputColor = untonemapped.rgb;
 		float3 hueCorrectionColor = renodx::color::gamma::Decode(LUTless);
 	
 		midGray = renodx::color::y::from::BT709(float3(midGray,midGray,midGray));
