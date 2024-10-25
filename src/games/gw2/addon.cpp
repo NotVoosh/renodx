@@ -60,6 +60,7 @@
 #include <embed/0xA4C910A5.h>	     // mystic forge
 #include <embed/0x0D1308E2.h>	     // dremwalkr daggr
 #include <embed/0xC1177C5A.h>	     // mystic beast
+#include <embed/0x8BBB8C81.h>	     // jahai tornado
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -137,7 +138,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x3BC05D0D),      // Underwater fog kinda 1                           cleared negative colors
     CustomShaderEntry(0x6C5C7797),      // Underwater fog kinda 2                                     //
     CustomShaderEntry(0x98553490),      // no AO (Crystal Oasis, maybe other)                         //
-	  CustomShaderEntry(0x8CFDCBEF),      // SoC								                                        //
+	CustomShaderEntry(0x8CFDCBEF),      // SoC						                                  //
 
     CustomShaderEntry(0xDF711B8B),      // Plains of Ashford                                    alpha saturate
     CustomShaderEntry(0x38A5D61E),      // Mesmer spell 1                                             //
@@ -153,7 +154,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x4F249A2F),      // Metrica 2                                                  //
     CustomShaderEntry(0x00EB18B3),      // Metrica 3                                                  //
     CustomShaderEntry(0xB7069766),      // Metrica 4                                                  //
-	  CustomShaderEntry(0x6039EAA8),      // Grothmar Arena                                             //
+	CustomShaderEntry(0x6039EAA8),      // Grothmar Arena                                             //
     CustomShaderEntry(0x351D5100),      // LA cloud                                                   //
     CustomShaderEntry(0xAFBAF19F),      // sc eyes                                                    //
     CustomShaderEntry(0xBFAC7226),      // conflux                                                    //
@@ -166,6 +167,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xA4C910A5),      // mystic forge                                               //
     CustomShaderEntry(0x0D1308E2),      // dremwalkr daggr                                            //
     CustomShaderEntry(0xC1177C5A),      // mystic beast                                               //
+    CustomShaderEntry(0x8BBB8C81),      // jahai tornado                                              //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //

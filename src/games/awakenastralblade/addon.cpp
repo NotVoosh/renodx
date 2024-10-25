@@ -10,9 +10,12 @@
 #include <embed/0xB8308863.h>   // uberpost
 #include <embed/0xFF4E4EF2.h>   // uberpost (title menu)
 #include <embed/0x41B1FF38.h>   // uberpost 3
+#include <embed/0xD25C43B1.h>   // uberpost 4
 
 #include <embed/0x366EE13E.h>   // post final
 #include <embed/0x4757CDEB.h>   // uberpost 2
+
+#include <embed/0x8A6BCB4C.h>   // videos
 
 #include <embed/0x20133A8B.h>   // final
 
@@ -30,9 +33,12 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xB8308863),  // uberpost
   CustomShaderEntry(0xFF4E4EF2),  // uberpost (title menu)
   CustomShaderEntry(0x41B1FF38),  // uberpost 3
+  CustomShaderEntry(0xD25C43B1),  // uberpost 4
 
   CustomShaderEntry(0x366EE13E),  // post final
   CustomShaderEntry(0x4757CDEB),  // uberpost 2
+
+  CustomShaderEntry(0x8A6BCB4C),  // videos
 
   CustomSwapchainShader(0x20133A8B),  // Final
 };
