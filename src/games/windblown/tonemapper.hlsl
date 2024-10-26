@@ -40,7 +40,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			config.mid_gray_nits = midGray * 100;
 			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.15f;
-			config.reno_drt_saturation = 1.7f;
+			config.reno_drt_saturation = 1.5f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 
@@ -65,7 +65,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			}
 			
 				if (injectedData.toneMapType == 4){									// ReinhardScalable
-			config.contrast += 0.35f;
+			config.contrast += 0.4f;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
