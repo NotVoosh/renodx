@@ -54,20 +54,20 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
 		}
 		
-		if (injectedData.toneMapType == 4.f){																// Frostbite
-			config.shadows -= 0.35f;
-			config.contrast += 0.2f;
+		if (injectedData.toneMapType == 4.f){							// ReinhardScalable
+			config.shadows -= 0.2f;
+			config.contrast += 0.1f;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		
-				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
-				float frostbitePeak = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
+				float3 sdrColor = renodx::tonemap::ReinhardScalable(outputColor, 1.f, 0.f, 0.18f, midGray);
+				float reinhardPeak = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
+			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak, 0.f, 0.18f, midGray);
 				
-				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, saturate(sdrColor));
+				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																injectedData.colorGradeSaturation + 0.15f,
+																injectedData.colorGradeSaturation + 0.2f,
 																0.f, 0.f);
 		} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
@@ -79,7 +79,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 															  : renodx::color::srgb::Decode(outputColor);
 		}
 		
-		if (injectedData.fxFilmGrain) {
+		if (injectedData.fxFilmGrain > 0.f) {
 			outputColor = applyFilmGrain(outputColor, screenXY);
 		}
 	

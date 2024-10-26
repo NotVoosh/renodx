@@ -1,6 +1,5 @@
 #include "./shared.h"
 #include "./ColorGradingLUT.hlsl"
-#include "./DICE.hlsl"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen)
 {
@@ -34,7 +33,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
-				if(injectedData.toneMapType <= 3){			// later for DICE
+				if(injectedData.toneMapType <= 3){			// later for Reinhard
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.mid_gray_value = midGray;
@@ -60,25 +59,20 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			renodx::lut::config::type::SRGB,
 			16.f);
 	
-				if (injectedData.toneMapType >= 3.f){
+				if (injectedData.toneMapType == 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			}
 			
-				if (injectedData.toneMapType == 4){									// DICE
-			config.shadows -= 0.6f;
-			config.contrast += 0.2f;
+				if (injectedData.toneMapType == 4.f){							// ReinhardScalable
+			config.contrast += 0.5f;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
-			DICESettings DICEconfig = DefaultDICESettings();
-			DICEconfig.Type = 3;
-        	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
-				float dicePaperWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapGameNits / 80.f, true)
-																		   : injectedData.toneMapGameNits / 80.f;
-				float dicePeakWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / 80.f, true)
-																		  : injectedData.toneMapPeakNits / 80.f;
+				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
+																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 
-			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
+			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak, 0.f, 0.18f, midGray);
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																		injectedData.colorGradeSaturation + 0.4f,
+																		injectedData.colorGradeSaturation + 0.5f,
 																		0.f, 0.f);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);

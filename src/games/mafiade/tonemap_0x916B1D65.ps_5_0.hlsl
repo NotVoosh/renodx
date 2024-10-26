@@ -111,7 +111,6 @@ void main(
   }
     
         float3 untonemapped;
-        float3 vanillaTM;
         float3 preLUT;
         float linearWhite;
   if (r2.w != 0) {
@@ -122,7 +121,7 @@ void main(
             //untonemapped = r4.rgb;
             
       r2.xyz = log2(r2.xyz);
-      r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
+      //r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
       r2.xyz = exp2(r2.xyz);
       r1.xyz = min(float3(1,1,1), r2.xyz);
       break;
@@ -169,7 +168,7 @@ void main(
       r2.xyz = saturate(r2.xyz * r0.www);
       // r2 = (((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F) / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F)
       r2.xyz = log2(r2.xyz);
-      r2.xyz = cb0[2].xxx * r2.xyz;                             // 1 (game brightness)
+      //r2.xyz = cb0[2].xxx * r2.xyz;                             // 1 (game brightness)
       r2.xyz = exp2(r2.xyz);
       r1.xyz = min(float3(1,1,1), r2.xyz);
       break;
@@ -179,7 +178,7 @@ void main(
             //untonemapped = r4.rgb;
             
       r2.xyz = log2(r2.xyz);
-      r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
+      //r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
       r1.xyz = exp2(r2.xyz);
       break;
       case -2 :
@@ -189,7 +188,7 @@ void main(
             
       r2.xyz = max(float3(0,0,0), r2.xyz);
       r2.xyz = log2(r2.xyz);
-      r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
+      //r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
       r1.xyz = exp2(r2.xyz);
       break;
       case -3 :

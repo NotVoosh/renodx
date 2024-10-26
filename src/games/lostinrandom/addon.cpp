@@ -47,7 +47,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "DICE"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Reinhard+"},
         .tint = 0xDB9D47,
     },
     new renodx::utils::settings::Setting{
@@ -105,17 +105,6 @@ renodx::utils::settings::Settings settings = {
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "diceShoulderStart",
-        .binding = &shader_injection.diceShoulderStart,
-        .default_value = 0.33f,
-        .label = "DICE Shoulder Start",
-        .section = "Tone Mapping",
-        .tint = 0x1E5787,
-        .max = 0.99f,
-        .format = "%.2f",
-        .is_enabled = []() { return shader_injection.toneMapType == 4.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",

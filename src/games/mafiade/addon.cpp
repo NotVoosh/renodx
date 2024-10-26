@@ -50,7 +50,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Reinhard+"},
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapPeakNits",
@@ -100,7 +100,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -162,7 +162,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 30.f,
+        .default_value = 37.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -330,8 +330,8 @@ void OnPresetOff() {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-extern "C" __declspec(dllexport) const char* NAME = "RenoDX";
-extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for Mafia: Definitive Edition";
+extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
+extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Mafia: Definitive Edition";
 
 // NOLINTEND(readability-identifier-naming)
 

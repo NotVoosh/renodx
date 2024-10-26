@@ -1,6 +1,5 @@
 #include "./shared.h"
 #include "./ColorGradingLUT.hlsl"
-#include "./DICE.hlsl"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen)
 {
@@ -39,7 +38,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			}
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 1.2f;
+			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.15f;
 			config.reno_drt_saturation = 1.7f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
@@ -65,20 +64,16 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			}
 			
-				if (injectedData.toneMapType == 4){									// DICE
+				if (injectedData.toneMapType == 4){									// ReinhardScalable
+			config.contrast += 0.35f;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
-			DICESettings DICEconfig = DefaultDICESettings();
-			DICEconfig.Type = 3;
-        	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
-				float dicePaperWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapGameNits / 80.f, true)
-																		   : injectedData.toneMapGameNits / 80.f;
-				float dicePeakWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / 80.f, true)
-																		  : injectedData.toneMapPeakNits / 80.f;
+				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
+																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 
-			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
+			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak, 0.f, 0.18f, midGray);
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																		injectedData.colorGradeSaturation + 0.f,
+																		injectedData.colorGradeSaturation + 0.08f,
 																		0.f, 0.f);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);

@@ -64,7 +64,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Reinhard+"},
         .tint = 0xAFD8B5,
     },
     new renodx::utils::settings::Setting{
@@ -189,7 +189,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 42.f,
+        .default_value = 37.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
