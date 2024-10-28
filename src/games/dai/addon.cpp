@@ -19,6 +19,7 @@
 #include <embed/0x4A22EBE7.h>     // tonemapper 4
 #include <embed/0x83C78E9A.h>     // tonemapper 5
 #include <embed/0x74DD925C.h>     // tonemapper 6
+#include <embed/0x848FA77D.h>     // tonemapper 7
 
 #include <embed/0xB3B5916C.h>     // tonemapper Cutscene 1
 #include <embed/0x298147DD.h>     // tonemapper Cutscene 2
@@ -45,6 +46,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x4A22EBE7),      // tonemapper 4                                               //
     CustomShaderEntry(0x83C78E9A),      // tonemapper 5                                          Ocularum
     CustomShaderEntry(0x74DD925C),      // tonemapper 6                                             //
+    CustomShaderEntry(0x848FA77D),      // tonemapper 7                                          Archer's flask of lighting
 
     CustomShaderEntry(0xB3B5916C),      // tonemapper Cutscene 1                                 Cutscenes only I think?
     CustomShaderEntry(0x298147DD),      // tonemapper Cutscene 2                                          //
@@ -53,6 +55,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   };
 
 ShaderInjectData shader_injection;
+
+const std::string build_date = __DATE__;
 
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
@@ -294,6 +298,11 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           system("start https://ko-fi.com/hdrden");
         },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "Version: " + build_date,
+        .section = "About",
     },
 };
 

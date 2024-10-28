@@ -7,6 +7,8 @@
 
 #define DEBUG_LEVEL_0
 
+#include <embed/0x8EF2D0AE.h>   // fxaa1
+
 #include <embed/0xA9329B7F.h>   // uberpost
 #include <embed/0x4B92CD8E.h>   // uberpost 2 (dice world)
 #include <embed/0x72D26F35.h>   // uberpost 3
@@ -26,6 +28,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
+  CustomShaderEntry(0x8EF2D0AE),  // fxaa1
+
   CustomShaderEntry(0xA9329B7F),  // uberpost
   CustomShaderEntry(0x4B92CD8E),  // uberpost 2 (dice world)
   CustomShaderEntry(0x72D26F35),  // uberpost 3
@@ -36,6 +40,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 };
 
 ShaderInjectData shader_injection;
+
+const std::string build_date = __DATE__;
 
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
@@ -280,6 +286,11 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           system("start https://ko-fi.com/hdrden");
         },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "Version: " + build_date,
+        .section = "About",
     },
 };
 
