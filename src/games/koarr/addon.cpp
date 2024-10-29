@@ -32,6 +32,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
 ShaderInjectData shader_injection;
 
+const std::string build_date = __DATE__;
+
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapType",
@@ -204,7 +206,8 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0x5865F2,
         .on_change = []() {
-          system("start https://discord.gg/5WZXDpmbpP");
+          static const std::string obfuscated_link = std::string("start https://discord.gg/XUhv") + std::string("tR54yc");
+          system(obfuscated_link.c_str());
         },
     },
     new renodx::utils::settings::Setting{
@@ -235,6 +238,11 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           system("start https://ko-fi.com/hdrden");
         },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "Version: " + build_date,
+        .section = "About",
     },
 };
 
@@ -320,8 +328,8 @@ bool OnDispatch(reshade::api::command_list* cmd_list,
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-extern "C" __declspec(dllexport) const char* NAME = "RenoDX";
-extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for Kingdoms of Amalur: Re-Reckoning";
+extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
+extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Kingdoms of Amalur: Re-Reckoning";
 
 // NOLINTEND(readability-identifier-naming)
 

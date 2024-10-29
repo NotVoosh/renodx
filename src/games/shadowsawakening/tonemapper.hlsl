@@ -44,7 +44,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			renodx::lut::config::type::LINEAR,
 			32.f);
 			
-				if (injectedData.toneMapType == 4.f && any(outputColor > 0)){		// Frostbite
+				if (injectedData.toneMapType == 4.f && any(outputColor != 0)){		// Frostbite
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 		
 				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);

@@ -13,6 +13,7 @@
 #include <embed/0xD6B5AD4A.h>   // uberpost 2
 
 #include <embed/0x51381740.h>   // color filter
+#include <embed/0x8A6BCB4C.h>   // videos
 
 #include <embed/0x20F00CF5.h>   // HDRPfinal
 #include <embed/0xF507A307.h>   // HDRPfinal 2
@@ -37,6 +38,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xD6B5AD4A),  // uberpost 2 (cutscenes ?)
 
     CustomShaderEntry(0x51381740),  // color filter
+    CustomShaderEntry(0x8A6BCB4C),  // videos
 
     CustomShaderEntry(0x20F00CF5),  // HDRPfinal
     CustomShaderEntry(0xF507A307),  // HDRPfinal 2
@@ -46,6 +48,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 };
 
 ShaderInjectData shader_injection;
+
+const std::string build_date = __DATE__;
 
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
@@ -292,7 +296,8 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0x5865F2,
         .on_change = []() {
-          system("start https://discord.gg/5WZXDpmbpP");
+          static const std::string obfuscated_link = std::string("start https://discord.gg/XUhv") + std::string("tR54yc");
+          system(obfuscated_link.c_str());
         },
     },
     new renodx::utils::settings::Setting{
@@ -323,6 +328,11 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           system("start https://ko-fi.com/hdrden");
         },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "Version: " + build_date,
+        .section = "About",
     },
 };
 
@@ -384,6 +394,12 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
           .ignore_size = false,
+      });
+      //  videos
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r8g8b8a8_typeless,
+          .new_format = reshade::api::format::r16g16b16a16_typeless,
+          .dimensions = {1920, 1080},
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);

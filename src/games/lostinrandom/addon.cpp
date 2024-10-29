@@ -255,7 +255,8 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0x5865F2,
         .on_change = []() {
-          system("start https://discord.gg/5WZXDpmbpP");
+          static const std::string obfuscated_link = std::string("start https://discord.gg/XUhv") + std::string("tR54yc");
+          system(obfuscated_link.c_str());
         },
     },
     new renodx::utils::settings::Setting{
