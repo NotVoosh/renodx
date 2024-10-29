@@ -61,6 +61,9 @@
 #include <embed/0x0D1308E2.h>	     // dremwalkr daggr
 #include <embed/0xC1177C5A.h>	     // mystic beast
 #include <embed/0x8BBB8C81.h>	     // jahai tornado
+#include <embed/0x5E04E03C.h>	     // q1 ballz
+#include <embed/0x03210DDC.h>	     // q1 ballz
+#include <embed/0x849571E8.h>	     // q1 ballz
 
 #include <embed/0xA8C3C9D5.h>      // Lut Sample 1
 #include <embed/0x5A098F2B.h>      // Lut Sample 2
@@ -168,6 +171,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x0D1308E2),      // dremwalkr daggr                                            //
     CustomShaderEntry(0xC1177C5A),      // mystic beast                                               //
     CustomShaderEntry(0x8BBB8C81),      // jahai tornado                                              //
+    CustomShaderEntry(0x5E04E03C),      // q1 ballz                                                   //
+    CustomShaderEntry(0x03210DDC),      // q1 ballz                                                   //
+    CustomShaderEntry(0x849571E8),      // q1 ballz                                                   //
 
     CustomShaderEntry(0xA8C3C9D5),      // Color grading LUT sampling 1                         we do tonemapping here
     CustomShaderEntry(0x5A098F2B),      // Color grading LUT sampling 2                                 //
