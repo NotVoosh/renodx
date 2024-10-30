@@ -235,6 +235,17 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxFlashbang",
+        .binding = &shader_injection.fxFlashbang,
+        .default_value = 100.f,
+        .label = "Flash Bang",
+        .section = "Effects",
+        .tooltip = "Reduce bright animation on looting certain items.",
+        .tint = 0x4D7180,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "IF SCREEN TURNS BLACK: please note location and let me know on Discord.",
         .section = "Instructions",
@@ -310,6 +321,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
+  renodx::utils::settings::UpdateSetting("fxFlashbang", 100.f);
 }
 
 auto start = std::chrono::steady_clock::now();
@@ -362,7 +374,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .ignore_size = false,
+          .ignore_size = true,
       });
       
       //  LUT 

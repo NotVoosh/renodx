@@ -239,7 +239,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 50.f,
+        .default_value = 0.f,
         .label = "Noise",
         .section = "Effects",
         .tooltip = "Scales game dithering noise.",
@@ -273,10 +273,9 @@ renodx::utils::settings::Settings settings = {
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
         .default_value = 0,
         .can_reset = false,
-        .label = "Custom Film Grain",
+        .label = "Film Grain Type",
         .section = "Effects",
-        .tooltip = "Replace game original Grain with custom one.",
-        .labels = {"Off", "On"},
+        .labels = {"Original", "Custom"},
         .tint = 0x75906B,
     },
     new renodx::utils::settings::Setting{
@@ -393,13 +392,24 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .ignore_size = false,
+          .ignore_size = true,
       });
-      //  videos
+      //  RG11B10_float
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_typeless,
-          .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .dimensions = {1920, 1080},
+          .old_format = reshade::api::format::r11g11b10_float,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .ignore_size = true,
+          .view_upgrades = {
+          {{reshade::api::resource_usage::shader_resource,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::unordered_access,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          {{reshade::api::resource_usage::render_target,
+          reshade::api::format::r11g11b10_float},
+          reshade::api::format::r16g16b16a16_float},
+          }
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);

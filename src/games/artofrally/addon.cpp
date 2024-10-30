@@ -260,7 +260,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 50.f,
+        .default_value = 0.f,
         .label = "Noise",
         .section = "Effects",
         .tooltip = "Scales game dithering noise.",
@@ -367,7 +367,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .ignore_size = false,
+          .ignore_size = true,
       });
 
       break;

@@ -1,5 +1,5 @@
-#ifndef SRC_WINDBLOWN_SHARED_H_
-#define SRC_WINDBLOWN_SHARED_H_
+#ifndef SRC_PATHFINDERKINGMAKER_SHARED_H_
+#define SRC_PATHFINDERKINGMAKER_SHARED_H_
 
 #ifndef __cplusplus
 #include "../../shaders/renodx.hlsl"
@@ -13,7 +13,6 @@ struct ShaderInjectData {
   float toneMapGameNits;
   float toneMapUINits;
   float toneMapGammaCorrection;
-  float toneMapHueCorrection;
   float colorGradeExposure;
   float colorGradeHighlights;
   float colorGradeShadows;
@@ -22,11 +21,11 @@ struct ShaderInjectData {
   float colorGradeBlowout;
   float colorGradeFlare;
   float colorGradeLUTStrength;
-  float colorGradeLUTExtrapolation;
+  float colorGradeLUTScaling;
   float fxBloom;
   float fxVignette;
   float fxFilmGrain;
-  float fxFlashbang;
+  float fxFilmGrainType;
   float elapsedTime;
 };
 
@@ -36,4 +35,4 @@ cbuffer cb13 : register(b13) {
 }
 #endif
 
-#endif  // SRC_WINDBLOWN_SHARED_H_
+#endif  // SRC_PATHFINDERKINGMAKER_SHARED_H_

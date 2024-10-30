@@ -231,7 +231,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Film Grain",
         .section = "Effects",
-        .tooltip = "Scales Film Grain (original or custom).",
         .tint = 0x011128,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
@@ -242,9 +241,9 @@ renodx::utils::settings::Settings settings = {
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
         .default_value = 0,
         .can_reset = false,
-        .label = "Custom Film Grain",
+        .label = "Film Grain Type",
         .section = "Effects",
-        .tooltip = "Enable custom Film Grain (also replaces game's one when used).",
+        .labels = {"Original", "Custom"},
         .tint = 0xC24608,
     },
     new renodx::utils::settings::Setting{
@@ -358,8 +357,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r11g11b10_float,
           .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 4,
-          .ignore_size = false,
+          .ignore_size = true,
           .view_upgrades = {
           {{reshade::api::resource_usage::shader_resource,
           reshade::api::format::r11g11b10_float},
@@ -372,88 +370,11 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           reshade::api::format::r16g16b16a16_float},
           }
       });
-
-      //  RG10B10_float (UAV stuff)
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 7,
-          .ignore_size = false,
-          .view_upgrades = {
-          {{reshade::api::resource_usage::shader_resource,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::unordered_access,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::render_target,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          }
-      });
-
-      //  RG10B10_float (UAV stuff)
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 9,
-          .ignore_size = false,
-          .view_upgrades = {
-          {{reshade::api::resource_usage::shader_resource,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::unordered_access,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::render_target,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          }
-      });
-
-      //  RG10B10_float (UAV stuff)
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 10,
-          .ignore_size = false,
-          .view_upgrades = {
-          {{reshade::api::resource_usage::shader_resource,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::unordered_access,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::render_target,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          }
-      });
-
-            //  RG10B10_float (UAV stuff)
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 11,
-          .ignore_size = false,
-          .view_upgrades = {
-          {{reshade::api::resource_usage::shader_resource,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::unordered_access,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::render_target,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          }
-      });
-
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .ignore_size = false,
+          .ignore_size = true,
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);
