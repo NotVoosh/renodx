@@ -1,5 +1,4 @@
 #include "./shared.h"
-#include "./DICE.hlsl"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen)
 {
