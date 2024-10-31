@@ -61,14 +61,12 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
 ShaderInjectData shader_injection;
 
-const std::string build_date = __DATE__;
-
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 2.f,
+        .default_value = 3.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
@@ -320,8 +318,9 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Version: " + build_date,
+        .label = "Version: " + std::string(IsoDate),
         .section = "About",
+        .tooltip = std::string(__DATE__),
     },
 };
 
