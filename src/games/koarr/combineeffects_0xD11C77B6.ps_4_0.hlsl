@@ -51,7 +51,6 @@ void main(
     r0.xyz = r1.xyz * r0.www + r0.xyz;
     
         float3 preLUT = r0.rgb;
-    r0.rgb = float3(0.18f,0.18f,0.18f);
   r0.xyz = saturate(r0.xyz * g_constants.rawUVadjust.xyy + g_constants.rawUVadjust.zww);
   r0.zw = r0.zz * g_constants.transitionAmounts.zz + float2(-0.5,0.5);
   r1.xy = floor(r0.zw);
@@ -63,8 +62,7 @@ void main(
   r1.xyzw = g_correctionSampler_texture.Sample(g_correctionSampler_sampler_s, r1.xy).xyzw;
   r0.xyw = r2.xyz + -r1.xyz;
   r0.xyz = r0.zzz * r0.xyw + r1.xyz;
-    float vanillaGray = renodx::color::y::from::BT709(r0.rgb);
-    r0.rgb = applyUserTonemap(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s, vanillaGray, v1.xy);
+    r0.rgb = applyUserTonemap(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s, v1.xy);
     
   o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
   o0.xyz = r0.xyz;    

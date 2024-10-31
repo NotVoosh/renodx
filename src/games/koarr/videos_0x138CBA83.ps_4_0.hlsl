@@ -33,10 +33,10 @@ void main(
   r0.xyz = float3(-0.87065506,0.529705048,-1.08166885) + r0.xyz;
   //r0.xyz = saturate(v2.xyz * r0.xyz);
     r0.xyz = v2.xyz * r0.xyz;
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = v1.zzz * r0.xyz;		// game brightness
-  o0.xyz = exp2(r0.xyz);
-    //o0.xyz = r0.xyz;
+  //r0.xyz = log2(r0.xyz);
+  //r0.xyz = v1.zzz * r0.xyz;		// game brightness
+  //o0.xyz = exp2(r0.xyz);
+    o0.xyz = r0.xyz;
   o0.w = v2.w;
     
 	o0 = saturate(o0);
