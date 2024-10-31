@@ -13,6 +13,7 @@
 
 #include <embed/0xD00B5B47.h>   // fxaa (post final)
 
+#include <embed/0xD63FB4E2.h>   // UI fast additive
 #include <embed/0x20133A8B.h>   // final
 
 #include <deps/imgui/imgui.h>
@@ -32,6 +33,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
   CustomShaderEntry(0xD00B5B47),  // fxaa (post final)
 
+  CustomShaderEntry(0xD63FB4E2),  // UI fast additive
   CustomSwapchainShader(0x20133A8B),  // Final
 };
 
