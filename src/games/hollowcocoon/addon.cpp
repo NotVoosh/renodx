@@ -13,7 +13,7 @@
 #include <embed/0xD6B5AD4A.h>   // uberpost 2
 
 #include <embed/0x51381740.h>   // color filter
-#include <embed/0x8A6BCB4C.h>   // videos
+#include <embed/0x54DC7E29.h>   // color filter 2
 
 #include <embed/0x20F00CF5.h>   // HDRPfinal
 #include <embed/0xF507A307.h>   // HDRPfinal 2
@@ -35,10 +35,10 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x6811A33B),  // LUTBuilder3D ACES
 
     CustomShaderEntry(0xFDF96092),  // uberpost
-    CustomShaderEntry(0xD6B5AD4A),  // uberpost 2 (cutscenes ?)
+    CustomShaderEntry(0xD6B5AD4A),  // uberpost 2
 
     CustomShaderEntry(0x51381740),  // color filter
-    CustomShaderEntry(0x8A6BCB4C),  // videos
+    CustomShaderEntry(0x54DC7E29),  // color filter 2
 
     CustomShaderEntry(0x20F00CF5),  // HDRPfinal
     CustomShaderEntry(0xF507A307),  // HDRPfinal 2
@@ -215,6 +215,17 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "colorGradeLUTLift",
+        .binding = &shader_injection.colorGradeLUTLift,
+        .default_value = 50.f,
+        .label = "LUT Lifting",
+        .section = "Color Grading",
+        .tooltip = "Reduces the shadows lifting done by LUT.",
+        .tint = 0x054135,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxBloom",
         .binding = &shader_injection.fxBloom,
         .default_value = 50.f,
@@ -350,6 +361,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
+  renodx::utils::settings::UpdateSetting("colorGradeLUTLift", 100.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxNoise", 50.f);
@@ -385,7 +397,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = true;
-      renodx::mods::swapchain::prevent_full_screen = false;
+      renodx::mods::swapchain::prevent_full_screen = true;
 
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({

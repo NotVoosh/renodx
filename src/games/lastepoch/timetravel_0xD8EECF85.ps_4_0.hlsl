@@ -135,7 +135,6 @@ void main(
   r1.x = 1 + -r1.x;
   r1.x = saturate(r1.x + r1.x);
   o0.xyzw = r1.xxxx * r0.xyzw;
-    
       if(injectedData.toneMapGammaCorrection == 1.f){
     o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
 	  o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;

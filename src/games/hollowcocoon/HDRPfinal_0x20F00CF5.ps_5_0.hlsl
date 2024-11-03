@@ -50,7 +50,8 @@ void main(
   r0.xyzw = t0.Load(r0.xyzw).xyzw;
   //r0.xyzw = saturate(r0.xyzw);
   r1.x = dot(r0.xyz, float3(0.212672904,0.715152204,0.0721750036));
-  r1.x = sqrt(r1.x);
+  //r1.x = sqrt(r1.x);
+    r1.r = sign(r1.r) * sqrt(abs(r1.r));
   r1.x = cb0[0].y * -r1.x + 1;
   r1.yz = v1.xy * cb0[3].xy + cb0[3].zw;
   r2.xy = r1.yz * cb0[1].xy + cb0[1].zw;

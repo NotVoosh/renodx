@@ -100,7 +100,8 @@ void main(
   r1.xyz = r1.xyz * r0.xyz;
   r1.xyz = cb0[11].yyy * r1.xyz;
   r0.w = dot(r0.xyz, float3(0.212599993,0.715200007,0.0722000003));
-  r0.w = sqrt(r0.w);
+  //r0.w = sqrt(r0.w);
+    r0.a = sign(r0.a) * sqrt(abs(r0.a));
   r0.w = cb0[11].x * -r0.w + 1;
   r0.xyz = injectedData.fxFilmGrainType ? applyFilmGrain(r0.rgb, w1.xy) : r1.xyz * r0.www * injectedData.fxFilmGrain + r0.xyz;
   //r0.xyz = max(float3(0,0,0), r0.xyz);

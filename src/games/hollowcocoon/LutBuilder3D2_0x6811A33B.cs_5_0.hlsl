@@ -166,7 +166,7 @@ cbuffer cb0 : register(b0)
     r2.xyz = cb0[13].xyz * r2.xyz;
     r1.xyz = r2.xyz * r0.www + r1.xyz;
     // Lift, gamma, gain
-    r1.xyz = r1.xyz * cb0[10].xyz + cb0[8].xyz;
+    r1.xyz = r1.xyz * cb0[10].xyz + cb0[8].xyz * injectedData.colorGradeLUTLift;
     r2.xyz = cmp(float3(0,0,0) < r1.xyz);
     r3.xyz = cmp(r1.xyz < float3(0,0,0));
     r2.xyz = (int3)-r2.xyz + (int3)r3.xyz;

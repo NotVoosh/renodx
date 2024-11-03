@@ -54,7 +54,8 @@ void main(
   r1.xyz = r0.xyw * r0.zzz;
   r1.xyz = cb0[0].xxx * r1.xyz;
   r0.z = dot(r0.xyw, float3(0.212672904,0.715152204,0.0721750036));
-  r0.z = sqrt(r0.z);
+  //r0.z = sqrt(r0.z);
+    r0.b = sign(r0.b) * sqrt(abs(r0.b));
   r0.z = cb0[0].y * -r0.z + 1;
   r0.xyz = injectedData.fxFilmGrainType ? applyFilmGrain(r0.xyw, v1) : r1.xyz * r0.zzz * injectedData.fxFilmGrain + r0.xyw;        // vanilla grain
   r2.z = 0;

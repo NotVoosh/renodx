@@ -1,5 +1,3 @@
-// Custom tonemapper, where the wild things are
-
 #include "./shared.h"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen)
@@ -32,7 +30,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.mid_gray_value = midGray;
-			config.mid_gray_nits = midGray * 100;
+			config.mid_gray_nits = midGray;
 			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.15f;
 			config.reno_drt_saturation = 1.5f;

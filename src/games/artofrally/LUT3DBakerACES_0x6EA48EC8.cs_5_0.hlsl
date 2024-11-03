@@ -237,7 +237,7 @@ cbuffer cb0 : register(b0)
       r1.g = dot(r0.rgb, cb0[5].rgb);
       r1.b = dot(r0.rgb, cb0[6].rgb);
       // LiftGammaGainHDR(r1.rgb, cb0[7].rgb, cb0[8].rgb, cb0[9].rgb)
-      r0.rgb = r1.rgb * cb0[9].rgb + cb0[7].rgb;
+      r0.rgb = r1.rgb * cb0[9].rgb + cb0[7].rgb * injectedData.colorGradeLUTLift;
       r1.rgb = saturate(r1.rgb * renodx::math::FLT_MAX + 0.5) * 2.0 - 1.0;
       r0.rgb = pow(abs(r0.rgb), cb0[8].rgb);
       r0.rgb = r0.rgb * r1.rgb;

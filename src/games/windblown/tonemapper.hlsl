@@ -33,7 +33,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
-				if(injectedData.toneMapType <= 3){			// later for DICE
+				if(injectedData.toneMapType <= 3){			// later for Reinhard
 			config.saturation = injectedData.colorGradeSaturation;
 			}
 			config.mid_gray_value = midGray;
@@ -47,7 +47,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			renodx::lut::Config lut_config1 = renodx::lut::config::Create(
 			lutSampler,
 			injectedData.colorGradeLUTStrength,
-			1.f,
+			injectedData.colorGradeLUTScaling,
 			renodx::lut::config::type::LINEAR,
 			renodx::lut::config::type::LINEAR,
 			preCompute);
@@ -64,7 +64,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection);
 			}
 			
-				if (injectedData.toneMapType == 4){									// ReinhardScalable
+				if (injectedData.toneMapType == 4.f){									// ReinhardScalable
 			config.contrast += 0.4f;
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)

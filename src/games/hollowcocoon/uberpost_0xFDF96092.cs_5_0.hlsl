@@ -206,7 +206,7 @@ cbuffer cb0 : register(b0)
     r1.xyz = t4.SampleLevel(s2_s, r0.xyz, 0).xyz;
         r1.rgb = applyUserTonemap(untonemapped, t4, s2_s);
   }
-  r0.x = saturate(r3.w * cb1[13].x + cb1[13].y);
+  r0.x = saturate(r3.w * cb1[13].x + cb1[13].y);    // alpha mask
   r0.yzw = r1.xyz + -r3.xyz;
   r3.xyz = r0.xxx * r0.yzw + r3.xyz;
 // No code for instruction (needs manual fix):

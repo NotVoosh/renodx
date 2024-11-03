@@ -36,7 +36,7 @@
 
 #include <embed/0x67B5C47D.h>   // worldmap
 #include <embed/0xD8EECF85.h>   // time travel
-#include <embed/0x8A6BCB4C.h>   // pre-rendered cutscenes
+//#include <embed/0x8A6BCB4C.h>   // pre-rendered cutscenes
 #include <embed/0x20133A8B.h>   // Final
 
 #include <deps/imgui/imgui.h>
@@ -79,7 +79,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0x67B5C47D),  // worldmap
     CustomShaderEntry(0xD8EECF85),  // time travel
-    CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
+    //CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
     CustomSwapchainShader(0x20133A8B),  // Final
 };
 
@@ -305,8 +305,8 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Cutscenes are clamped to UI brightness, turn it up when they play. TAA can reduce Peak.",
-        .section = "Instructions",
+        .label = "TAA can lower Peak Brightness.",
+        .section = "Note",
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,

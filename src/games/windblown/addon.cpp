@@ -194,6 +194,17 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "colorGradeLUTScaling",
+        .binding = &shader_injection.colorGradeLUTScaling,
+        .default_value = 100.f,
+        .label = "LUT Scaling",
+        .section = "Color Grading",
+        .tooltip = "Scales the color grade LUT to full range when size is clamped.",
+        .tint = 0x4D7180,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "colorGradeLUTExtrapolation",
         .binding = &shader_injection.colorGradeLUTExtrapolation,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
@@ -244,11 +255,6 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x4D7180,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
-        .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "IF SCREEN TURNS BLACK: please note location and let me know on Discord.",
-        .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
