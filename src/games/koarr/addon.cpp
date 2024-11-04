@@ -13,6 +13,7 @@
 #include <embed/0x138CBA83.h>   // videos
 
 #include <embed/0xD11C77B6.h>   // combineeffects
+#include <embed/0x70CEAF26.h>   // combineeffects 2
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -28,6 +29,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x138CBA83),  // pre-rendered stuff
 
     CustomShaderEntry(0xD11C77B6),  // combineeffects (color grading, dof, bloom)
+    CustomShaderEntry(0x70CEAF26),  // combineeffects 2 (color grading)
 };
 
 ShaderInjectData shader_injection;
@@ -205,6 +207,69 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x0D1D34,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Vibrant Filmic",
+        .section = "Presets",
+        .group = "presets",
+        .tooltip = "Powered by RenoDRT",
+        .tint = 0x38F6FC,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 65.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 35.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+          renodx::utils::settings::UpdateSetting("fxBloom", 33.f);
+          renodx::utils::settings::UpdateSetting("fxFilmGrain", 33.f);
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Enhanced Vanilla",
+        .section = "Presets",
+        .group = "presets",
+        .tooltip = "Powered by Frostbite",
+        .tint = 0x38F6FC,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapType", 4.f);
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 70.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+          renodx::utils::settings::UpdateSetting("fxBloom", 33.f);
+          renodx::utils::settings::UpdateSetting("fxFilmGrain", 33.f);
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Reset",
+        .section = "Presets",
+        .group = "presets",
+        .tooltip = "Reverts to default settings.",
+        .tint = 0x0D1D34,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 27.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+          renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
+          renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
+        },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
@@ -509,7 +574,12 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .new_format = reshade::api::format::r16g16b16a16_float,
           .aspect_ratio = screen_width / screen_height,
       });
-      
+      // LUT
+      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
+          .old_format = reshade::api::format::r8g8b8a8_unorm,
+          .new_format = reshade::api::format::r16g16b16a16_float,
+          .dimensions = {256,16},
+      });
       break;
     case DLL_PROCESS_DETACH:
       // Final shader copy pasta start
