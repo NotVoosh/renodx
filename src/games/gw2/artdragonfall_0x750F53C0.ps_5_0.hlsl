@@ -35,6 +35,6 @@ void main(
   r0.yzw = saturate(cb0[1].xyz * r1.xyz + r0.yzw);
   o0.xyz = r0.yzw * r0.xxx;
   o0.w = r0.x;
-		o0.rgb = max(0, o0.rgb);
+		o0 = saturate(o0);
   return;
 }

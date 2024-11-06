@@ -12,6 +12,15 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
+float3 applyVignette(float3 color, float2 xy, float intensity){
+	xy = xy - 0.5f;
+	float v = dot(xy, xy);
+	v = saturate(1-v);
+	v = pow(v, intensity);
+	color *= v.xxx;
+	return color;
+}
+
 float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler, float2 screenXY){
 		
 		float3 outputColor = untonemapped;
@@ -77,10 +86,12 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
 			
+				if (injectedData.fxVignette > 0.f){
+			outputColor = applyVignette(outputColor, screenXY, injectedData.fxVignette);
+			}
 				if (injectedData.fxFilmGrain > 0.f) {
 			outputColor = applyFilmGrain(outputColor, screenXY);
 			}
-			
 				if(injectedData.toneMapGammaCorrection == 1.f){
 			outputColor = renodx::color::correct::GammaSafe(outputColor);
 			outputColor *= injectedData.toneMapGameNits / injectedData.toneMapUINits;

@@ -210,6 +210,16 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxVignette",
+        .binding = &shader_injection.fxVignette,
+        .default_value = 0.f,
+        .label = "Vignette",
+        .section = "Effects",
+        .tint = 0x0D1D34,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
         .binding = &shader_injection.fxFilmGrain,
         .default_value = 0.f,
@@ -250,8 +260,8 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 70.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 27.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
@@ -346,6 +356,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
+  renodx::utils::settings::UpdateSetting("fxVignette", 0.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
 }
 
