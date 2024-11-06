@@ -229,7 +229,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "DICE"},
+        .labels = {"Vanilla", "None", "Frostbite", "RenoDRT", "DICE"},
         .tint = 0x69278A,
     },
     new renodx::utils::settings::Setting{
@@ -296,7 +296,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tint = 0x87581D,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 3; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -363,13 +363,13 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 50.f,
+        .default_value = 0.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x186885,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -381,7 +381,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Embrace the darkness... (Gently.)",
         .tint = 0x3A5953,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType == 3.f; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -412,7 +412,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "Color Tint",
         .section = "Color Grading",
-        .tooltip = "Scales game's original Color Tint.",
         .tint = 0x67A833,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -423,7 +422,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "Bloom",
         .section = "Effects",
-        .tooltip = "Scales game's original Bloom.",
         .tint = 0x67A833,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -434,7 +432,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "Light Adaptation",
         .section = "Effects",
-        .tooltip = "Scales game's original Light Adaptation.",
         .tint = 0x67A833,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -445,7 +442,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Depth Blur",
         .section = "Effects",
-        .tooltip = "Scales game's original Depth Blur.",
         .tint = 0x67A833,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
@@ -454,9 +450,8 @@ renodx::utils::settings::Settings settings = {
         .key = "fxVignette",
         .binding = &shader_injection.fxVignette,
         .default_value = 50.f,
-        .label = "Vignette (underwater)",
+        .label = "Vignette (Underwater)",
         .section = "Effects",
-        .tooltip = "Scales game's original Vignette.",
         .tint = 0x67A833,
         .max = 100.f,
         .parse = [](float value) { return -value * 0.02f + 2; },
@@ -467,7 +462,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "Fog transparency",
         .section = "Effects",
-        .tooltip = "Scales game's fog transparency.",
         .tint = 0x67A833,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -478,10 +472,67 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Film Grain",
         .section = "Effects",
-        .tooltip = "Scales custom Film Grain.",
         .tint = 0x2C9D5D,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Vibrant Filmic",
+        .section = "Color Grading Templates",
+        .group = "templates",
+        .tooltip = "Powered by RenoDRT",
+        .tint = 0x186885,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 55.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 75.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Enhanced Vanilla",
+        .section = "Color Grading Templates",
+        .group = "templates",
+        .tooltip = "Can be used with any Tone Mapper",
+        .tint = 0x186885,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 70.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 27.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+        },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Reset",
+        .section = "Color Grading Templates",
+        .group = "templates",
+        .tooltip = "Reverts to default Color Grading.",
+        .tint = 0x2C9D5D,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 27.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+        },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,

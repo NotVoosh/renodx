@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./DICE.hlsl"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen)
 {
@@ -13,12 +14,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 
 float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler, float3 preCompute){
 		
-		float3 outputColor;
-			if(injectedData.toneMapType == 0.f){
-		outputColor = saturate(untonemapped);
-			} else {
-		outputColor = max(0, untonemapped);
-			}
+		float3 outputColor = untonemapped;
 
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -30,11 +26,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
-				if(injectedData.toneMapType <= 3.f){
 			config.saturation = injectedData.colorGradeSaturation;
-			}
-			config.mid_gray_value = 0.18f;
-			config.mid_gray_nits = 18.f;
+			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 	
@@ -46,23 +39,36 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			renodx::lut::config::type::LINEAR,
 			preCompute);
 			
-				if (injectedData.toneMapType == 4.f && any(outputColor != 0)){	// ReinhardScalable
-			outputColor = renodx::tonemap::config::Apply(outputColor, config);
-		
-				float3 sdrColor = renodx::tonemap::ReinhardScalable(outputColor, 1.f);
-				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
+				if (injectedData.toneMapType == 2.f && any(outputColor != 0)){		// Frostbite
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
+				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
+				float frostbitePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			
-			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak);
-		
+			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
+			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
 				float3 lutColor = min(1.f, renodx::lut::Sample(lutTexture, lut_config, outputColor));
-			
-			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f,
-																injectedData.colorGradeSaturation,
-																0.f, 0.f);
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
+
+				} else if (injectedData.toneMapType == 4.f) {		// DICE
+			DICESettings DICEconfig = DefaultDICESettings();
+			DICEconfig.Type = 3;
+			DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
+				float dicePaperWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapGameNits / 80.f, true)
+																		   : injectedData.toneMapGameNits / 80.f;
+				float dicePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / 80.f, true)
+																		  : injectedData.toneMapPeakNits / 80.f;
+				float3 sdrColor = DICETonemap(outputColor * dicePaperWhite, dicePaperWhite, DICEconfig) / dicePaperWhite;
+			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeak, DICEconfig) / dicePaperWhite;
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
+			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
+				float3 lutColor = min(1.f, renodx::lut::Sample(lutTexture, lut_config, outputColor));
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
+
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
+
 	return outputColor;
 }

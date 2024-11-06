@@ -185,7 +185,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x3A5953,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -197,7 +197,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Embrace the darkness... (Gently.)",
         .tint = 0x3A5953,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType == 3.f; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -206,7 +206,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "LUT Strength",
         .section = "Color Grading",
-        .tooltip = "Scales game original color grading LUT.",
         .tint = 0x3A5953,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -248,7 +247,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Film Grain",
         .section = "Effects",
-        .tooltip = "Scales custom Film Grain.",
         .tint = 0xDF7211,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
@@ -601,7 +599,6 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = true;
       renodx::mods::swapchain::use_resource_cloning = true;
-      //renodx::mods::shader::trace_unmodified_shaders = true;
       
       //  final shader copy pasta start
       reshade::register_event<reshade::addon_event::init_device>(OnInitDevice);
@@ -624,7 +621,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       reshade::register_event<reshade::addon_event::draw_indexed>(OnDrawIndexed);
       reshade::register_event<reshade::addon_event::draw_or_dispatch_indirect>(OnDrawOrDispatchIndirect);
       reshade::register_event<reshade::addon_event::dispatch>(OnDispatch);
-      
+
       break;
     case DLL_PROCESS_DETACH:
       // Final shader copy pasta start
