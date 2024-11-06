@@ -42,7 +42,7 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_highlights = 1.1f;
+			config.reno_drt_highlights = 1.2f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
@@ -92,7 +92,6 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
-			
 		//		if (injectedData.fxVignette > 0.f){
 		//	outputColor = applyVignette(outputColor, screenXY, injectedData.fxVignette);
 		//	}
@@ -130,7 +129,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_highlights = 1.1f;
+			config.reno_drt_highlights = 1.2f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;

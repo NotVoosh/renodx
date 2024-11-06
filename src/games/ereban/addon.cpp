@@ -285,7 +285,7 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
