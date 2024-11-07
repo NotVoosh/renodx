@@ -285,12 +285,12 @@ void main(
   r0.x = r1.z * cb0[128].z + -r0.x;
   r0.yzw = r2.xyz + -r3.xyz;
   o0.xyz = r0.xxx * r0.yzw + r3.xyz;
+  o0.w = 1;
         if(injectedData.toneMapType != 0.f){
       o0.rgb = applyUserTonemap(untonemapped, t2, t3, s0_s, cb0[129].a, cb0[128].rgb);
       }
         if(injectedData.fxFilmGrain > 0.f){
     o0.rgb = applyFilmGrain(o0.rgb, v1);
       }
-  o0.w = 1;
   return;
 }

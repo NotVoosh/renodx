@@ -30,21 +30,33 @@ void main(
   uint4 bitmask, uiDest;
   float4 fDest;
 
-  r0.xyzw = t0.SampleBias(s0_s, v1.xy, cb0[19].x).xyzw;
+  r0.xyzw = v1.xyxy * float4(2,2,2,2) + float4(-1,-1,-1,-1);
+  r1.x = dot(r0.zw, r0.zw);
+  r0.xyzw = r1.xxxx * r0.xyzw;
+  r0.xyzw = cb0[136].xxxx * r0.xyzw;
+  r1.xyzw = t0.SampleBias(s0_s, v1.xy, cb0[19].x).xyzw;
+  r0.xyzw = r0.xyzw * float4(-0.333333343,-0.333333343,-0.666666687,-0.666666687) + v1.xyxy;
+  r2.xyzw = t0.SampleBias(s0_s, r0.xy, cb0[19].x).xyzw;
+  r0.xyzw = t0.SampleBias(s0_s, r0.zw, cb0[19].x).xyzw;
   r0.w = cmp(0 < cb0[138].z);
   if (r0.w != 0) {
-    r1.xy = -cb0[138].xy + v1.xy;
-    r1.yz = cb0[138].zz * abs(r1.xy) * injectedData.fxVignette;
-    r1.x = cb0[137].w * r1.y;
-    r0.w = dot(r1.xz, r1.xz);
+    r1.yz = -cb0[138].xy + v1.xy;
+    r3.yz = cb0[138].zz * abs(r1.yz) * injectedData.fxVignette;
+    r3.x = cb0[137].w * r3.y;
+    r0.w = dot(r3.xz, r3.xz);
     r0.w = 1 + -r0.w;
     r0.w = max(0, r0.w);
     r0.w = log2(r0.w);
     r0.w = cb0[138].w * r0.w;
     r0.w = exp2(r0.w);
-    r1.xyz = float3(1,1,1) + -cb0[137].xyz;
-    r1.xyz = r0.www * r1.xyz + cb0[137].xyz;
-    r0.xyz = r1.xyz * r0.xyz;
+    r1.yzw = float3(1,1,1) + -cb0[137].xyz;
+    r1.yzw = r0.www * r1.yzw + cb0[137].xyz;
+    r0.x = r1.x;
+    r0.y = r2.y;
+    r0.xyz = r0.xyz * r1.yzw;
+  } else {
+    r0.x = r1.x;
+    r0.y = r2.y;
   }
   r0.xyz = cb0[128].www * r0.xyz;
       float3 untonemapped;
@@ -245,7 +257,7 @@ void main(
       o0.rgb = applyUserTonemap(untonemapped, t1, t2, s0_s, cb0[129].a, cb0[128].rgb);
       }
         if(injectedData.fxFilmGrain > 0.f){
-      o0.rgb = applyFilmGrain(o0.rgb, v1);
+    o0.rgb = applyFilmGrain(o0.rgb, v1);
       }
   return;
 }

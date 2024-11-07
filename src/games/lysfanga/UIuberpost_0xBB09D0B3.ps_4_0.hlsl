@@ -39,7 +39,7 @@ void main(
     r2.xyz = r1.xyz * r1.www;
     r1.xyz = float3(8,8,8) * r2.xyz;
   }
-  r1.xyz = cb0[130].xxx * r1.xyz;
+  r1.xyz = cb0[130].xxx * r1.xyz * injectedData.fxBlooom;
   r0.xyz = r1.xyz * cb0[130].yzw + r0.xyz;
   r0.w = cmp(0 < cb0[138].z);
   if (r0.w != 0) {
@@ -105,7 +105,9 @@ void main(
   r0.x = r0.z * cb0[128].z + -r0.w;
   r0.yzw = r1.xyz + -r2.xyz;
   o0.xyz = r0.xxx * r0.yzw + r2.xyz;
+        if(injectedData.toneMapType != 0.f){
       o0.rgb = applyLUT(preLUT, t2, t3, s0_s, cb0[129].a, cb0[128].rgb);
+      }
   o0.w = 1;
   return;
 }

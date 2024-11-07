@@ -113,7 +113,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 1.f,
         .label = "Exposure",
         .section = "Color Grading",
-        .tint = 0x51283B,
+        .tint = 0x896895,
         .max = 10.f,
         .format = "%.2f",
     },
@@ -123,7 +123,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Highlights",
         .section = "Color Grading",
-        .tint = 0x745362,
+        .tint = 0x896895,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -133,7 +133,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Shadows",
         .section = "Color Grading",
-        .tint = 0x201018,
+        .tint = 0x896895,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -143,7 +143,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Contrast",
         .section = "Color Grading",
-        .tint = 0x51283B,
+        .tint = 0x896895,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -153,7 +153,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Saturation",
         .section = "Color Grading",
-        .tint = 0x51283B,
+        .tint = 0x896895,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -164,7 +164,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
-        .tint = 0x4D7180,
+        .tint = 0x896895,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
@@ -176,7 +176,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
-        .tint = 0x4D7180,
+        .tint = 0x896895,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType == 3.f; },
         .parse = [](float value) { return value * 0.02f; },
@@ -187,7 +187,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "LUT Strength",
         .section = "Color Grading",
-        .tint = 0x4D7180,
+        .tint = 0x896895,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
@@ -198,7 +198,7 @@ renodx::utils::settings::Settings settings = {
         .label = "LUT Scaling",
         .section = "Color Grading",
         .tooltip = "Scales the color grade LUT to full range when size is clamped.",
-        .tint = 0x4D7180,
+        .tint = 0x896895,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
@@ -208,7 +208,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom",
         .section = "Effects",
-        .tint = 0x2A4B84,
+        .tint = 0x452f7A,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -218,7 +218,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
-        .tint = 0x2A4B84,
+        .tint = 0x452f7A,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -228,13 +228,24 @@ renodx::utils::settings::Settings settings = {
         .default_value = 0.f,
         .label = "Film Grain",
         .section = "Effects",
-        .tint = 0x1C1C3C,
+        .tint = 0x452f7A,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "fxBlooom",
+        .binding = &shader_injection.fxBlooom,
+        .default_value = 50.f,
+        .label = "Bloom 2",
+        .section = "Effects",
+        .tooltip = "This 2nd bloom applies on top of everything including UI...",
+        .tint = 0x452f7A,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Post-Processing and at least one sub-item (Vignette, Bloom) should be enabled in game Video settings.",
+        .label = "Enable Post-Processing in game Video settings. Rest (including Bloom & Vignette) is up to preference.",
         .section = "Instructions",
     },
     new renodx::utils::settings::Setting{
@@ -309,6 +320,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
+  renodx::utils::settings::UpdateSetting("fxBloom2", 50.f);
 }
 
 auto start = std::chrono::steady_clock::now();
@@ -361,14 +373,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .ignore_size = true,
-      });
-      
-      //  LUT 
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_typeless,
-          .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .dimensions = {1024, 32},
+          .ignore_size = false,
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);
