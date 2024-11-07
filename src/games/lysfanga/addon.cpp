@@ -9,9 +9,11 @@
 
 #include <embed/0xE651D798.h>   // uberpost
 #include <embed/0x2C36979C.h>   // uberpost 2
+#include <embed/0x9A27FDCD.h>   // uberpost 3
+#include <embed/0x9D2A9AD7.h>   // uberpost 4
 
-#include <embed/0x5FDD841D.h>   // (2nd) bloom
-#include <embed/0xBB09D0B3.h>   // UI uberpost (LUT/bloom)
+#include <embed/0x5FDD841D.h>   // blooom
+#include <embed/0xBB09D0B3.h>   // UI uberpost (LUT/blooom)
 
 #include <embed/0x20133A8B.h>   // final
 
@@ -28,9 +30,11 @@ namespace {
 renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xE651D798),  // uberpost (tonemap)
   CustomShaderEntry(0x2C36979C),  // uberpost (tonemap) 2
+  CustomShaderEntry(0x9A27FDCD),  // uberpost (tonemap) 3
+  CustomShaderEntry(0x9D2A9AD7),  // uberpost (tonemap) 4
 
-  CustomShaderEntry(0x5FDD841D),  // bloom
-  CustomShaderEntry(0xBB09D0B3),  // uberpost (LUT/bloom)
+  CustomShaderEntry(0x5FDD841D),  // blooom
+  CustomShaderEntry(0xBB09D0B3),  // uberpost (LUT/blooom)
 
   CustomSwapchainShader(0x20133A8B),  // Final
 };

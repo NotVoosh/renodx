@@ -57,8 +57,8 @@ void main(
     r0.xyz = r1.xyz * r0.xyz;
   }
   //r0.xyz = saturate(cb0[128].www * r0.xyz);
-    r0.rgb = cb0[128].www * r0.rgb;
-      float3 preLUT = r0.rgb;
+      float3 preLUT = cb0[128].www * r0.rgb;
+    r0.rgb = saturate(preLUT);
   r0.w = cmp(0 < cb0[129].w);
   if (r0.w != 0) {
     r1.xyz = float3(12.9200001,12.9200001,12.9200001) * r0.xyz;
