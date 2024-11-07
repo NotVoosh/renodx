@@ -47,8 +47,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::tonemap::ReinhardScalable(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits, 0.f, 0.18f, renodx::color::y::from::BT709(vanillaGray));
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
 			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
-			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
-			sdrColor = renodx::color::bt709::clamp::AP1(sdrColor);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 			

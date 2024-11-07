@@ -65,8 +65,6 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
 			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
-			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
-			sdrColor = renodx::color::bt709::clamp::AP1(sdrColor);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 
@@ -84,8 +82,6 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
 			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
-			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
-			sdrColor = renodx::color::bt709::clamp::AP1(sdrColor);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 
@@ -142,7 +138,6 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
-			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
 			
 			} else if (injectedData.toneMapType == 4.f){			// DICE
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
@@ -156,7 +151,7 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 
 			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
-			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
+
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}

@@ -62,7 +62,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 				float3 sdrColor = DICETonemap(outputColor * dicePaperWhite, dicePaperWhite, DICEconfig) / dicePaperWhite;
 			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeak, DICEconfig) / dicePaperWhite;
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
-			outputColor = renodx::color::bt709::clamp::AP1(outputColor);
 				float3 lutColor = min(1.f, renodx::lut::Sample(lutTexture, lut_config, outputColor));
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 
