@@ -105,7 +105,9 @@ void main(
   r0.x = r0.z * cb0[128].z + -r0.w;
   r0.yzw = r1.xyz + -r2.xyz;
   o0.xyz = r0.xxx * r0.yzw + r2.xyz;
-        if(injectedData.toneMapType != 0.f){
+        if(injectedData.toneMapType == 1.f){
+      o0.rgb = preLUT;
+      } else if(injectedData.toneMapType >= 2.f){
       o0.rgb = applyLUT(preLUT, t2, t3, s0_s, cb0[129].a, cb0[128].rgb);
       }
   o0.w = 1;
