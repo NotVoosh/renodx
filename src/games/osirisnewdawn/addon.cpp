@@ -7,6 +7,8 @@
 
 #define DEBUG_LEVEL_0
 
+#include <embed/0x47A1239F.h>   // LUT3DBaker
+
 #include <embed/0x808BC2A2.h>   // uberpost
 #include <embed/0x71A4E35E.h>   // uberpost (character menu)
 #include <embed/0x1BF2161B.h>   // uberpost2 (bloom OFF)
@@ -30,6 +32,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
+  CustomShaderEntry(0x47A1239F),  // LUT3DBaker
+
   CustomShaderEntry(0x808BC2A2),  // uberpost (fantastic)
   CustomShaderEntry(0x71A4E35E),  // uberpost (character menu)
   CustomShaderEntry(0x1BF2161B),  // uberpost2 (bloom OFF)
@@ -50,12 +54,13 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 3.f,
+        .default_value = 2.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
         .tooltip = "Sets the tone mapper type",
-        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Frostbite"},
+        .labels = {"Vanilla", "None", "ACES", "RenoDRT", "Reinhard+"},
+        .tint = 0xAD5729,
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapPeakNits",
@@ -65,6 +70,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Peak Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the value of peak white in nits",
+        .tint = 0xB88151,
         .min = 48.f,
         .max = 4000.f,
     },
@@ -75,6 +81,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Game Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the value of 100% white in nits",
+        .tint = 0xB88151,
         .min = 48.f,
         .max = 500.f,
     },
@@ -85,6 +92,7 @@ renodx::utils::settings::Settings settings = {
         .label = "UI Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the brightness of UI and HUD elements in nits",
+        .tint = 0xB88151,
         .min = 48.f,
         .max = 500.f,
     },
@@ -97,6 +105,18 @@ renodx::utils::settings::Settings settings = {
         .label = "Gamma Correction",
         .section = "Tone Mapping",
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
+        .tint = 0xB88151,
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 60.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .tint = 0xB88151,
+        .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
+        .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -104,6 +124,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 1.f,
         .label = "Exposure",
         .section = "Color Grading",
+        .tint = 0xC57D51,
         .max = 10.f,
         .format = "%.2f",
     },
@@ -113,6 +134,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Highlights",
         .section = "Color Grading",
+        .tint = 0xC57D51,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -122,6 +144,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Shadows",
         .section = "Color Grading",
+        .tint = 0xC57D51,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -131,6 +154,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Contrast",
         .section = "Color Grading",
+        .tint = 0xC57D51,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -140,29 +164,32 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Saturation",
         .section = "Color Grading",
+        .tint = 0xC57D51,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 50.f,
+        .default_value = 80.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
+        .tint = 0xC57D51,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 37.f,
+        .default_value = 40.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
+        .tint = 0xC57D51,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3; },
+        .is_enabled = []() { return shader_injection.toneMapType == 3.f; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -171,6 +198,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "LUT Strength",
         .section = "Color Grading",
+        .tint = 0xC57D51,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
@@ -181,6 +209,7 @@ renodx::utils::settings::Settings settings = {
         .label = "LUT Scaling",
         .section = "Color Grading",
         .tooltip = "Scales the color grade LUT to full range when size is clamped.",
+        .tint = 0xC57D51,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
     },
@@ -190,6 +219,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom",
         .section = "Effects",
+        .tint = 0xB88151,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -199,6 +229,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Lens Flare",
         .section = "Effects",
+        .tint = 0xB88151,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -208,6 +239,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Vignette",
         .section = "Effects",
+        .tint = 0xB88151,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -215,10 +247,9 @@ renodx::utils::settings::Settings settings = {
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
         .default_value = 0.f,
-        .label = "Noise",
+        .label = "Dithering Noise",
         .section = "Effects",
-        .tooltip = "Scales game dithering noise.",
-        .tint = 0x02A9C9,
+        .tint = 0xB88151,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -228,6 +259,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Film Grain",
         .section = "Effects",
+        .tint = 0xB88151,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -240,6 +272,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Film Grain Type",
         .section = "Effects",
         .labels = {"Original", "Custom"},
+        .tint = 0xB88151,
     },
     new renodx::utils::settings::Setting{
         .key = "fxChroma",
@@ -247,6 +280,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Chromatic Aberration",
         .section = "Effects",
+        .tint = 0xB88151,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
