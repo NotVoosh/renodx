@@ -22,6 +22,7 @@
 #include "../../mods/shader.hpp"
 #include "../../mods/swapchain.hpp"
 #include "../../utils/settings.hpp"
+#include "../../utils/date.hpp"
 #include "./shared.h"
 
 namespace {
@@ -285,7 +286,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Version: " + std::string(IsoDate),
+        .label = "Version: " + std::string(renodx::utils::date::ISO_DATE),
         .section = "About",
         .tooltip = std::string(__DATE__),
     },
