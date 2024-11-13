@@ -254,11 +254,6 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Resolution Scale should be 100 and Post-Process Antialiasing (FXAA) should be OFF.",
-        .section = "Instructions",
-    },
-    new renodx::utils::settings::Setting{
-        .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",
         .section = "About",
     },
@@ -304,7 +299,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Version: " + std::string(renodx::utils::date::ISO_DATE),
+        .label = "Version: BETA" + std::string(renodx::utils::date::ISO_DATE),
         .section = "About",
         .tooltip = std::string(__DATE__),
     },
@@ -602,8 +597,8 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
-      renodx::mods::swapchain::force_borderless = true;
-      renodx::mods::swapchain::prevent_full_screen = true;
+      renodx::mods::swapchain::force_borderless = false;
+      renodx::mods::swapchain::prevent_full_screen = false;
       renodx::mods::swapchain::use_resource_cloning = true;
       
       //  final shader copy pasta start
@@ -621,6 +616,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .ignore_size = true,
           .use_resource_view_cloning = true,
           .use_resource_view_hot_swap = true,
+          .usage_include = reshade::api::resource_usage::render_target | reshade::api::resource_usage::unordered_access,
       });
 
       reshade::register_event<reshade::addon_event::draw>(OnDraw);
