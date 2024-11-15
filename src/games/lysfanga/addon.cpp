@@ -12,6 +12,9 @@
 #include <embed/0x9A27FDCD.h>   // uberpost 3
 #include <embed/0x9D2A9AD7.h>   // uberpost 4
 
+#include <embed/0x55B0DCB7.h>   // UI text
+#include <embed/0xC1457489.h>   // UI text 2
+#include <embed/0x36588C4F.h>   // UI True Shadow something
 #include <embed/0x5FDD841D.h>   // blooom
 #include <embed/0xBB09D0B3.h>   // UI uberpost (LUT/blooom)
 
@@ -34,6 +37,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x9A27FDCD),  // uberpost (tonemap) 3
   CustomShaderEntry(0x9D2A9AD7),  // uberpost (tonemap) 4
 
+  CustomShaderEntry(0x55B0DCB7),  // UI text
+  CustomShaderEntry(0xC1457489),  // UI text 2
+  CustomShaderEntry(0x36588C4F),  // UI True Shadow something... goes brrr with upgrades
   CustomShaderEntry(0x5FDD841D),  // blooom
   CustomShaderEntry(0xBB09D0B3),  // uberpost (LUT/blooom)
 
@@ -84,11 +90,10 @@ renodx::utils::settings::Settings settings = {
         .default_value = 203.f,
         .label = "UI Brightness",
         .section = "Tone Mapping",
-        .tooltip = "Currently not available.",
+        .tooltip = "Sets the brightness of UI and HUD elements in nits",
         .tint = 0x1C1C3C,
         .min = 48.f,
         .max = 500.f,
-        .is_enabled = []() { return shader_injection.toneMapType < 0.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapGammaCorrection",
@@ -243,15 +248,28 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom 2",
         .section = "Effects",
-        .tooltip = "This 2nd bloom applies on top of everything including UI...",
+        .tooltip = "This 2nd bloom applies on top of tonemapping, menus and some UI elements...",
         .tint = 0x452f7A,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Bloom balance",
+        .section = "Effects",
+        .group = "bloooom",
+        .tooltip = "Just an idea... Hover Bloom 2 for info.",
+        .tint = 0x452f7A,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("fxBloom", 100.f);
+          renodx::utils::settings::UpdateSetting("fxBlooom", 0.f);
+        },
+    },
+    new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Enable Post-Processing in game Video settings. Rest (including Bloom & Vignette) is up to preference.",
-        .section = "Instructions",
+        .label = "Enable Post-Processing in game Video settings."
+                 "\nRest (including Bloom & Vignette) is up to preference.",
+        .section = "Notes",
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
@@ -325,7 +343,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
-  renodx::utils::settings::UpdateSetting("fxBloom2", 50.f);
+  renodx::utils::settings::UpdateSetting("fxBlooom", 50.f);
 }
 
 auto start = std::chrono::steady_clock::now();
@@ -378,7 +396,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .ignore_size = false,
+          .ignore_size = true,
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);
