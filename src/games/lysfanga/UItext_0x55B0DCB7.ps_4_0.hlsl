@@ -76,6 +76,7 @@ void main(
   r0.x = 1 + -r0.x;
   r0.xyzw = r1.xyzw * r0.xxxx;
   o0.xyzw = v1.wwww * r0.xyzw;
+        if(injectedData.fxBlooom > 0.f){
       if(injectedData.toneMapGammaCorrection == 1.f) {
 		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
     o0.rgb *= injectedData.toneMapUINits / injectedData.toneMapGameNits;
@@ -83,5 +84,6 @@ void main(
     } else {
     o0.rgb *= injectedData.toneMapUINits / injectedData.toneMapGameNits;
     }
+  }
   return;
 }

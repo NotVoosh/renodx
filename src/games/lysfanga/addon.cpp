@@ -248,7 +248,9 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom 2",
         .section = "Effects",
-        .tooltip = "This 2nd bloom applies on top of tonemapping, menus and some UI elements...",
+        .tooltip = "This 2nd bloom applies on top of tonemapping, menus and some UI elements..."
+                   "\nRecommended OFF as it allows optimal brightness management."
+                   "\nCan't be disabled in game settings.",
         .tint = 0x452f7A,
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
@@ -258,7 +260,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Bloom balance",
         .section = "Effects",
         .group = "bloooom",
-        .tooltip = "Just an idea... Hover Bloom 2 for info.",
+        .tooltip = "Click me..! Hover Bloom 2 for more info.",
         .tint = 0x452f7A,
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("fxBloom", 100.f);
@@ -268,7 +270,8 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "Enable Post-Processing in game Video settings."
-                 "\nRest (including Bloom & Vignette) is up to preference.",
+                 "\nRest (including Bloom & Vignette) is up to preference."
+                 "\nBloom balance is highly recommended.",
         .section = "Notes",
     },
     new renodx::utils::settings::Setting{
