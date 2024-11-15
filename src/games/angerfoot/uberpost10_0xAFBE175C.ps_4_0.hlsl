@@ -190,5 +190,12 @@ void main(
     r1.x = r0.w;
   }
   o0.xyzw = r1.yzwx;
+      if(injectedData.toneMapGammaCorrection == 1.f){
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
+    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+    } else {
+    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    }
   return;
 }

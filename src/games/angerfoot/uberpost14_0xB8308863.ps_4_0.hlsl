@@ -177,5 +177,12 @@ void main(
   //o0.xyz = r0.xyz ? r1.xyz : r2.xyz;
     o0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
   o0.w = r0.w;
+      if(injectedData.toneMapGammaCorrection == 1.f){
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
+    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
+    } else {
+    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    }
   return;
 }

@@ -30,6 +30,9 @@ void main(
   r0.xyz = float3(-0.5,-0.5,-0.5) + r0.xyz;
   //r0.xyz = saturate(cb0[2].zzz * r0.xyz + float3(0.5,0.5,0.5));
     r0.xyz = cb0[2].zzz * r0.xyz + float3(0.5,0.5,0.5);
+      if(injectedData.toneMapType == 0.f){
+    r0.rgb = saturate(r0.rgb);
+    }
   r0.xyz = cb0[2].yyy * r0.xyz;
   //r0.xyz = log2(r0.xyz);
   r0.w = 1 / cb0[2].x;

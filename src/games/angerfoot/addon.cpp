@@ -19,10 +19,10 @@
 #include <embed/0x86E67F52.h>   // uberpost 7 (CA)
 #include <embed/0x46D3ECE8.h>   // uberpost 8
 #include <embed/0xDB814E6C.h>   // uberpost 9 (pause menu)
-#include <embed/0xAFBE175C.h>   // uberpost 10 (fadein/out)
+#include <embed/0xAFBE175C.h>   // uberpost 10 ("level clear" screen)
 #include <embed/0x272EB112.h>   // uberpost 12 (pause menu)
 #include <embed/0xAF565E99.h>   // uberpost 13 (fadein/out)
-#include <embed/0xB8308863.h>   // uberpost 14 (fadein/out)
+#include <embed/0xB8308863.h>   // uberpost 14 (map)
 
 #include <embed/0x9BC48214.h>   // uberpost 15 (idk)
 #include <embed/0x43621B25.h>   // uberpost 16 (idk)
@@ -58,10 +58,10 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x86E67F52),  // uberpost 7 (CA)
     CustomShaderEntry(0x46D3ECE8),  // uberpost 8
     CustomShaderEntry(0xDB814E6C),  // uberpost 9 (pause menu)
-    CustomShaderEntry(0xAFBE175C),  // uberpost 10 (fadein/out)
+    CustomShaderEntry(0xAFBE175C),  // uberpost 10 ("level clear" screen)
     CustomShaderEntry(0x272EB112),  // uberpost 12 (pause menu)
     CustomShaderEntry(0xAF565E99),  // uberpost 13 (fadein/out)
-    CustomShaderEntry(0xB8308863),  // uberpost 14 (fadein/out)
+    CustomShaderEntry(0xB8308863),  // uberpost 14 (map)
 
     CustomShaderEntry(0x9BC48214),  // uberpost 15 (idk)
     CustomShaderEntry(0x43621B25),  // uberpost 16 (idk)
