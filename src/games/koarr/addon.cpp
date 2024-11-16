@@ -240,9 +240,9 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
-          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 65.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 75.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 80.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 40.f);

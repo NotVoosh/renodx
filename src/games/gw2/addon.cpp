@@ -487,9 +487,9 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
-          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 65.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 75.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 80.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 40.f);
@@ -537,7 +537,8 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Render Sampling should be native. Enable Bloom, Color Grading & Color Tint in game settings. You can tune them down above (Light Adaptation & Depth Blur aswell).",
+        .label = "Render Sampling should be native. Enable Bloom, Color Grading & Color Tint in game settings."
+                 "\nYou can tune them down above (Light Adaptation & Depth Blur aswell).",
         .section = "Notes",
     },
     new renodx::utils::settings::Setting{

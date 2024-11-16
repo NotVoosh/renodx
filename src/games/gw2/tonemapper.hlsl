@@ -42,7 +42,6 @@ float3 applyUserTonemap(float3 LUTless, Texture2D lutTexture, SamplerState lutSa
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.1f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.025f * pow(injectedData.colorGradeFlare, 5.f);
@@ -132,7 +131,6 @@ float3 applyUserTonemap(float3 vanilla, float2 screenXY){
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.1f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.025f * pow(injectedData.colorGradeFlare, 5.f);
