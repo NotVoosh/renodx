@@ -8,7 +8,8 @@
 #define DEBUG_LEVEL_0
 
 #include <embed/0xF1A75575.h>   // uberpost (vignette)
-#include <embed/0xCF6E0603.h>   // uberpost
+#include <embed/0xCF6E0603.h>   // uberpost 2
+#include <embed/0x9B5C1401.h>   // uberpost 3 (fish EYE)
 
 #include <embed/0xBDEF4B88.h>   // HDRP final (DR + grain)
 #include <embed/0x99DC845A.h>   // HDRP final 2 (DR + grain + dither)
@@ -39,6 +40,7 @@ namespace {
 renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xF1A75575),  // uberpost (vignette)
   CustomShaderEntry(0xCF6E0603),  // uberpost 2
+  CustomShaderEntry(0x9B5C1401),  // uberpost 3 (fish EYE)
 
   CustomShaderEntry(0xBDEF4B88),  // HDRP final (DR + grain)
   CustomShaderEntry(0x99DC845A),  // HDRP final 2 (DR + grain + dither)
@@ -192,7 +194,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.f,
+        .default_value = 25.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -336,7 +338,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 25.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
