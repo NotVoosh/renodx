@@ -183,7 +183,7 @@ cbuffer cb0 : register(b0)
     } else {
       r0.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r0.rgb);
       r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r0.rgb);
-      r0.rgb = applyUserTonemap(r3.rgb);
+      r0.rgb = applyUserTonemapACES(r3.rgb);
     }    
   r0.a = 1;
   u0[vThreadID.xyz] = r0.rgba;
