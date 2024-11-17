@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./tonemapper.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/e42df452b62857a60944aed34f02efa1bda50018/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Lut3DBaker.compute
 // KGenLUT3D_NeutralTonemap
@@ -30,15 +31,19 @@ cbuffer cb0 : register(b0)
 // (start) ColorGrade  
     // (start) LogGrade
     // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
-    r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.413588405,-0.413588405,-0.413588405);		// ACEScc_MIDGRAY = 0.4135884
-    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.0275523961, 0.0275523961, 0.0275523961);
-	
-    // LUT_SPACE_DECODE(r0.rgb)
-    r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);
-    r0.rgb = exp2(r0.rgb);
-    r0.rgb = r0.rgb + float3(-0.047996,-0.047996,-0.047996);
-    r0.rgb = r0.rgb * float3(0.179999992,0.179999992,0.179999992);
+    r0.rgb = r0.rgb * cb0[0].ggg;
     
+      float3 preContrast = r0.rgb;
+    r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
+    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);
+      r0.rgb = lerp(preContrast, r0.rgb, injectedData.colorGradeLUTStrength);
+	
+      if(injectedData.colorGradeLUTSampling == 0.f){
+    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb);
+    } else {
+    r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
+    }
+        float3 preCG = r0.rgb;
     // (start) LinearGrade
       // WhiteBalance(r0.rgb, cb0[1].rgb)
       r1.r = dot(float3(0.390405, 0.549941, 0.00892631989), r0.rgb);
@@ -126,6 +131,7 @@ cbuffer cb0 : register(b0)
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
       r0.rgb = max(0, r0.rgb);
 		
+        r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
 		if(injectedData.toneMapType == 0.f){
 	// Neutral Tonemap
 	  r1.rgb = r0.rgb * float3(1.31338608, 1.31338608, 1.31338608);
@@ -137,7 +143,9 @@ cbuffer cb0 : register(b0)
 	  r0.rgb = r0.rgb + float3(-0.0666666627, -0.0666666627, -0.0666666627);
 	  r0.rgb = r0.rgb * float3(1.31338608, 1.31338608, 1.31338608);
 	  r0.rgb = max(0, r0.rgb);
-		}
+		} else {
+      r0.rgb = applyUserTonemapNeutral(r0.rgb);
+    }
 	  r0.a = 1;  
   u0[vThreadID.xyz] = r0.rgba;
   }

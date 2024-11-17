@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./tonemapper.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/e42df452b62857a60944aed34f02efa1bda50018/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Lut3DBaker.compute
 // KGenLUT3D_AcesTonemap
@@ -28,17 +29,19 @@ cbuffer cb0 : register(b0)
   r0.a = r1.b ? r0.a : 0;
   if (r0.a != 0) {
 // (start) ColorGrade  
-    // LUT_SPACE_DECODE(r0.rgb)
-    r0.rgb = r0.rgb * cb0[0].ggg + float3(-0.386036,-0.386036,-0.386036);
-    r0.rgb = r0.rgb * float3(13.605482,13.605482,13.605482);
-    r0.rgb = exp2(r0.rgb);
-    r0.rgb = r0.rgb + float3(-0.047996,-0.047996,-0.047996);
-    r0.rgb = r0.rgb * float3(0.179999992,0.179999992,0.179999992);
-
+    r0.rgb = r0.rgb * cb0[0].ggg;
+    
+      if(injectedData.colorGradeLUTSampling == 0.f){
+    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb);
+    } else {
+    r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
+    }
     // unity_to_ACES(r0.rgb)
     r1.r = dot(float3(0.439701, 0.382978, 0.177335), r0.rgb);
     r1.g = dot(float3(0.0897922963, 0.813423, 0.0967615992), r0.rgb);
     r1.b = dot(float3(0.017544, 0.111544, 0.870704), r0.rgb);
+
+      float3 preCG = mul(renodx::color::AP0_TO_AP1_MAT, r1.rgb);
     
   // ACEScc (log) space
     // ACES_to_ACEScc(r1.rgb)
@@ -53,7 +56,7 @@ cbuffer cb0 : register(b0)
     r0.rgb = r0.rgb + float3(9.72,9.72,9.72);
     r0.rgb = r0.rgb * float3(0.0570776239,0.0570776239,0.0570776239);
     r0.rgb = r1.rgb ? r2.rgb : r0.rgb;
-    
+
     // (start) LogGrade
     // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
     r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
@@ -158,6 +161,8 @@ cbuffer cb0 : register(b0)
       r0.gba = r1.rrr * r0.gba + -r1.ggg;
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
       // (end) LinearGrade
+
+        r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
     if(injectedData.toneMapType == 0.f){
       r3.rgb = mul(renodx::color::AP1_TO_AP0_MAT, r0.rgb);
 
@@ -174,11 +179,12 @@ cbuffer cb0 : register(b0)
       r3.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r3.rgb);
       r3.rgb = mul(renodx::color::D60_TO_D65_MAT, r3.rgb);
       r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r3.rgb);
-    } else {                // if(not vanilla){skip tonemapping}
+    r0.rgb = max(0, r3.rgb);
+    } else {
       r0.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r0.rgb);
       r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r0.rgb);
+      r0.rgb = applyUserTonemap(r3.rgb);
     }    
-    r0.rgb = max(0, r3.rgb);
   r0.a = 1;
   u0[vThreadID.xyz] = r0.rgba;
   }

@@ -97,7 +97,7 @@ void main(
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t4.Sample(s4_s, r0.xyz).wxyz;
-	    r1.gba = applyUserTonemap(untonemapped, t4, s4_s);
+	    r1.gba = sampleLUT(untonemapped, t4, s4_s);
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {
     r0.xyz = saturate(r1.yzw);

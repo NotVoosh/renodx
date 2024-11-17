@@ -11,7 +11,19 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler){
+float3 sampleLUT(float3 color, Texture3D lutTexture, SamplerState lutSampler){
+	float3 lutInput;
+		if(injectedData.colorGradeLUTSampling == 0.f){
+    lutInput = renodx::color::arri::logc::c1000::Encode(color);
+      } else {
+    lutInput = renodx::color::pq::Encode(color, 100.f);
+    }
+    float3 lutOutput = renodx::lut::Sample(lutTexture, lutSampler, lutInput, 32.f);
+
+return lutOutput;
+}
+
+float3 applyUserTonemap(float3 untonemapped){
 
 		float3 outputColor = untonemapped;
 		float3 midGray = renodx::color::y::from::BT709(renodx::tonemap::uncharted2::BT709(float3(0.18f,0.18f,0.18f), 5.f));
@@ -38,15 +50,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.hue_correction_color = hueCorrectionColor;
 			config.reno_drt_hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::ICTCP;
 
-			renodx::lut::Config lut_config = renodx::lut::config::Create(
-			lutSampler,
-			injectedData.colorGradeLUTStrength,
-			injectedData.colorGradeLUTScaling,
-			renodx::lut::config::type::ARRI_C1000_NO_CUT,
-			renodx::lut::config::type::LINEAR,
-			32.f);
-
-			outputColor = renodx::lut::Sample(lutTexture, lut_config, outputColor);
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(outputColor);
 			}

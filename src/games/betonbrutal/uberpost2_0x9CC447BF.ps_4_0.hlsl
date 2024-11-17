@@ -133,7 +133,7 @@ void main(
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t3.Sample(s3_s, r0.xyz).wxyz;
-    r1.gba = applyUserTonemap(untonemapped, t3, s3_s);
+    r1.gba = sampleLUT(untonemapped, t3, s3_s);
 
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {

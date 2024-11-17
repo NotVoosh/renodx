@@ -1,8 +1,7 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/e42df452b62857a60944aed34f02efa1bda50018/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Lut3DBaker.compute
-// KGenLUT3D_AcesTonemap
+// KGenLUT3D_NoTonemap
 
 Texture2D<float4> t0 : register(t0);
 
@@ -29,52 +28,19 @@ cbuffer cb0 : register(b0)
   r0.a = r1.b ? r0.a : 0;
   if (r0.a != 0) {
 // (start) ColorGrade  
-  r0.rgb = r0.rgb * cb0[0].ggg;
+    // (start) LogGrade
+    // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
+    r0.rgb = r0.rgb * cb0[0].ggg;
+    
+    r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
+    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);
+	
       if(injectedData.colorGradeLUTSampling == 0.f){
     r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb);
     } else {
     r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
     }
-
-    // unity_to_ACES(r0.rgb)
-    r1.r = dot(float3(0.439701, 0.382978, 0.177335), r0.rgb);
-    r1.g = dot(float3(0.0897922963, 0.813423, 0.0967615992), r0.rgb);
-    r1.b = dot(float3(0.017544, 0.111544, 0.870704), r0.rgb);
-
-      float3 preCG = mul(renodx::color::AP0_TO_AP1_MAT, r1.rgb);
     
-  // ACEScc (log) space
-    // ACES_to_ACEScc(r1.rgb)
-    r0.rgb = max(0, r1.rgb);
-    r0.rgb = min(r0.rgb, 65504);
-    r1.rgb = cmp(r0.rgb < float3(0.0000305175708, 0.0000305175708, 0.0000305175708));
-    r2.rgb = r0.rgb * float3(0.5,0.5,0.5) + float3(0.0000152587800,0.0000152587800,0.0000152587800);
-    r2.rgb = log2(r2.rgb);
-    r2.rgb = r2.rgb + float3(9.72,9.72,9.72);
-    r2.rgb = r2.rgb * float3(0.0570776239,0.0570776239,0.0570776239);
-    r0.rgb = log2(r0.rgb);
-    r0.rgb = r0.rgb + float3(9.72,9.72,9.72);
-    r0.rgb = r0.rgb * float3(0.0570776239,0.0570776239,0.0570776239);
-    r0.rgb = r1.rgb ? r2.rgb : r0.rgb;
-    
-    // (start) LogGrade
-    // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
-    r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
-    r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);
-    
-    // ACEScc_to_ACES(r0.rgb)
-    r1.rgb = r0.rgb * float3(17.52,17.52,17.52) + float3(-9.72,-9.72,-9.72);
-    r1.rgb = exp2(r1.rgb);
-    r2.rgb = r1.rgb + float3(-0.0000152587891,-0.0000152587891,-0.0000152587891);
-    r2.rgb = r2.rgb + r2.rgb;
-    r3.rgba = cmp(r0.rrgg < float4(-0.301369876, 1.46799636, -0.301369876, 1.46799636));
-    r0.rg = r3.ga ? r1.rg : float2(65504,65504);
-    r3.rg = r3.rb ? r2.rg : r0.rg;
-    r0.rg = cmp(r0.bb < float2(-0.301369876, 1.46799636));
-    r0.g = r0.g ? r1.b : 65504;
-    r3.b = r0.r ? r2.b : r0.g;
-
-      r0.rgb = mul(renodx::color::AP0_TO_AP1_MAT, r3.rgb);
     // (start) LinearGrade
       // WhiteBalance(r0.rgb, cb0[1].rgb)
       r1.r = dot(float3(0.390405, 0.549941, 0.00892631989), r0.rgb);
@@ -140,13 +106,12 @@ cbuffer cb0 : register(b0)
       r3.b = r2.r + cb0[3].r;
       r0.g = t0.SampleLevel(s0_s, r3.ba, 0).r;
       r0.g = saturate(r0.g);
-      r0.g = r0.g + -0.5f;
-      r0.g = r0.g + r3.b;
-      r0.b = cmp(r0.g < 0);
-      r0.a = cmp(1 < r0.g);
-      r1.gb = r0.gg + float2(1,-1);
-      r0.g = r0.a ? r1.b : r0.g;
-      r0.g = r0.b ? r1.g : r0.g;
+      r0.g = r3.b + r0.g;
+      r0.gba = r0.ggg + float3(-0.5,0.5,-1.5);
+      r1.g = cmp(r0.g < 0);
+      r1.b = cmp(1 < r0.g);
+      r0.g = r1.b ? r0.a : r0.g;
+      r0.g = r1.g ? r0.b : r0.g;
       // HsvToRgb(r0.gba)
       r0.gba = r0.ggg + float3(1, 0.666666687, 0.333333343);
       r0.gba = frac(r0.gba);
@@ -161,31 +126,8 @@ cbuffer cb0 : register(b0)
       r1.g = dot(r1.gba, float3(0.212672904, 0.715152204, 0.072175));
       r0.gba = r1.rrr * r0.gba + -r1.ggg;
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
-      // (end) LinearGrade
-      r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
-    if(injectedData.toneMapType == 0.f){
-      r3.rgb = mul(renodx::color::AP1_TO_AP0_MAT, r0.rgb);
-
-      r3.rgb = renodx::tonemap::aces::RRT(r3.rgb);
-      float a = 278.5085;
-      float b = 10.7772;
-      float c = 293.6045;
-      float d = 88.7122;
-      float e = 80.6889;
-      r3.rgb = (r3.rgb * (a * r3.rgb + b)) / (r3.rgb * (c * r3.rgb + d) + e);
-      r3.rgb = renodx::tonemap::aces::DarkToDim(r3.rgb);
-      half3 AP1_RGB2Y = half3(0.272229, 0.674082, 0.0536895);
-      r3.rgb = lerp(dot(r3.rgb, AP1_RGB2Y).rrr, r3.rgb, 0.93);
-      r3.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r3.rgb);
-      r3.rgb = mul(renodx::color::D60_TO_D65_MAT, r3.rgb);
-      r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r3.rgb);
-      r0.rgb = max(0, r3.rgb);
-    } else {                // if(not vanilla){only do color grading, skip tonemapping}
-      r3.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r0.rgb);
-      r0.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r3.rgb);
-      r0.rgb = applyUserTonemap(r0.rgb);
-    }    
-  r0.a = 1;
+      r0.rgb = max(0, r0.rgb);
+	  r0.a = 1;  
   u0[vThreadID.xyz] = r0.rgba;
   }
 return;

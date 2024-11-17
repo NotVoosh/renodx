@@ -218,9 +218,9 @@ cbuffer cb0 : register(b0)
     r0.w = max(9.99999975e-05, r0.w);
     r0.w = r1.w / r0.w;
     r4.xyz = -r1.xyz * r0.www + r1.xyz;
-    r4.xyz = r0.xyz * cb1[9].xyz * injectedData.fxBloom + r4.xyz;   // bloom
+    r4.xyz = r0.xyz * cb1[9].xyz+ r4.xyz;
     r4.xyz = r4.xyz + -r1.xyz;
-    r2.xyz = cb1[7].xxx * r4.xyz + r1.xyz;
+    r2.xyz = cb1[7].xxx * r4.xyz * injectedData.fxBloom + r1.xyz;
     r0.w = cmp(0 != cb1[7].w);
     if (r0.w != 0) {
       r3.zw = r3.xy * cb1[10].xy + cb1[10].zw;
@@ -279,7 +279,7 @@ cbuffer cb0 : register(b0)
     r0.w = 0.5 * cb1[6].x;
     r0.xyz = r0.xyz * cb1[6].xxx + r0.www;
     r1.xyz = t4.SampleLevel(s2_s, r0.xyz, 0).xyz;
-        r1.rgb = applyUserTonemap(untonemapped, t4, s2_s);
+        r1.rgb = sampleLUT(untonemapped, t4, s2_s);
   }
   r0.x = saturate(r2.w * cb1[13].x + cb1[13].y);
   r0.yzw = r1.xyz + -r2.xyz;

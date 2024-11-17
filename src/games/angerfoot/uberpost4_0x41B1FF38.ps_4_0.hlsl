@@ -53,7 +53,7 @@ void main(
   r0.w = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r0.www;
   r0.xyzw = t3.Sample(s3_s, r0.xyz).xyzw;
-    r0.rgb = applyUserTonemap(untonemapped, t3, s3_s);
+    r0.rgb = sampleLUT(untonemapped, t3, s3_s);
 
   //r1.xyz = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r0.xyz));
   //r1.xyz = log2(r1.xyz);

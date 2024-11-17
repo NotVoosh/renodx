@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./tonemapper.hlsl"
 
 Texture2D<float4> t7 : register(t7);
 
@@ -44,12 +45,14 @@ cbuffer cb0 : register(b0)
   r0.xyz = (uint3)vThreadID.xyz;
   r0.w = cmp(0 < cb0[17].x);
   if (r0.w != 0) {
-    // LogCtoLinear
-    r1.xyz = r0.xyz * cb0[0].yyy + float3(-0.386036009,-0.386036009,-0.386036009);
-    r1.xyz = float3(13.6054821,13.6054821,13.6054821) * r1.xyz;
-    r1.xyz = exp2(r1.xyz);
-    r1.xyz = float3(-0.0479959995,-0.0479959995,-0.0479959995) + r1.xyz;
-    r1.xyz = float3(0.179999992,0.179999992,0.179999992) * r1.xyz;
+    r0.xyz = r0.xyz * cb0[0].yyy;
+      if(injectedData.colorGradeLUTSampling == 0.f){
+    r1.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb);
+    } else {
+    r1.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
+    }
+      float3 preCG = mul(renodx::color::BT709_TO_AP1_MAT, r1.rgb);
+
     // WhiteBalance
     r2.x = dot(float3(0.390404999,0.549941003,0.00892631989), r1.xyz);
     r2.y = dot(float3(0.070841603,0.963172019,0.00135775004), r1.xyz);
@@ -166,7 +169,7 @@ cbuffer cb0 : register(b0)
     r2.xyz = cb0[13].xyz * r2.xyz;
     r1.xyz = r2.xyz * r0.www + r1.xyz;
     // Lift, gamma, gain
-    r1.xyz = r1.xyz * cb0[10].xyz + cb0[8].xyz * injectedData.colorGradeLUTLift;
+    r1.xyz = r1.xyz * cb0[10].xyz + cb0[8].xyz;
     r2.xyz = cmp(float3(0,0,0) < r1.xyz);
     r3.xyz = cmp(r1.xyz < float3(0,0,0));
     r2.xyz = (int3)-r2.xyz + (int3)r3.xyz;
@@ -264,13 +267,13 @@ cbuffer cb0 : register(b0)
     r0.w = rcp(r0.w);
     r1.xyz = r2.xyz * r0.www;
     r1.xyz = max(float3(0,0,0), r1.xyz);
+      r1.rgb = lerp(preCG, r1.rgb, injectedData.colorGradeLUTStrength);
   } else {
-    // LogCtoLinear
-    r0.xyz = r0.xyz * cb0[0].yyy + float3(-0.386036009,-0.386036009,-0.386036009);
-    r0.xyz = float3(13.6054821,13.6054821,13.6054821) * r0.xyz;
-    r0.xyz = exp2(r0.xyz);
-    r0.xyz = float3(-0.0479959995,-0.0479959995,-0.0479959995) + r0.xyz;
-    r0.xyz = float3(0.179999992,0.179999992,0.179999992) * r0.xyz;
+      if(injectedData.colorGradeLUTSampling == 0.f){
+    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb * cb0[0].ggg);
+    } else {
+    r0.rgb = renodx::color::pq::Decode(r0.rgb * cb0[0].ggg, 100.f);
+    }
     // unity_to_ACES
     r2.x = dot(float3(0.439700991,0.382977992,0.177334994), r0.xyz);
     r2.y = dot(float3(0.0897922963,0.813422978,0.0967615992), r0.xyz);
@@ -417,6 +420,7 @@ cbuffer cb0 : register(b0)
   r1.x = dot(float3(3.2409699,-1.5373832,-0.498610765), r0.xyz);
   r1.y = dot(float3(-0.969243646,1.8759675,0.0415550582), r0.xyz);
   r1.z = dot(float3(0.0556300804,-0.203976959,1.05697155), r0.xyz);
+  r0.xyz = max(float3(0,0,0), r1.xyz);
   } else {
     r0.r = dot(float3(0.662454188,0.134004205,0.156187683), r1.rgb);
     r0.g = dot(float3(0.272228718,0.674081743,0.0536895171), r1.rgb);
@@ -424,8 +428,9 @@ cbuffer cb0 : register(b0)
     r1.r = dot(float3(3.2409699,-1.5373832,-0.498610765), r0.rgb);
     r1.g = dot(float3(-0.969243646,1.8759675,0.0415550582), r0.rgb);
     r1.b = dot(float3(0.0556300804,-0.203976959,1.05697155), r0.rgb);
+    r0.rgb = applyUserTonemap(r1.rgb);
   }
-  r0.xyz = max(float3(0,0,0), r1.xyz);
+
   r0.w = 1;
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzw
