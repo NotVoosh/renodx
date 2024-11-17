@@ -40,33 +40,36 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::LINEAR,
 			33.f);
 			
-				if (injectedData.toneMapType == 2.f){			// Frostbite
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
-				float3 sdrColor = renodx::tonemap::frostbite::BT709(outputColor, 1.f);
+			config.exposure = 1.f;
+			config.highlights = 1.f;
+			config.shadows = 1.f;
+			config.contrast = 1.f;
+			
+				if(injectedData.toneMapType != 1.f){
+			outputColor = renodx::lut::Sample(lutTexture, lut_config, outputColor);
+			}
+				if(injectedData.toneMapType == 0.f){
+			outputColor = saturate(outputColor);
+			}
+				if (injectedData.toneMapType == 2.f){			// Frostbite
 				float frostbitePeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = renodx::tonemap::frostbite::BT709(outputColor, frostbitePeak);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
-				float3 lutColor = min(1.f, renodx::lut::Sample(lutTexture, lut_config, outputColor));
-			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 
 			} else if (injectedData.toneMapType == 4.f){		// DICE
 			DICESettings DICEconfig = DefaultDICESettings();
 			DICEconfig.Type = 3;
 			DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 				float dicePaperWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapGameNits / 80.f, true)
 																		   : injectedData.toneMapGameNits / 80.f;
 				float dicePeakWhite = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / 80.f, true)
 																		  : injectedData.toneMapPeakNits / 80.f;
-				float3 sdrColor = DICETonemap(outputColor * dicePaperWhite, dicePaperWhite, DICEconfig) / dicePaperWhite;
 			outputColor = DICETonemap(outputColor * dicePaperWhite, dicePeakWhite, DICEconfig) / dicePaperWhite;
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
-				float3 lutColor = min(1.f, renodx::lut::Sample(lutTexture, lut_config, outputColor));
-			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
-
 			} else {
-			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
+			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}
 
 	return outputColor;
