@@ -123,7 +123,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 60.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xFFB469,
@@ -229,7 +229,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeLUTLift",
         .binding = &shader_injection.colorGradeLUTLift,
-        .default_value = 50.f,
+        .default_value = 100.f,
         .label = "LUT Lifting",
         .section = "Color Grading",
         .tooltip = "Reduces the shadows lifting done by LUT.",
@@ -280,7 +280,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "From Title Menu: Options > Interface > Dark Mode (recommended, not required to run the mod).",
-        .section = "Instructions",
+        .section = "Notes",
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
