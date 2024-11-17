@@ -216,17 +216,6 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
-        .key = "colorGradeLUTLift",
-        .binding = &shader_injection.colorGradeLUTLift,
-        .default_value = 50.f,
-        .label = "LUT Lifting",
-        .section = "Color Grading",
-        .tooltip = "Reduces the shadows lifting done by LUT.",
-        .tint = 0x054135,
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
         .key = "fxBloom",
         .binding = &shader_injection.fxBloom,
         .default_value = 50.f,
@@ -361,7 +350,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
-  renodx::utils::settings::UpdateSetting("colorGradeLUTLift", 100.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxNoise", 50.f);
