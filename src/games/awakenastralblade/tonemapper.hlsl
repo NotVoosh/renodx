@@ -40,7 +40,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			
 		float3 lutInput;
 					if(injectedData.colorGradeLUTSampling == 0.f){
-				lutInput = renodx::color::arri::logc::c1000::Encode(untonemapped);
+				lutInput = renodx::color::arri::logc::c1000::Encode(untonemapped, false);
 				} else {
 				lutInput = renodx::color::pq::Encode(untonemapped, 100.f);
 				}

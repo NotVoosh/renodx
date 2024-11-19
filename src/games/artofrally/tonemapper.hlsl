@@ -3,7 +3,7 @@
 float3 sampleLUT(float3 color, Texture3D lutTexture, SamplerState lutSampler){
 	float3 lutInput;
 		if(injectedData.colorGradeLUTSampling == 0.f){
-    lutInput = renodx::color::arri::logc::c1000::Encode(color);
+    lutInput = renodx::color::arri::logc::c1000::Encode(color, false);
       } else {
     lutInput = renodx::color::pq::Encode(color, 100.f);
     }

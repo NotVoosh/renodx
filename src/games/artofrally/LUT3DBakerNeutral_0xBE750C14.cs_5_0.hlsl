@@ -39,7 +39,7 @@ cbuffer cb0 : register(b0)
       r0.rgb = lerp(preContrast, r0.rgb, injectedData.colorGradeLUTStrength);
 	
       if(injectedData.colorGradeLUTSampling == 0.f){
-    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb);
+    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb, false);
     } else {
     r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
     }

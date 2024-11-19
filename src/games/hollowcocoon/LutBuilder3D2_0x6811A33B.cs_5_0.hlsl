@@ -47,7 +47,7 @@ cbuffer cb0 : register(b0)
   if (r0.w != 0) {
     r0.xyz = r0.xyz * cb0[0].yyy;
       if(injectedData.colorGradeLUTSampling == 0.f){
-    r1.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb);
+    r1.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb, false);
     } else {
     r1.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
     }
@@ -270,7 +270,7 @@ cbuffer cb0 : register(b0)
       r1.rgb = lerp(preCG, r1.rgb, injectedData.colorGradeLUTStrength);
   } else {
       if(injectedData.colorGradeLUTSampling == 0.f){
-    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb * cb0[0].ggg);
+    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb * cb0[0].ggg, false);
     } else {
     r0.rgb = renodx::color::pq::Decode(r0.rgb * cb0[0].ggg, 100.f);
     }
