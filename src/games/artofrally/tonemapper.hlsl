@@ -42,6 +42,10 @@ float3 applyUserTonemapNeutral(float3 untonemapped){
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(outputColor);
 			}
+				if(injectedData.toneMapType == 2.f){		// ACES
+			config.contrast *= 0.7f;
+			config.saturation *= 0.7f;
+			}
 				if (injectedData.toneMapType == 4.f){		// ReinhardScalable
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
