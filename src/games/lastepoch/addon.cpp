@@ -33,6 +33,7 @@
 #include <embed/0x55B0DCB7.h>   // UI text 1
 #include <embed/0x915C6643.h>   // UI text 2
 #include <embed/0xB4EB8715.h>   // UI text 3
+#include <embed/0x49EB4070.h>   // UI dmg digits
 
 #include <embed/0x67B5C47D.h>   // worldmap
 #include <embed/0xD8EECF85.h>   // time travel
@@ -77,6 +78,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x55B0DCB7),  // UI text 1
     CustomShaderEntry(0x915C6643),  // UI text 2
     CustomShaderEntry(0xB4EB8715),  // UI text 3
+    CustomShaderEntry(0x49EB4070),  // UI dmg digits
 
     CustomShaderEntry(0x67B5C47D),  // worldmap
     CustomShaderEntry(0xD8EECF85),  // time travel
@@ -367,7 +369,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1.f);
+  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
