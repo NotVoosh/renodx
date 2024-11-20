@@ -63,6 +63,7 @@ void main(
   r1.w = 1;
   r0.xyzw = r1.xyzw + -r2.xyzw;
   o0.xyzw = cb0[2].xxxx * r0.xyzw * injectedData.fxLumaSharpen + r2.xyzw;
+    o0.rgb = renodx::color::bt709::clamp::AP1(o0.rgb);
       if(injectedData.fxFilmGrainType == 1.f){
     o0.rgb = applyFilmGrain(o0.rgb, v0);
     }
