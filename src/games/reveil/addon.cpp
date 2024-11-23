@@ -8,6 +8,7 @@
 #define DEBUG_LEVEL_0
 
 #include <embed/0xF5AC76A9.h>   // LutBuilder3D
+#include <embed/0xB2C2262A.h>   // LutBuilder3D 2 (B&W)
 
 #include <embed/0xF1A75575.h>   // uberpost (vignette)
 #include <embed/0xCF6E0603.h>   // uberpost 2
@@ -41,6 +42,7 @@ namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xF5AC76A9),  // LutBuilder3D
+  CustomShaderEntry(0xB2C2262A),  // LutBuilder3D 2 (B&W)
 
   CustomShaderEntry(0xF1A75575),  // uberpost (vignette)
   CustomShaderEntry(0xCF6E0603),  // uberpost 2
