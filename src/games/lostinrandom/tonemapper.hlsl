@@ -53,7 +53,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			renodx::lut::config::type::SRGB,
 			16.f);
 
-				if(injectedData.toneMapType == 3.f){
+				if(injectedData.toneMapType >= 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 			
@@ -62,37 +62,15 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak, 0.f, 0.18f, midGray);
-			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
+			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, midGray);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.5f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}
 
-			float3 lutColor;
-				if(injectedData.colorGradeLUTExtrapolation == 1.f){
-		LUTExtrapolationData extrapolationData = DefaultLUTExtrapolationData();
-    	extrapolationData.inputColor = outputColor.rgb;
-    	LUTExtrapolationSettings extrapolationSettings = DefaultLUTExtrapolationSettings();
-    	extrapolationSettings.lutSize = round(1.0 / preCompute.y);
-    // Empirically found value for Prey. Anything less will be too compressed, anything more won't have a noticieable effect.
-    // This helps keep the extrapolated LUT colors at bay, avoiding them being overly saturated or overly desaturated.
-    // At this point, Prey can have colors with brightness beyond 35000 nits, so obviously they need compressing.
-    //extrapolationSettings.inputTonemapToPeakWhiteNits = 1000.0; // Relative to "extrapolationSettings.whiteLevelNits" // NOT NEEDED UNTIL PROVEN OTHERWISE
-    // Empirically found value for Prey. This helps to desaturate extrapolated colors more towards their Vanilla (HDR tonemapper but clipped) counterpart, often resulting in a more pleasing and consistent look.
-    // This can sometimes look worse, but this value is balanced to avoid hue shifts.
-    //extrapolationSettings.clampedLUTRestorationAmount = 1.0 / 4.0; // NOT NEEDED UNTIL PROVEN OTHERWISE
-    	extrapolationSettings.inputLinear = true;
-    	extrapolationSettings.lutInputLinear = true;
-    	extrapolationSettings.lutOutputLinear = true;
-    	extrapolationSettings.outputLinear = true;
-			lutColor = SampleLUTWithExtrapolation(lutTexture1, lutSampler, extrapolationData, extrapolationSettings);
-			outputColor = lutColor;
-			} else {
-			lutColor = renodx::lut::Sample(saturate(outputColor), lut_config1, lutTexture1);
+			float3 lutColor = renodx::lut::Sample(saturate(outputColor), lut_config1, lutTexture1);
 			outputColor = RestorePostProcess(outputColor, saturate(outputColor), lutColor);			
-			}
 			
 	return outputColor;
 }

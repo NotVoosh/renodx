@@ -203,7 +203,6 @@ renodx::utils::settings::Settings settings = {
         .section = "Color Grading",
         .tint = 0x4D7180,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.colorGradeLUTExtrapolation == 0; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -216,17 +215,6 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x4D7180,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "colorGradeLUTExtrapolation",
-        .binding = &shader_injection.colorGradeLUTExtrapolation,
-        .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 0,
-        .can_reset = false,
-        .label = "LUT Extrapolation",
-        .section = "Color Grading",
-        .tooltip = "It does things, very experimental.",
-        .tint = 0x4D7180,
     },
     new renodx::utils::settings::Setting{
         .key = "fxBloom",
@@ -338,7 +326,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
-  renodx::utils::settings::UpdateSetting("colorGradeLUTExtrapolation", 0);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
