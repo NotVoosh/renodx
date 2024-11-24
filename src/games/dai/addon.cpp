@@ -119,13 +119,25 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 50.f,
+        .default_value = 70.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xEC4E1B,
-        .max = 99.f,
+        .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueProcessor",
+        .binding = &shader_injection.toneMapHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
+        .label = "Hue Processor",
+        .section = "Tone Mapping",
+        .tooltip = "Selects hue correction processor",
+        .labels = {"OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0xEC4E1B,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -254,6 +266,11 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
+        .label = "Resolution Scale should be 100 and Post-Process Antialiasing (FXAA) should be Off.",
+        .section = "Notes",
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",
         .section = "About",
     },
@@ -299,7 +316,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Version: BETA" + std::string(renodx::utils::date::ISO_DATE),
+        .label = "Version: BETA " + std::string(renodx::utils::date::ISO_DATE),
         .section = "About",
         .tooltip = std::string(__DATE__),
     },

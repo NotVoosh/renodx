@@ -12,6 +12,7 @@ void main(
     
         color.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::DecodeSafe(color.rgb)
                                                         : renodx::color::srgb::DecodeSafe(color.rgb);
+        
         color.rgb *= injectedData.toneMapUINits / 80.f;
     
     output.rgba = color;

@@ -454,7 +454,7 @@ void main(
     //r1.xyz = r0.xyz * r0.xyz;
       r1.rgb = sign(r0.rgb) * pow(abs(r0.rgb), 2.f);
     }
-    
+    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
     r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
     r1.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r1.rgb)
                                                  : renodx::color::srgb::EncodeSafe(r1.rgb);
