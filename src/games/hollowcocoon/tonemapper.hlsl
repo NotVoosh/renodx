@@ -23,7 +23,7 @@ float3 sampleLUT(float3 color, Texture3D lutTexture, SamplerState lutSampler){
 return lutOutput;
 }
 
-float3 applyUserTonemap(float3 untonemapped){
+float3 applyUserTonemap(float3 untonemapped, bool ACES){
 		
 		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(untonemapped);
@@ -39,8 +39,8 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.mid_gray_value = midGray;
-			config.mid_gray_nits = midGray * 100;
+			config.mid_gray_value = ACES ? midGray : 0.18f;
+			config.mid_gray_nits = ACES ? midGray * 100 : 18.f;
 			config.reno_drt_highlights = 1.15f;
 			config.reno_drt_contrast = 1.15f;
 			config.reno_drt_saturation = 1.5f;
@@ -50,7 +50,7 @@ float3 applyUserTonemap(float3 untonemapped){
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(outputColor);
 			}
-				if(injectedData.toneMapType >= 3.f){
+				if(injectedData.toneMapType >= 3.f && ACES == 1){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// ReinhardScalable
