@@ -205,7 +205,6 @@ renodx::utils::settings::Settings settings = {
         .section = "Color Grading",
         .tint = 0x4D7180,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.colorGradeLUTExtrapolation == 0; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
