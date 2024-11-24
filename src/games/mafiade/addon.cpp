@@ -97,12 +97,23 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 50.f,
+        .default_value = 70.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueProcessor",
+        .binding = &shader_injection.toneMapHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
+        .label = "Hue Processor",
+        .section = "Tone Mapping",
+        .tooltip = "Selects hue correction processor",
+        .labels = {"OKLab", "ICtCp", "darktable UCS"},
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -152,7 +163,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 50.f,
+        .default_value = 35.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",

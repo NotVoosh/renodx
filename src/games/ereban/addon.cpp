@@ -59,7 +59,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 2.f,
+        .default_value = 3.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
@@ -125,6 +125,18 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "toneMapHueProcessor",
+        .binding = &shader_injection.toneMapHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
+        .label = "Hue Processor",
+        .section = "Tone Mapping",
+        .tooltip = "Selects hue correction processor",
+        .labels = {"OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0xC24608,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
         .binding = &shader_injection.colorGradeExposure,
         .default_value = 1.f,
@@ -183,7 +195,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x00A2AF,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -353,7 +365,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
-      renodx::mods::swapchain::force_borderless = true;
+      renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
 
       //  RG10B10_float (UAV stuff)

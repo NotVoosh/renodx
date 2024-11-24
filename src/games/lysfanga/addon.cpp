@@ -53,7 +53,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 2.f,
+        .default_value = 3.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
@@ -109,13 +109,25 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 60.f,
+        .default_value = 70.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x1E5787,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueProcessor",
+        .binding = &shader_injection.toneMapHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
+        .label = "Hue Processor",
+        .section = "Tone Mapping",
+        .tooltip = "Selects hue correction processor",
+        .labels = {"OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0x1E5787,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -395,6 +407,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           reshade::api::format::r16g16b16a16_float},
           }
       });
+      
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,

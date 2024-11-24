@@ -14,12 +14,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
 
 float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lutTexture2, SamplerState lutSampler, float toggle, float3 preCompute){
 		
-		float3 outputColor;
-			if(toggle != 0){
-		outputColor = 0.f;
-		} else {
-		outputColor = untonemapped;
-		}
+		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(untonemapped);
 		float midGray = renodx::color::y::from::BT709(renodx::tonemap::ACESFittedAP1(0.18f));
 		
@@ -41,10 +36,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			config.reno_drt_saturation = 1.5f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
-			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
-			config.hue_correction_color = hueCorrectionColor;
-			config.reno_drt_hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::ICTCP;
 
 			renodx::lut::Config lut_config1 = renodx::lut::config::Create(
 			lutSampler,
@@ -61,16 +52,20 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture1, Texture2D lu
 			renodx::lut::config::type::SRGB,
 			renodx::lut::config::type::SRGB,
 			16.f);
+
+				if(injectedData.toneMapType == 3.f){
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
+			}
 			
 				if (injectedData.toneMapType == 4.f){							// ReinhardScalable
-			config.shadows *= 0.9f;
-			config.contrast *= 1.35f;
-			config.saturation *= 1.5f;
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 0.9f, 1.35f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak, 0.f, 0.18f, midGray);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.5f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}

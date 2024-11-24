@@ -43,7 +43,7 @@ void main(
   r0.xyz = r1.xyz * r0.xyz + float3(0.0125228781,0.0125228781,0.0125228781);
   o0.xyz = r1.xyz * r0.xyz;
   o0.w = 1;
-
+      o0 = saturate(o0);
       o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
   return;
 }

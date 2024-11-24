@@ -47,7 +47,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 2.f,
+        .default_value = 3.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
@@ -103,13 +103,25 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 60.f,
+        .default_value = 70.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x1E5787,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "toneMapHueProcessor",
+        .binding = &shader_injection.toneMapHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
+        .label = "Hue Processor",
+        .section = "Tone Mapping",
+        .tooltip = "Selects hue correction processor",
+        .labels = {"OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0x1E5787,
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -215,7 +227,7 @@ renodx::utils::settings::Settings settings = {
         .can_reset = false,
         .label = "LUT Extrapolation",
         .section = "Color Grading",
-        .tooltip = "or ErshtraPumbolation. It does things, very experimental.",
+        .tooltip = "It does things, very experimental.",
         .tint = 0x4D7180,
     },
     new renodx::utils::settings::Setting{
@@ -374,13 +386,6 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .old_format = reshade::api::format::r8g8b8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
           .ignore_size = true,
-      });
-      
-      //  LUT 
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_typeless,
-          .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .dimensions = {1024, 32},
       });
 
       reshade::register_event<reshade::addon_event::present>(OnPresent);

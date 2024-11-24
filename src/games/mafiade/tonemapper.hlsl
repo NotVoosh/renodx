@@ -5,7 +5,7 @@
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float linearWhite){
 		
 		float3 outputColor = untonemapped;
-		float3 vanillaGray = renodx::tonemap::uncharted2::BT709(float3(0.18f,0.18f,0.18f), linearWhite);
+		float3 midGray = renodx::color::y::from::BT709(renodx::tonemap::uncharted2::BT709(float3(0.18f,0.18f,0.18f), linearWhite));
 		float3 hueCorrectionColor = renodx::tonemap::uncharted2::BT709(outputColor, linearWhite);
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -18,16 +18,12 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.mid_gray_value = renodx::color::y::from::BT709(vanillaGray);
-			config.mid_gray_nits = renodx::color::y::from::BT709(vanillaGray) * 100;
+			config.mid_gray_value = midGray;
+			config.mid_gray_nits = midGray * 100;
 			config.reno_drt_contrast = 1.05f;
 			config.reno_drt_saturation = 1.15f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
-			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_color = hueCorrectionColor;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
-			config.reno_drt_hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::ICTCP;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -40,14 +36,20 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				if(injectedData.toneMapGammaCorrection == 0.f){
 			outputColor = renodx::color::correct::Gamma(outputColor, true);
 			}
+				if(injectedData.toneMapType == 3.f){
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
+			}
 				if(injectedData.toneMapType == 4.f){
-			config.contrast *= 1.1f;
-			config.saturation *= 1.2f;
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.15f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
-				float3 sdrColor = renodx::tonemap::ReinhardScalable(outputColor, 1.f, 0.f, 0.18f, renodx::color::y::from::BT709(vanillaGray));
-			outputColor = renodx::tonemap::ReinhardScalable(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits, 0.f, 0.18f, renodx::color::y::from::BT709(vanillaGray));
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
-			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma, config.hue_correction_strength, config.hue_correction_color);
+				float3 sdrColor = renodx::tonemap::ReinhardScalable(outputColor, 1.f, 0.f, 0.18f, midGray);
+			outputColor = renodx::tonemap::ReinhardScalable(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits, 0.f, 0.18f, midGray);
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
+			sdrColor = renodx::color::correct::Hue(sdrColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
+			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
+			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
 			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 			
@@ -75,7 +77,7 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			config.mid_gray_value = renodx::color::y::from::BT709(vanillaGray);
 			config.mid_gray_nits = renodx::color::y::from::BT709(vanillaGray) * 100;
 			config.reno_drt_contrast = 1.05f;
-			//config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_flare = 0.025f * pow(injectedData.colorGradeFlare, 5.f);
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -88,7 +90,7 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			outputColor = renodx::color::correct::Gamma(outputColor, true);
 			}
 				if(injectedData.toneMapType == 4.f){
-			config.contrast *= 1.1f;
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.1f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 				float3 sdrColor = renodx::tonemap::ReinhardScalable(outputColor, 1.f, 0.f, 0.18f, renodx::color::y::from::BT709(vanillaGray));
 			outputColor = renodx::tonemap::ReinhardScalable(outputColor, injectedData.toneMapPeakNits / injectedData.toneMapGameNits, 0.f, 0.18f, renodx::color::y::from::BT709(vanillaGray));
