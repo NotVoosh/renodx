@@ -124,7 +124,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tint = 0xEC4E1B,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -137,7 +137,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Selects hue correction processor",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
         .tint = 0xEC4E1B,
-        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -264,11 +264,11 @@ renodx::utils::settings::Settings settings = {
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
-    new renodx::utils::settings::Setting{
+  /*  new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "Resolution Scale should be 100 and Post-Process Antialiasing (FXAA) should be Off.",
         .section = "Notes",
-    },
+    },*/
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",

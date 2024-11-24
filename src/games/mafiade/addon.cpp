@@ -101,7 +101,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -113,7 +113,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tooltip = "Selects hue correction processor",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
-        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -174,7 +174,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 35.f,
+        .default_value = 40.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
