@@ -22,6 +22,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.reno_drt_saturation = 1.15f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
