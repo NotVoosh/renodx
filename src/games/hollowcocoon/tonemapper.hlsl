@@ -41,11 +41,13 @@ float3 applyUserTonemap(float3 untonemapped, bool ACES){
 			config.saturation = injectedData.colorGradeSaturation;
 			config.mid_gray_value = ACES ? midGray : 0.18f;
 			config.mid_gray_nits = ACES ? midGray * 100 : 18.f;
-			config.reno_drt_highlights = 1.15f;
-			config.reno_drt_contrast = 1.15f;
-			config.reno_drt_saturation = 1.5f;
+			config.reno_drt_highlights = 1.2f;
+			config.reno_drt_shadows = 1.2f;
+			config.reno_drt_contrast = 1.3f;
+			config.reno_drt_saturation = 1.2f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
+			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(outputColor);
@@ -54,12 +56,12 @@ float3 applyUserTonemap(float3 untonemapped, bool ACES){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// ReinhardScalable
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 0.9f, 1.35f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.2f, 1.05f, 1.3f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, midGray);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.5f);
+			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, ACES ? midGray : 0.18f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);

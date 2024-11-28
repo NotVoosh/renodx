@@ -111,7 +111,7 @@ void main(
       } else if(injectedData.toneMapType == 1.f){
       o0.rgb = preLUT;
       } else if(injectedData.toneMapType >= 2.f){
-      o0.rgb = applyLUT(preLUT, t2, t3, s0_s, cb0[129].a, cb0[128].rgb);
+      o0.rgb = sampleLUT(preLUT, t2, s0_s, cb0[128].rgb);
       }
           if(injectedData.fxBlooom > 0.f){
         if(injectedData.toneMapGammaCorrection == 1.f){

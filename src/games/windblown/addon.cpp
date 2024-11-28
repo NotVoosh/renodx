@@ -101,7 +101,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 70.f,
+        .default_value = 75.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x1E5787,
@@ -174,7 +174,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 80.f,
+        .default_value = 50.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
@@ -186,7 +186,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 40.f,
+        .default_value = 50.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -221,16 +221,6 @@ renodx::utils::settings::Settings settings = {
         .binding = &shader_injection.fxBloom,
         .default_value = 50.f,
         .label = "Bloom",
-        .section = "Effects",
-        .tint = 0x2A4B84,
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.02f; },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "fxVignette",
-        .binding = &shader_injection.fxVignette,
-        .default_value = 50.f,
-        .label = "Vignette",
         .section = "Effects",
         .tint = 0x2A4B84,
         .max = 100.f,
@@ -327,7 +317,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
-  renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
   renodx::utils::settings::UpdateSetting("fxFlashbang", 100.f);
 }

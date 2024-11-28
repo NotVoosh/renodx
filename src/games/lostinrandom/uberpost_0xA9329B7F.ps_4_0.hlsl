@@ -57,7 +57,6 @@ void main(
     r0.xyz = r1.xyz * r0.xyz;
   }
   r0.xyz = cb0[125].www * r0.xyz;
-      float3 untonemapped;
   // sRGB_2_AP0
   r1.y = dot(float3(0.439700991,0.382977992,0.177334994), r0.xyz);
   r1.z = dot(float3(0.0897922963,0.813422978,0.0967615992), r0.xyz);
@@ -72,7 +71,7 @@ void main(
     r0.x = dot(float3(3.2409699,-1.5373832,-0.498610765), r1.xyz);
     r0.y = dot(float3(-0.969243646,1.8759675,0.0415550582), r1.xyz);
     r0.z = dot(float3(0.0556300804,-0.203976959,1.05697155), r1.xyz);
-          untonemapped = r0.rgb;
+      r1.rgb = applyUserTonemap(r0.rgb);
       } else {
 // ACESTonemap
  // glow module
@@ -222,7 +221,7 @@ void main(
   r1.y = saturate(dot(float3(-0.969243646,1.8759675,0.0415550582), r0.xyz));
   r1.z = saturate(dot(float3(0.0556300804,-0.203976959,1.05697155), r0.xyz));
 // end tonemap
-}
+} 
   r0.x = cmp(0 < cb0[126].w);
   if (r0.x != 0) {
     // linear_to_sRGB
@@ -274,7 +273,7 @@ void main(
   r0.yzw = r2.xyz + -r3.xyz;
   o0.xyz = r0.xxx * r0.yzw + r3.xyz;
         if(injectedData.toneMapType != 0.f){
-      o0.rgb = applyUserTonemap(untonemapped, t2, t3, s0_s, cb0[126].a, cb0[125].rgb);
+      o0.rgb = sampleLUT(preLUT, t2, s0_s, cb0[125].rgb);
       } else {
       o0.rgb = lerp(preLUT, o0.rgb, injectedData.colorGradeLUTStrength);
       }

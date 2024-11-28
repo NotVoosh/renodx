@@ -45,11 +45,12 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_saturation = 1.15f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(outputColor);
 			}
-				if(injectedData.toneMapType >= 3.f){
+				if(injectedData.toneMapType >= 2.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){			// Reinhard

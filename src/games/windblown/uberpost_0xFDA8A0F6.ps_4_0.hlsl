@@ -88,7 +88,7 @@ void main(
   r0.w = cmp(0 < cb0[142].z);
   if (r0.w != 0) {
     r1.xy = -cb0[142].xy + v1.xy;
-    r1.yz = cb0[142].zz * abs(r1.xy) * injectedData.fxVignette;   // vignette
+    r1.yz = cb0[142].zz * abs(r1.xy);
     r1.x = cb0[141].w * r1.y;
     r0.w = dot(r1.xz, r1.xz);
     r0.w = 1 + -r0.w;
@@ -101,8 +101,6 @@ void main(
     r0.xyz = r1.xyz * r0.xyz;
   }
   r0.xyz = cb0[132].www * r0.xyz;
-
-      float3 untonemapped;
   r1.y = dot(float3(0.439700991,0.382977992,0.177334994), r0.xyz);
   r1.z = dot(float3(0.0897922963,0.813422978,0.0967615992), r0.xyz);
   r1.w = dot(float3(0.0175439995,0.111543998,0.870703995), r0.xyz);
@@ -116,7 +114,7 @@ void main(
     r0.x = dot(float3(3.2409699,-1.5373832,-0.498610765), r1.xyz);
     r0.y = dot(float3(-0.969243646,1.8759675,0.0415550582), r1.xyz);
     r0.z = dot(float3(0.0556300804,-0.203976959,1.05697155), r1.xyz);
-          untonemapped = r0.rgb;
+        r1.rgb = applyUserTonemap(r0.rgb);
       } else {
 // acestonemap
   r0.x = min(r1.y, r1.z);
@@ -296,7 +294,7 @@ void main(
   o0.xyz = r0.xxx * r0.yzw + r3.xyz;
   o0.w = 1;
         if(injectedData.toneMapType != 0.f){
-      o0.rgb = applyUserTonemap(untonemapped, t2, t3, s0_s, cb0[133].a, cb0[132].rgb);
+      o0.rgb = sampleLUT(preLUT, t2, s0_s, cb0[132].rgb);
       } else {
       o0.rgb = lerp(preLUT, o0.rgb, injectedData.colorGradeLUTStrength);
       }
