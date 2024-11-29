@@ -97,7 +97,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 70.f,
+        .default_value = 75.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .max = 100.f,
@@ -163,7 +163,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 35.f,
+        .default_value = 50.f,
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
@@ -174,7 +174,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 40.f,
+        .default_value = 50.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -253,7 +253,7 @@ renodx::utils::settings::Settings settings = {
         .key = "fxFilmGrainType",
         .binding = &shader_injection.fxFilmGrainType,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 0,
+        .default_value = 1,
         .can_reset = false,
         .label = "Film Grain Type",
         .section = "Effects",
@@ -560,9 +560,9 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
-      renodx::mods::swapchain::force_borderless = true;
+      renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
-      renodx::mods::shader::force_pipeline_cloning = true;
+      //renodx::mods::shader::force_pipeline_cloning = true;
       
       // final shader copy pasta start
       reshade::register_event<reshade::addon_event::init_device>(OnInitDevice);

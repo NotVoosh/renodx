@@ -19,9 +19,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
 			config.reno_drt_contrast = 1.1f;
-			config.reno_drt_saturation = 1.15f;
+			config.reno_drt_saturation = 1.25f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
@@ -44,8 +44,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				float3 sdrColor = renodx::tonemap::ReinhardScalable(max(0.f, outputColor), 1.f, 0.f, 0.18f, midGray);
 				float reinhardPeak = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, midGray);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
-			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.25f);
+			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, 1.25f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
@@ -74,8 +74,9 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			config.contrast = injectedData.colorGradeContrast;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
+			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.1f;
-			config.reno_drt_flare = 0.10f * pow(injectedData.colorGradeFlare, 10.f);
+			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
