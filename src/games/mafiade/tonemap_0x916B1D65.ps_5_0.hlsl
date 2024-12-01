@@ -458,9 +458,14 @@ void main(
     r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
     r1.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r1.rgb)
                                                  : renodx::color::srgb::EncodeSafe(r1.rgb);
+
+    // This shader writes on swapchain most of the time.
+    // Intermediate fp11 resources spawn temporarily during cutscenes (Depth of Field/Blur effects)
+    // Using AP1 to preserve WCG when this happens
+    // Inverse conversion is done on latest DoF shader (samples everything, writes on swapchain)
+      o0.rgb = injectedData.is_swapchain_write ? r1.rgb : renodx::color::ap1::from::BT709(r1.rgb);
     
-    
-  o0.xyz = r1.xyz;
+  //o0.xyz = r1.xyz;
   o0.w = 1;
   return;
 }

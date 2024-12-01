@@ -29,8 +29,18 @@
 
 namespace {
 
+ShaderInjectData shader_injection;
+
 renodx::mods::shader::CustomShaders custom_shaders = {
-    CustomShaderEntry(0x916B1D65),  // tonemap (+ post-processing)
+    //CustomShaderEntry(0x916B1D65),  // tonemap (+ post-processing)
+    CustomShaderEntryCallback(0x916B1D65, [](reshade::api::command_list* cmd_list) {
+      if (renodx::utils::swapchain::HasBackBufferRenderTarget(cmd_list)) {
+        shader_injection.is_swapchain_write = true;
+      } else {
+        shader_injection.is_swapchain_write = false;
+      }
+      return true;
+    }),
 
     CustomShaderEntry(0x747C6210),  // loading screen
     CustomShaderEntry(0xA7799306),  // videos
@@ -38,8 +48,6 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0x3EB9D976),  // DoF 7
   };
-
-ShaderInjectData shader_injection;
 
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
@@ -584,7 +592,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .old_format = reshade::api::format::b8g8r8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
       });
-
+/*
       //  RG11B10_float ("cutscenes" DoF)
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r11g11b10_float,
@@ -622,7 +630,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           reshade::api::format::r16g16b16a16_float},
           }
       });
-
+*/
       break;
     case DLL_PROCESS_DETACH:
       // Final shader copy pasta start

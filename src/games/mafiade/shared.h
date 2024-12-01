@@ -31,6 +31,8 @@ struct ShaderInjectData {
   float fxFilmGrainSize;
   float fxFilmGrainType;
   float fxNoise;
+
+  bool is_swapchain_write;
 };
 
 #ifndef __cplusplus
