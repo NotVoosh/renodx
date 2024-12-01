@@ -7,6 +7,10 @@
 
 #define DEBUG_LEVEL_0
 
+#include <embed/0xF70A0EED.h>   // lutbuilder 3
+#include <embed/0x6A8BFC0E.h>   // lutbuilder
+#include <embed/0x30261E46.h>   // lutbuilder 2
+
 #include <embed/0xF804335C.h>   // videos
 #include <embed/0xE911C9D2.h>   // lighting
 
@@ -34,6 +38,10 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
+  CustomShaderEntry(0x6A8BFC0E),  // lutbuilder
+  CustomShaderEntry(0xF70A0EED),  // lutbuilder 3
+  CustomShaderEntry(0x30261E46),  // lutbuilder 2
+
   CustomShaderEntry(0xF804335C),  // videos
   CustomShaderEntry(0xE911C9D2),  // lighting
 
@@ -57,7 +65,7 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapType",
         .binding = &shader_injection.toneMapType,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 3.f,
+        .default_value = 4.f,
         .can_reset = false,
         .label = "Tone Mapper",
         .section = "Tone Mapping",
@@ -186,7 +194,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 25.f,
+        .default_value = 0.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -268,12 +276,12 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
-          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 65.f);
-          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 55.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 75.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 80.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 40.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
@@ -290,9 +298,9 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 20.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 5.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
@@ -311,7 +319,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 25.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },

@@ -27,10 +27,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_highlights = 1.05f;
+			config.reno_drt_contrast = 1.1f;
+			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.025f * pow(injectedData.colorGradeFlare, 5.f);
-			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::REINHARD;
+			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
 			
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
 			config.exposure = 1.f;
@@ -40,9 +40,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			
 		float3 lutInput;
 					if(injectedData.colorGradeLUTSampling == 0.f){
-				lutInput = renodx::color::arri::logc::c1000::Encode(untonemapped, false);
+				lutInput = renodx::color::arri::logc::c1000::Encode(outputColor, false);
 				} else {
-				lutInput = renodx::color::pq::Encode(untonemapped, 100.f);
+				lutInput = renodx::color::pq::Encode(outputColor, 100.f);
 				}
 		float3 lutOutput = renodx::lut::Sample(lutTexture, lutSampler, lutInput, 33.f);
 			outputColor = lerp(outputColor, lutOutput, injectedData.colorGradeLUTStrength);

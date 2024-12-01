@@ -34,6 +34,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.reno_drt_saturation = 1.25f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
@@ -51,21 +52,12 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if(injectedData.toneMapType == 4.f){
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.1f, 0.85f, 1.1f);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
-				float3 sdrColor = renodx::tonemap::ReinhardScalable(max(0.f, outputColor), 1.f, 0.f, 0.18f, midGray);
-				float reinhardPeak = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, midGray);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.25f);
-			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, 1.25f);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
-			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
-				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
-			
-			} else {
-			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
+			config.type -= 1;
+			config.reno_drt_shadows = 0.85f;
+			config.reno_drt_flare = 0.f;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::REINHARD;
 			}
+			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 	
 	return outputColor;
 }
@@ -89,6 +81,7 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			config.reno_drt_highlights = 1.1f;
 			config.reno_drt_contrast = 1.1f;
 			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -103,16 +96,12 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			}
 
 				if(injectedData.toneMapType == 4.f){
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.1f, 0.85f, 1.1f);
-			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
-				float3 sdrColor = renodx::tonemap::ReinhardScalable(outputColor, 1.f, 0.f, 0.18f, midGray);
-				float reinhardPeak = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-			outputColor = renodx::tonemap::ReinhardScalable(outputColor, reinhardPeak, 0.f, 0.18f, midGray);
-				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
-			} else {
-			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
+			config.type -= 1;
+			config.reno_drt_shadows = 0.85f;
+			config.reno_drt_flare = 0.f;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::REINHARD;
 			}
+			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 	
 	return outputColor;
 }

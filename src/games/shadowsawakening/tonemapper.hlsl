@@ -27,10 +27,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_highlights = 1.15f;
+			config.reno_drt_contrast = 1.1f;
+			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.025f * pow(injectedData.colorGradeFlare, 5.f);
-			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::REINHARD;
+			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,

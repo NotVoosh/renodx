@@ -12,14 +12,15 @@
 #include <embed/0x8A6BCB4C.h>   // videos
 #include <embed/0x0EBC87AB.h>   // screenLUT (game brightness)
 
-#include <embed/0xE363E5C8.h>   // uberpost
-#include <embed/0x3BD8B8FD.h>   // uberpost (title menu)
+#include <embed/0xE363E5C8.h>   // uberpost (bloom + vignette)
+#include <embed/0x3BD8B8FD.h>   // uberpost title menu (CA + bloom + vignette)
 
 #include <embed/0x192EEB27.h>   // HDRP final
 #include <embed/0x02AB22C6.h>   // HDRP (title menu)
 #include <embed/0x0FA783B7.h>   // HDRP2 (title menu)
 #include <embed/0xCF6A37F9.h>   // HDRP final (DLSS/TAAU)
 #include <embed/0x9A3E0141.h>   // HDRP final (FXAA)
+#include <embed/0x38B55FCE.h>   // HDRP final 6 (FXAA + grain)
 
 #include <embed/0x20133A8B.h>   // Final
 
@@ -34,20 +35,24 @@
 
 namespace {
 
+
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x7F27D36D),  // LutBuilder3D
 
     CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
     CustomShaderEntry(0x0EBC87AB),  // screenLUT (game brightness)
 
-    CustomShaderEntry(0xE363E5C8),  // uberpost = tonemap/LUT/postprocess
-    CustomShaderEntry(0x3BD8B8FD),  // uberpost (title menu)
+    CustomShaderEntry(0xE363E5C8),  // uberpost (bloom + vignette)
+    CustomShaderEntry(0x3BD8B8FD),  // uberpost title menu (CA + bloom + vignette)
 
-    CustomShaderEntry(0x192EEB27),  // HDRPfinal
+    //BypassShaderEntry(0x222A387F),
+
+    CustomShaderEntry(0x192EEB27),  // HDRPfinal (grain)
     CustomShaderEntry(0x02AB22C6),  // HDRPfinal (title menu)
     CustomShaderEntry(0x0FA783B7),  // HDRPfinal2 (title menu)
     CustomShaderEntry(0xCF6A37F9),  // HDRPfinal (DLSS/TAAU)
     CustomShaderEntry(0x9A3E0141),  // HDRPfinal (FXAA)
+    CustomShaderEntry(0x38B55FCE),  // HDRPfinal6 (FXAA + grain)
 
     CustomSwapchainShader(0x20133A8B),  // Final
 };
