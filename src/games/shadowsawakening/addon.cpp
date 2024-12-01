@@ -7,9 +7,9 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xF70A0EED.h>   // lutbuilder 3
-#include <embed/0x6A8BFC0E.h>   // lutbuilder
-#include <embed/0x30261E46.h>   // lutbuilder 2
+//#include <embed/0xF70A0EED.h>   // lutbuilder 3
+//#include <embed/0x6A8BFC0E.h>   // lutbuilder
+//#include <embed/0x30261E46.h>   // lutbuilder 2
 
 #include <embed/0xF804335C.h>   // videos
 #include <embed/0xE911C9D2.h>   // lighting
@@ -38,9 +38,9 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-  CustomShaderEntry(0x6A8BFC0E),  // lutbuilder
-  CustomShaderEntry(0xF70A0EED),  // lutbuilder 3
-  CustomShaderEntry(0x30261E46),  // lutbuilder 2
+  //CustomShaderEntry(0x6A8BFC0E),  // lutbuilder
+  //CustomShaderEntry(0xF70A0EED),  // lutbuilder 3
+  //CustomShaderEntry(0x30261E46),  // lutbuilder 2
 
   CustomShaderEntry(0xF804335C),  // videos
   CustomShaderEntry(0xE911C9D2),  // lighting
