@@ -14,6 +14,7 @@
 #include <embed/0x00D96EAE.h>   // videos 2
 
 #include <embed/0x3EB9D976.h>   // DoF 7
+#include <embed/0xD980FA68.h>   // low health effect
 
 #include <embed/0xFFFFFFFD.h> // Custom final VS
 #include <embed/0xFFFFFFFE.h> // Custom final PS
@@ -46,7 +47,8 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xA7799306),  // videos
     CustomShaderEntry(0x00D96EAE),  // videos 2
 
-    CustomShaderEntry(0x3EB9D976),  // DoF 7
+    CustomSwapchainShader(0x3EB9D976),  // DoF 7
+    CustomSwapchainShader(0xD980FA68),  // low health effect
   };
 
 renodx::utils::settings::Settings settings = {
@@ -353,6 +355,8 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("fxNoise", 50.f);
 }
 
+auto start = std::chrono::steady_clock::now();
+
 }  // namespace
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -521,6 +525,9 @@ void OnPresent(reshade::api::command_queue* queue, reshade::api::swapchain* swap
   auto back_buffer_resource = swapchain->get_current_back_buffer();
   auto back_buffer_desc = device->get_resource_desc(back_buffer_resource);
 
+  auto end = std::chrono::steady_clock::now();
+  shader_injection.elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
   // copy backbuffer
   {
     const reshade::api::resource resources[2] = {back_buffer_resource, data.final_texture};
@@ -592,45 +599,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .old_format = reshade::api::format::b8g8r8a8_typeless,
           .new_format = reshade::api::format::r16g16b16a16_typeless,
       });
-/*
-      //  RG11B10_float ("cutscenes" DoF)
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 3,
-          .ignore_size = false,
-          .view_upgrades = {
-          {{reshade::api::resource_usage::shader_resource,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::unordered_access,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::render_target,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          }
-      });
 
-      //  RG11B10_float ("cutscenes" DoF 2)
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r11g11b10_float,
-          .new_format = reshade::api::format::r16g16b16a16_float,
-          .index = 4,
-          .ignore_size = false,
-          .view_upgrades = {
-          {{reshade::api::resource_usage::shader_resource,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::unordered_access,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          {{reshade::api::resource_usage::render_target,
-          reshade::api::format::r11g11b10_float},
-          reshade::api::format::r16g16b16a16_float},
-          }
-      });
-*/
       break;
     case DLL_PROCESS_DETACH:
       // Final shader copy pasta start

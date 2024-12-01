@@ -1,5 +1,16 @@
 #include "./shared.h"
 
+float3 applyFilmGrain(float3 outputColor, float2 screen)
+{
+    float3 grainedColor = renodx::effects::ApplyFilmGrain(
+			outputColor,
+			screen,
+			frac(injectedData.elapsedTime / 1000.f),
+			injectedData.fxFilmGrain * 0.03f,
+			1.f);
+    return grainedColor;
+}
+
 float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float linearWhite){
 		
 		float3 outputColor = untonemapped;
@@ -32,7 +43,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			renodx::lut::config::type::GAMMA_2_2,
 			renodx::lut::config::type::LINEAR,
 			16.f);
-
+			
 				if(injectedData.toneMapGammaCorrection == 0.f){
 			outputColor = renodx::color::correct::Gamma(outputColor, true);
 			}
@@ -86,9 +97,11 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			renodx::lut::config::type::GAMMA_2_2,
 			renodx::lut::config::type::LINEAR,
 			16.f);
-				if(injectedData.toneMapGammaCorrection == 0){
+
+				if(injectedData.toneMapGammaCorrection == 0.f){
 			outputColor = renodx::color::correct::Gamma(outputColor, true);
 			}
+
 				if(injectedData.toneMapType == 4.f){
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 0.8f, 1.1f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);

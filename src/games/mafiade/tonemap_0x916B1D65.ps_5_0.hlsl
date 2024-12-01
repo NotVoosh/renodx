@@ -412,18 +412,10 @@ void main(
     r2.x = dot(cb0[1].xy, r0.xy);
     r2.y = dot(cb0[1].zw, r0.xy);
     r0.xyz = t8.Sample(s0_s, r2.xy).xyz;
-        
-        float3 grainedColor = renodx::effects::ApplyFilmGrain(
-          r1.rgb,
-          r2.xy,
-          1,
-          injectedData.fxFilmGrain * 0.03f,
-          1.f);
-
         if(injectedData.fxFilmGrainType == 0){  
     r1.xyz = r0.xyz * cb0[0].yyy * injectedData.fxFilmGrain + r1.xyz;
-    } else {
-    r1.rgb = grainedColor;
+    } else if(injectedData.is_swapchain_write == true) {
+    r1.rgb = applyFilmGrain(r1.rgb, v1.yz);
     }
   }
     
@@ -455,17 +447,21 @@ void main(
       r1.rgb = sign(r0.rgb) * pow(abs(r0.rgb), 2.f);
     }
     r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
-    r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    r1.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r1.rgb)
-                                                 : renodx::color::srgb::EncodeSafe(r1.rgb);
 
     // This shader writes on swapchain most of the time.
     // Intermediate fp11 resources spawn temporarily during cutscenes (Depth of Field/Blur effects)
     // Using AP1 to preserve WCG when this happens
-    // Inverse conversion is done on latest DoF shader (samples everything, writes on swapchain)
-      o0.rgb = injectedData.is_swapchain_write ? r1.rgb : renodx::color::ap1::from::BT709(r1.rgb);
+    // Inverse conversion is done in latest DoF shader (samples everything, writes on swapchain)
+    // + same with "low health" effect
+        if(injectedData.is_swapchain_write == true){
+      r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+      r1.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r1.rgb)
+                                                   : renodx::color::srgb::EncodeSafe(r1.rgb);
+      } else {
+      r1.rgb = renodx::color::ap1::from::BT709(r1.rgb);
+      }
     
-  //o0.xyz = r1.xyz;
+  o0.xyz = r1.xyz;
   o0.w = 1;
   return;
 }

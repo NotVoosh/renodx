@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./tonemapper.hlsl"
 
 Texture2D<float4> t5 : register(t5);
 
@@ -65,6 +66,13 @@ void main(
     r2.xyz = r0.xyz * r0.xyz;
   }
       r2.rgb = renodx::color::bt709::from::AP1(r2.rgb);   // writing on swapchain here, back to bt709
+        if(injectedData.fxFilmGrainType == 1.f){
+      r2.rgb = applyFilmGrain(r2.rgb, v1.xy);
+      }
+      r2.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+      r2.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r2.rgb)
+                                                   : renodx::color::srgb::EncodeSafe(r2.rgb);
+
   o0.xyzw = r2.xyzw;
   return;
 }
