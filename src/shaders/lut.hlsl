@@ -283,7 +283,7 @@ float3 LinearUnclampedOutput(float3 color, Config lut_config) {
   } else if (lut_config.type_output == config::type::GAMMA_2_2) {
     color = renodx::color::gamma::DecodeSafe(color);
   } else {
-    color = renodx::math::Sign(color) * renodx::color::srgb::Decode(abs(color));
+    color = renodx::color::srgb::DecodeSafe(color);
   }
   return color;
 }
@@ -314,7 +314,8 @@ float3 RestoreSaturationLoss(float3 color_input, float3 color_output, Config lut
     clamped = max(0, renodx::color::bt709::from::BT2020(clamped));
   }
 
-  float3 sat_clamped = clamped - y_in;
+  float y_clamped = renodx::color::y::from::BT709(abs(clamped));
+  float3 sat_clamped = clamped - y_clamped;
 
   float y_out = renodx::color::y::from::BT709(abs(color_output));
   float3 sat_out = color_output - y_out;
