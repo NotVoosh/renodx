@@ -58,12 +58,16 @@ float3 applyUserTonemap(float3 untonemapped){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// ReinhardScalable
-			config.type -= 1;
-			config.reno_drt_shadows = 1.05f;
-			config.reno_drt_flare = 0.f;
-			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::REINHARD;
-			}
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.2f, 1.05f, 1.3f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
+				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
+																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
+			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, midGray);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
+			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
+			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
+			}
 
 	return outputColor;
 }
