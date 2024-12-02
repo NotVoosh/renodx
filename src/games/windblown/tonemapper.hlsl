@@ -12,27 +12,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 sampleLUT(float3 color, Texture2D lutTexture, SamplerState lutSampler, float3 preCompute){
-			
-			renodx::lut::Config lut_config = renodx::lut::config::Create(
-			lutSampler,
-			injectedData.colorGradeLUTStrength,
-			injectedData.colorGradeLUTScaling,
-			renodx::lut::config::type::LINEAR,
-			renodx::lut::config::type::LINEAR,
-			preCompute);
-		
-		float3 input = color;
-		float3 lutColor = renodx::lut::Sample(saturate(input), lut_config, lutTexture);
-		float3 output = RestorePostProcess(input, saturate(input), lutColor);
-		//float3 input = renodx::color::pq::Encode(color, 100.f);
-		//float3 lutColor = renodx::lut::Sample(lutTexture, lutSampler, input, preCompute);
-		//float3 output = lerp(input, lutColor, injectedData.colorGradeLUTStrength);
-
-	return output;
-}
-
-float3 applyUserTonemap(float3 untonemapped){
+float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler, float3 preCompute){
 		
 		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(untonemapped);
@@ -60,19 +40,32 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
+			renodx::lut::Config lut_config = renodx::lut::config::Create(
+			lutSampler,
+			injectedData.colorGradeLUTStrength,
+			injectedData.colorGradeLUTScaling,
+			renodx::lut::config::type::LINEAR,
+			renodx::lut::config::type::LINEAR,
+			preCompute);
+
 				if(injectedData.toneMapType >= 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// ReinhardScalable
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.2f, 1.05f, 1.3f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, config.exposure, config.highlights, config.shadows, config.contrast);
+				float3 sdrColor = renodx::tonemap::ReinhardScalable(max(0.f, outputColor), 1.f, 0.f, 0.18f, midGray);
 				float reinhardPeak = injectedData.toneMapGammaCorrection ? renodx::color::correct::Gamma(injectedData.toneMapPeakNits / injectedData.toneMapGameNits, true)
 																		  : injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 			outputColor = sign(outputColor) * renodx::tonemap::ReinhardScalable(abs(outputColor), reinhardPeak, 0.f, 0.18f, midGray);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
+			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, 1.2f);
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
+			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
+				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 			} else {
-			outputColor = renodx::tonemap::config::Apply(outputColor, config);
+			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
 			
 	return outputColor;

@@ -69,7 +69,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::color::grade::UserColorGrading(outputColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 			sdrColor = renodx::color::grade::UserColorGrading(sdrColor, 1.f, 1.f, 1.f, 1.f, config.saturation, config.reno_drt_dechroma);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, injectedData.colorGradeLUTStrength);
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 		} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 		}
