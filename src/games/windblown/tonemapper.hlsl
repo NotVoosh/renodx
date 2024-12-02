@@ -1,5 +1,4 @@
 #include "./shared.h"
-#include "./ColorGradingLUT.hlsl"
 
 float3 applyFilmGrain(float3 outputColor, float2 screen)
 {
