@@ -30,7 +30,7 @@ float3 RenoDRTSmoothClamp(float3 untonemapped) {
   renodrtSC_config.highlights = 1.f;
   renodrtSC_config.shadows = 1.f;
   renodrtSC_config.contrast = 1.05f;
-  renodrtSC_config.saturation = 1.05f;
+  renodrtSC_config.saturation = 1.04f;
   renodrtSC_config.dechroma = 0.f;
   renodrtSC_config.flare = 0.f;
   renodrtSC_config.hue_correction_strength = 0.f;
