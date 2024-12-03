@@ -15,6 +15,8 @@
 #include <embed/0xD11C77B6.h>   // combineeffects
 #include <embed/0x70CEAF26.h>   // combineeffects 2
 
+#include <embed/0x8159D8EB.h>   // FXAA
+
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
 
@@ -31,6 +33,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0xD11C77B6),  // combineeffects (color grading, dof, bloom)
     CustomShaderEntry(0x70CEAF26),  // combineeffects 2 (color grading)
+    CustomShaderEntry(0x8159D8EB),  // FXAA
 };
 
 ShaderInjectData shader_injection;

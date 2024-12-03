@@ -51,7 +51,8 @@ void main(
   r0.xyz = r0.zzz * r0.xyw + r1.xyz;
     r0.rgb = applyUserTonemap(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s, v1.xy);
     
-  o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
+  //o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
+    o0.a = renodx::color::y::from::BT709(r0.rgb);
   o0.xyz = r0.xyz;
   return;
 }
