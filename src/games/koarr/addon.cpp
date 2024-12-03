@@ -98,6 +98,17 @@ renodx::utils::settings::Settings settings = {
         .tint = 0xAC7C38,
     },
     new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 75.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .tint = 0xAC7C38,
+        .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType == 2.f || shader_injection.toneMapType == 3.f; },
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "diceShoulderStart",
         .binding = &shader_injection.diceShoulderStart,
         .default_value = 0.33f,
@@ -247,7 +258,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 45.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
