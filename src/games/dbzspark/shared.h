@@ -14,20 +14,30 @@ struct ShaderInjectData {
   float toneMapGameNits;
   float toneMapUINits;
   float toneMapGammaCorrection;
-  float toneMapHueCorrection;
   float colorGradeExposure;
   float colorGradeHighlights;
   float colorGradeShadows;
   float colorGradeContrast;
   float colorGradeSaturation;
-  float colorGradeLUTStrength;
-  float colorGradeBlowout;
 };
 
 #ifndef __cplusplus
 cbuffer injectedBuffer : register(b0, space50) {
   ShaderInjectData injectedData : packoffset(c0);
 }
+/* static const ShaderInjectData injectedData = {
+    2.f,    // toneMapType
+    2.f,    // toneMapDisplay
+    800.f,  // toneMapPeakNits
+    160.f,  // toneMapGameNits
+    120.f,  // toneMapUINits
+    1.f,    // toneMapGammaCorrection
+    1.f,    // colorGradeExposure
+    1.f,    // colorGradeHighlights
+    1.f,    // colorGradeShadows
+    1.f,    // colorGradeContrast
+    1.f,    // colorGradeSaturation
+}; */
 #endif
 
 #endif  // SRC_DBZSPARK_SHARED_H_
