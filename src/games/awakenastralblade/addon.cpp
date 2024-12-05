@@ -109,6 +109,17 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x927A13,
     },
     new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 75.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .tint = 0x927A13,
+        .max = 100.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "diceShoulderStart",
         .binding = &shader_injection.diceShoulderStart,
         .default_value = 0.33f,
@@ -172,10 +183,11 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeBlowout",
         .binding = &shader_injection.colorGradeBlowout,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Blowout",
         .section = "Color Grading",
-        .tooltip = "Controls highlight desaturation due to overexposure.",
+        .tooltip = "Controls highlight desaturation due to overexposure."
+                   "\nDefault: RenoDRT = 50 | Frostbite/DICE = 0",
         .tint = 0x432A26,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
@@ -248,7 +260,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
         .binding = &shader_injection.fxFilmGrain,
-        .default_value = 0.f,
+        .default_value = 15.f,
         .label = "Film Grain",
         .section = "Effects",
         .tint = 0x02A9C9,
@@ -268,7 +280,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
@@ -288,7 +300,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 33.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 5.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);
@@ -335,8 +347,8 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
-        },
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
+},
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
@@ -345,7 +357,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -355,7 +367,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -372,6 +384,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0.f);
+  renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);

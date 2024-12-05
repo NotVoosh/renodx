@@ -30,11 +30,11 @@ float3 RenoDRTSmoothClamp(float3 untonemapped) {
   renodrtSC_config.highlights = 1.f;
   renodrtSC_config.shadows = 1.f;
   renodrtSC_config.contrast = 1.05f;
-  renodrtSC_config.saturation = 1.04f;
+  renodrtSC_config.saturation = 1.05f;
   renodrtSC_config.dechroma = 0.f;
   renodrtSC_config.flare = 0.f;
   renodrtSC_config.hue_correction_strength = 0.f;
-  renodrtSC_config.hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::OKLAB;
+  renodrtSC_config.hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::ICTCP;
   renodrtSC_config.tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
   renodrtSC_config.hue_correction_type = renodx::tonemap::renodrt::config::hue_correction_type::INPUT;
   renodrtSC_config.working_color_space = 2u;
@@ -67,10 +67,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
-
-				if(injectedData.toneMapType == 3.f){
-			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, 1u);
-			}
+			config.reno_drt_hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::ICTCP;
 			
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -79,6 +76,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			renodx::lut::config::type::SRGB,
 			renodx::lut::config::type::SRGB,
 			16.f);
+
+				if(injectedData.toneMapType >= 3.f){
+			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection / 2, 1u);
+			}
 			
 				if (injectedData.toneMapType == 2.f){			// Frostbite
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, 1u);
