@@ -2,35 +2,22 @@
 #include "./common.hlsl"
 
 Texture2D<float4> t6 : register(t6);
-
 Texture3D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s6_s : register(s6);
-
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[41];
 }
 
@@ -157,6 +144,7 @@ void main(
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
   r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r1.xyz;
     r1.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
       if(injectedData.fxFilmGrain > 0.f){
     r1.rgb = applyFilmGrain(r1.rgb, w1);
     }

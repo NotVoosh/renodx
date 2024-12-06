@@ -10,8 +10,7 @@ SamplerState s0_s : register(s0);
 
 RWTexture3D<float4> u0 : register(u0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[10];
 }
 
@@ -132,7 +131,6 @@ cbuffer cb0 : register(b0)
       
         r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
 
-      //r0.rgb = max(0, r0.rgb);
       r0.rgb = applyUserTonemap(r0.rgb);
 	  r0.a = 1;  
   u0[vThreadID.xyz] = r0.rgba;

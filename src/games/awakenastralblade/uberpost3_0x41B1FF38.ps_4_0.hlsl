@@ -2,23 +2,16 @@
 #include "./common.hlsl"
 
 Texture3D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[37];
 }
 
@@ -61,6 +54,7 @@ void main(
   
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
     o0.rgb = r0.rgb;
   return;
 }

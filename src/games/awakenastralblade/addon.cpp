@@ -238,7 +238,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Dithering Noise",
         .section = "Effects",
         .tint = 0x02A9C9,
@@ -248,7 +248,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxFilmGrain",
         .binding = &shader_injection.fxFilmGrain,
-        .default_value = 15.f,
+        .default_value = 0.f,
         .label = "Film Grain",
         .section = "Effects",
         .tint = 0x02A9C9,
