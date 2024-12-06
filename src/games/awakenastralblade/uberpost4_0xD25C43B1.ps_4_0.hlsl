@@ -1,5 +1,5 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture3D<float4> t5 : register(t5);
 
@@ -30,12 +30,7 @@ cbuffer cb0 : register(b0)
   float4 cb0[37];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -77,7 +72,9 @@ void main(
   r0.xyzw = r3.xyzw + r0.xyzw;
   r0.xyzw = r2.xyzw * float4(2,2,2,2) + r0.xyzw;
   r0.xyzw = r0.xyzw + r1.xyzw;
+
   r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+
   r1.xyzw = float4(0.0625,0.0625,0.0625,1) * r0.xyzw;
   r0.xyzw = float4(0.0625,0.0625,0.0625,0.0625) * r0.xyzw;
   r2.xyz = cb0[35].xyz * r1.xyz;
@@ -93,46 +90,15 @@ void main(
   r0.xyzw = r2.xyzw * r0.xyzw + r1.xyzw;
   r0.xyzw = cb0[36].zzzz * r0.xyzw;
 
-      float3 untonemapped = r0.rgb;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  o0.w = r0.w;
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.xyz = cb0[36].yyy * r0.xyz;
   r0.w = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r0.www;
   r0.xyzw = t5.Sample(s5_s, r0.xyz).xyzw;
-      r0.rgb = applyUserTonemap(untonemapped, t5, s5_s);
-/*
-  r1.xyz = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r0.xyz));
-  r1.xyz = log2(r1.xyz);
-  r1.xyz = float3(0.416666657,0.416666657,0.416666657) * r1.xyz;
-  r1.xyz = exp2(r1.xyz);
-  r1.xyz = r1.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
-  r2.xyz = float3(12.9200001,12.9200001,12.9200001) * r0.xyz;
-  r0.xyz = cmp(float3(0.00313080009,0.00313080009,0.00313080009) >= r0.xyz);
-  r0.xyz = r0.xyz ? r2.xyz : r1.xyz;
-  r1.xy = v1.xy * cb0[30].xy + cb0[30].zw;
-  r1.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
-  r0.w = r1.w * 2 + -1;
-  r1.x = 1 + -abs(r0.w);
-  r0.w = saturate(r0.w * 3.40282347e+38 + 0.5);
-  r0.w = r0.w * 2 + -1;
-  r1.x = sqrt(r1.x);
-  r1.x = 1 + -r1.x;
-  r0.w = r1.x * r0.w;
-  r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) + r0.xyz;
-  r1.xyz = float3(0.0549999997,0.0549999997,0.0549999997) + r0.xyz;
-  r1.xyz = float3(0.947867334,0.947867334,0.947867334) * r1.xyz;
-  r1.xyz = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r1.xyz));
-  r1.xyz = log2(r1.xyz);
-  r1.xyz = float3(2.4000001,2.4000001,2.4000001) * r1.xyz;
-  r1.xyz = exp2(r1.xyz);
-  r2.xyz = float3(0.0773993805,0.0773993805,0.0773993805) * r0.xyz;
-  r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
-  o0.xyz = r0.xyz ? r2.xyz : r1.xyz;
-  */
+
     r0.rgb = renodx::color::srgb::EncodeSafe(r0.rgb);
+
   r1.xy = v1.xy * cb0[30].xy + cb0[30].zw;
   r1.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
   r0.w = r1.w * 2 + -1;
@@ -142,18 +108,13 @@ void main(
   r1.x = sqrt(r1.x);
   r1.x = 1 + -r1.x;
   r0.w = r1.x * r0.w;
+
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
     r1.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
-      if(injectedData.fxFilmGrain){
+      if(injectedData.fxFilmGrain > 0.f){
     r1.rgb = applyFilmGrain(r1.rgb, w1);
     }
-      if(injectedData.toneMapGammaCorrection == 1.f){
-    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
-    r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb, true);
-    } else {
-    r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    }
+    r1.rgb = PostToneMapScale(r1.rgb);
     o0.rgb = r1.rgb;
   return;
 }

@@ -13,12 +13,7 @@ cbuffer cb0 : register(b0)
   float4 cb0[29];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -40,27 +35,7 @@ void main(
   r0.y = 1 + -r0.y;
   r0.x = r0.x * r0.y;
   r1.xyzw = t1.Sample(s1_s, w1.xy).xyzw;
-  /*
-  r0.yzw = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r1.xyz));
-  r0.yzw = log2(r0.yzw);
-  r0.yzw = float3(0.416666657,0.416666657,0.416666657) * r0.yzw;
-  r0.yzw = exp2(r0.yzw);
-  r0.yzw = r0.yzw * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
-  r2.xyz = float3(12.9200001,12.9200001,12.9200001) * r1.xyz;
-  r1.xyz = cmp(float3(0.00313080009,0.00313080009,0.00313080009) >= r1.xyz);
-  o0.w = r1.w;
-  r0.yzw = r1.xyz ? r2.xyz : r0.yzw;
-  r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) + r0.yzw;
-  r1.xyz = float3(0.0549999997,0.0549999997,0.0549999997) + r0.xyz;
-  r1.xyz = float3(0.947867334,0.947867334,0.947867334) * r1.xyz;
-  r1.xyz = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r1.xyz));
-  r1.xyz = log2(r1.xyz);
-  r1.xyz = float3(2.4000001,2.4000001,2.4000001) * r1.xyz;
-  r1.xyz = exp2(r1.xyz);
-  r2.xyz = float3(0.0773993805,0.0773993805,0.0773993805) * r0.xyz;
-  r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
-  o0.xyz = r0.xyz ? r2.xyz : r1.xyz;
-  */
+
     r0.gba = renodx::color::srgb::EncodeSafe(r1.rgb);
   r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);

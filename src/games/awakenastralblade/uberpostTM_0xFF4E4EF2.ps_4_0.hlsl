@@ -1,5 +1,5 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture3D<float4> t4 : register(t4);
 
@@ -26,12 +26,7 @@ cbuffer cb0 : register(b0)
   float4 cb0[43];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -76,7 +71,9 @@ void main(
   r0.xy = cb0[26].xx * r0.xy;
   r0.xyzw = t2.Sample(s2_s, r0.xy).xyzw;
   r0.xyzw = r2.xyzw + r0.xyzw;
+
   r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+
   r2.xy = v1.xy * cb0[33].xy + cb0[33].zw;
   r2.xyzw = t3.Sample(s3_s, r2.xy).xyzw;
   r3.xyzw = float4(0.0625,0.0625,0.0625,0.0625) * r0.xyzw;
@@ -89,16 +86,12 @@ void main(
   r0.xyzw = r2.xyzw * r3.xyzw + r0.xyzw;
   r0.xyzw = cb0[36].zzzz * r0.xyzw;
 
-      float3 untonemapped = r0.rgb;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.xyz = cb0[36].yyy * r0.xyz;
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t4.Sample(s4_s, r0.xyz).wxyz;
-      r1.rgb = applyUserTonemap(untonemapped, t4, s4_s);
-
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {
     r0.xyz = saturate(r1.yzw);

@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./common.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/e42df452b62857a60944aed34f02efa1bda50018/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Lut3DBaker.compute
 // KGenLUT3D_NoTonemap
@@ -32,15 +33,17 @@ cbuffer cb0 : register(b0)
     // Contrast(r0.rgb, ACEScc_MIDGRAY, cb0[3].b)
     r0.rgb = r0.rgb * cb0[0].ggg;
     
+      float3 preContrast = r0.rgb;
+
     r0.rgb = r0.rgb + float3(-0.413588405,-0.413588405,-0.413588405);	// ACEScc_MIDGRAY = 0.4135884
     r0.rgb = r0.rgb * cb0[3].bbb + float3(0.413588405,0.413588405,0.413588405);
-	
-      if(injectedData.colorGradeLUTSampling == 0.f){
-    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb, false);
-    } else {
-    r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
-    }
     
+      r0.rgb = lerp(preContrast, r0.rgb, injectedData.colorGradeLUTStrength);
+	
+      r0.rgb = lutShaper(r0.rgb, true);
+
+      float3 preCG = r0.rgb;
+
     // (start) LinearGrade
       // WhiteBalance(r0.rgb, cb0[1].rgb)
       r1.r = dot(float3(0.390405, 0.549941, 0.00892631989), r0.rgb);
@@ -126,7 +129,11 @@ cbuffer cb0 : register(b0)
       r1.g = dot(r1.gba, float3(0.212672904, 0.715152204, 0.072175));
       r0.gba = r1.rrr * r0.gba + -r1.ggg;
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
-      r0.rgb = max(0, r0.rgb);
+      
+        r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
+
+      //r0.rgb = max(0, r0.rgb);
+      r0.rgb = applyUserTonemap(r0.rgb);
 	  r0.a = 1;  
   u0[vThreadID.xyz] = r0.rgba;
   }

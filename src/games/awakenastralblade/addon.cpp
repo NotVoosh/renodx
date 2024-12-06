@@ -7,19 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x995B320A.h>   // LUT3DBaker (NoTonemap)
-
-#include <embed/0xB8308863.h>   // uberpost
-#include <embed/0xFF4E4EF2.h>   // uberpost (title menu)
-#include <embed/0x41B1FF38.h>   // uberpost 3
-#include <embed/0xD25C43B1.h>   // uberpost 4
-
-#include <embed/0x366EE13E.h>   // post final
-#include <embed/0x4757CDEB.h>   // uberpost 2
-
-#include <embed/0x8A6BCB4C.h>   // videos
-
-#include <embed/0x20133A8B.h>   // final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -324,6 +312,19 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);
         },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "forceHueProcessor",
+        .binding = &shader_injection.forceHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 0.f,
+        .label = "Force Hue Processor",
+        .section = "Processor",
+        .tooltip = "Default: Frostbite = dartable UCS"
+                   "\nRenoDRT = ICtCp | DICE = OkLab",
+        .labels = {"Default", "OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0xB12419,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
