@@ -7,25 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xBE750C14.h>   // LUT3DBaker (neutral)
-#include <embed/0x6EA48EC8.h>   // LUT3DBaker (ACES)
-
-#include <embed/0x6BE60185.h>   // uberpost (FXAA/SMAA)
-#include <embed/0x728A5929.h>   // uberpost (title menu)
-#include <embed/0x6D14F22A.h>   // uberpost (no AA/TAA)
-#include <embed/0x18DC6A24.h>   // uberpost FG (no AA/TAA)
-#include <embed/0xC63B24BB.h>   // uberpost FG 2 (FXAA/SMAA)
-#include <embed/0x7E2A04D8.h>   // uberpost bloom (no AA/TAA)
-#include <embed/0x957EC72A.h>   // uberpost bloom 2 (FXAA/SMAA)
-#include <embed/0x272EB112.h>   // uberpost potato (no AA/TAA)
-#include <embed/0xDB814E6C.h>   // uberpost potato (FXAA/SMAA)
-
-#include <embed/0xCC8B6ACF.h>   // post final (FXAA)
-#include <embed/0x366EE13E.h>   // post final (title menu/SMAA)
-
-#include <embed/0x2B868B21.h>   // UI default
-#include <embed/0xD0559BEE.h>   // UI default 2
-#include <embed/0x20133A8B.h>   // final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -272,7 +254,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Dithering Noise",
         .section = "Effects",
         .tint = 0x78303B,
@@ -306,7 +288,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -316,7 +298,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -326,7 +308,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{

@@ -1,38 +1,23 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Mon Oct  7 16:09:53 2024
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture3D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[43];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -50,7 +35,9 @@ void main(
   r0.w = cmp(cb0[40].y < 0.5);
   if (r0.w != 0) {
     r1.xy = -cb0[38].xy + v1.xy;
-    r1.yz = cb0[39].xx * abs(r1.yx) * injectedData.fxVignette;  // vignette
+
+    r1.yz = cb0[39].xx * abs(r1.yx) * min(1, injectedData.fxVignette);
+
     r0.w = cb0[22].x / cb0[22].y;
     r0.w = -1 + r0.w;
     r0.w = cb0[39].w * r0.w + 1;
@@ -62,9 +49,11 @@ void main(
     r0.w = dot(r1.xy, r1.xy);
     r0.w = 1 + -r0.w;
     r0.w = max(0, r0.w);
+
     r0.w = log2(r0.w);
-    r0.w = cb0[39].y * r0.w;
+    r0.w = cb0[39].y * r0.w * max(1, injectedData.fxVignette);
     r0.w = exp2(r0.w);
+
     r1.xyz = float3(1,1,1) + -cb0[37].xyz;
     r1.xyz = r0.www * r1.xyz + cb0[37].xyz;
     r1.xyz = r1.xyz * r0.xyz;
@@ -90,29 +79,25 @@ void main(
   }
   r0.xy = w1.xy * cb0[41].xy + cb0[41].zw;
   r0.xyzw = t4.Sample(s4_s, r0.xy).xyzw;
-  r3.xyz = saturate(r1.xyz);
-  r0.w = dot(r3.xyz, float3(0.212672904,0.715152204,0.0721750036));
-  r0.w = sqrt(r0.w);
+    r0.a = renodx::color::y::from::BT709(r1.rgb);
+    r0.a = renodx::math::SqrtSafe(r0.a);
   r0.w = cb0[40].z * -r0.w + 1;
   r0.xyz = r1.xyz * r0.xyz;
-  r0.xyz = cb0[40].www * r0.xyz;
-  r2.xyz = r0.xyz * r0.www * injectedData.fxFilmGrain + r1.xyz;     // noise
+
+  r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
+
+  r2.xyz = r0.xyz * r0.www + r1.xyz;
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
 
-      float3 untonemapped = r0.rgb;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.xyz = cb0[36].yyy * r0.xyz;
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
-  r1.xyzw = t2.Sample(s2_s, r0.xyz).wxyz;
-      r1.gba = sampleLUT(untonemapped, t2, s2_s);
-      
+  r1.xyzw = t2.Sample(s2_s, r0.xyz).wxyz;      
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {
-    r0.xyz = saturate(r1.yzw);
-    r1.x = dot(r0.xyz, float3(0.212672904,0.715152204,0.0721750036));
+      r1.x = renodx::color::y::from::BT709(r1.gba);
   } else {
     r1.x = r0.w;
   }
