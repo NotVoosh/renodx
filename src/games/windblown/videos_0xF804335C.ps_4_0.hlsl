@@ -1,23 +1,14 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -43,7 +34,7 @@ void main(
   r0.xyz = r1.xyz * r0.xyz + float3(0.0125228781,0.0125228781,0.0125228781);
   o0.xyz = r1.xyz * r0.xyz;
   o0.w = 1;
-      o0 = saturate(o0);
-      o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    o0 = saturate(o0);
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

@@ -1,27 +1,17 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[146];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -81,7 +71,9 @@ void main(
     r1.yzw = r3.xyz * r3.www;
     r3.xyz = float3(8,8,8) * r1.yzw;
   }
-  r1.yzw = cb0[134].xxx * r3.xyz * injectedData.fxBloom;  // bloom
+
+  r1.yzw = cb0[134].xxx * r3.xyz * injectedData.fxBloom;
+  
   r0.x = r1.x;
   r0.y = r2.y;
   r0.xyz = r1.yzw * cb0[134].yzw + r0.xyz;
@@ -295,20 +287,16 @@ void main(
   r0.yzw = r2.xyz + -r3.xyz;
   o0.xyz = r0.xxx * r0.yzw + r3.xyz;
   o0.w = 1;
-        if(injectedData.toneMapType != 0.f){
-      o0.rgb = applyUserTonemap(untonemapped, t2, s0_s, cb0[132].rgb);
-      } else {
-      o0.rgb = lerp(preLUT, o0.rgb, injectedData.colorGradeLUTStrength);
-      }
-        if(injectedData.fxFilmGrain > 0.f){
-      o0.rgb = applyFilmGrain(o0.rgb, v1);
-        }
-        if(injectedData.toneMapGammaCorrection == 1.f){
-      o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-      o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-      } else {
-      o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      }
+      if(injectedData.toneMapType == 0.f){
+    o0.rgb = lerp(preLUT, o0.rgb, injectedData.colorGradeLUTStrength);
+    } else if(injectedData.toneMapType == 1.f){
+    o0.rgb = preLUT;
+    } else {
+    o0.rgb = applyUserTonemap(untonemapped, t2, s0_s, cb0[132].rgb);
+    }
+      if(injectedData.fxFilmGrain > 0.f){
+    o0.rgb = applyFilmGrain(o0.rgb, v1);
+    }
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }
