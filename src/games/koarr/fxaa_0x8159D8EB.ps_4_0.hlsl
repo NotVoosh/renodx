@@ -2,23 +2,18 @@
 
 cbuffer g_databuffer : register(b0)
 {
-
   struct
   {
     float4 pixelData;
     float4 pixelSize;
     float4 inverseGamma;
   } g_data : packoffset(c0);
-
 }
 
 SamplerState g_color_buffer_sampler_s : register(s0);
 Texture2D<float4> g_color_buffer_texture : register(t0);
 
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,

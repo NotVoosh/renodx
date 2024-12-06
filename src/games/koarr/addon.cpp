@@ -7,15 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xFFFFFFFD.h>     // Custom final VS
-#include <embed/0xFFFFFFFE.h>     // Custom final PS
-
-#include <embed/0x138CBA83.h>   // videos
-
-#include <embed/0xD11C77B6.h>   // combineeffects
-#include <embed/0x70CEAF26.h>   // combineeffects 2
-
-#include <embed/0x8159D8EB.h>   // FXAA
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -26,17 +18,17 @@
 #include "../../utils/date.hpp"
 #include "./shared.h"
 
+ShaderInjectData shader_injection;
+
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-    CustomShaderEntry(0x138CBA83),  // pre-rendered stuff
+    CustomShaderEntry(0x138CBA83),  // videos (pre-rendered)
 
     CustomShaderEntry(0xD11C77B6),  // combineeffects (color grading, dof, bloom)
     CustomShaderEntry(0x70CEAF26),  // combineeffects 2 (color grading)
     CustomShaderEntry(0x8159D8EB),  // FXAA
 };
-
-ShaderInjectData shader_injection;
 
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
@@ -297,11 +289,24 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "forceHueProcessor",
+        .binding = &shader_injection.forceHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 0.f,
+        .label = "Force Hue Processor",
+        .section = "Processor",
+        .tooltip = "Default: Frostbite = dartable UCS"
+                   "\nRenoDRT = ICtCp | DICE = OkLab",
+        .labels = {"Default", "OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0xFB7352,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
@@ -410,13 +415,13 @@ void OnInitDevice(reshade::api::device* device) {
     std::vector<reshade::api::pipeline_subobject> subobjects;
 
     reshade::api::shader_desc vs_desc = {};
-    vs_desc.code = _0xFFFFFFFD;
-    vs_desc.code_size = sizeof(_0xFFFFFFFD);
+    vs_desc.code = _final_vertex_shader;
+    vs_desc.code_size = sizeof(_final_vertex_shader);
     subobjects.push_back({reshade::api::pipeline_subobject_type::vertex_shader, 1, &vs_desc});
 
     reshade::api::shader_desc ps_desc = {};
-    ps_desc.code = _0xFFFFFFFE;
-    ps_desc.code_size = sizeof(_0xFFFFFFFE);
+    ps_desc.code = _final_pixel_shader;
+    ps_desc.code_size = sizeof(_final_pixel_shader);
     subobjects.push_back({reshade::api::pipeline_subobject_type::pixel_shader, 1, &ps_desc});
 
     reshade::api::format format = reshade::api::format::r16g16b16a16_float;
