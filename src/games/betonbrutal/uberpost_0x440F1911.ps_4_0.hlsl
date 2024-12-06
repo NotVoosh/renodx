@@ -1,4 +1,3 @@
-#include "./shared.h"
 #include "./common.hlsl"
 
 Texture2D<float4> t7 : register(t7);  // grain

@@ -1,4 +1,3 @@
-#include "./shared.h"
 #include "./common.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/master/Packages/com.unity.render-pipelines.high-definition/Runtime/PostProcessing/Shaders/LutBuilder3D.compute

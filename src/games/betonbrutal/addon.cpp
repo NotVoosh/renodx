@@ -32,7 +32,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x0E55C1C1),  // Luma Sharpen
     CustomShaderEntry(0x84D86903),  // UI
 
-    CustomSwapchainShader(0x20133A8B),  // Final
+    CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;

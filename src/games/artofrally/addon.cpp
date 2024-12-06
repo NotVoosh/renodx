@@ -39,7 +39,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
   CustomShaderEntry(0x2B868B21),  // UI default
   CustomShaderEntry(0xD0559BEE),  // UI default 2
-  CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;

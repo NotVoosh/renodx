@@ -1,4 +1,3 @@
-#include "./shared.h"
 #include "./common.hlsl"
 
 Texture3D<float4> t2 : register(t2);

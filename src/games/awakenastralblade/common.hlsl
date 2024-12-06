@@ -71,7 +71,7 @@ float3 RenoDRTSmoothClamp(float3 untonemapped) {
   return renoDRTColor;
 }
 
-float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig, uint hueProcessor){
+float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig){
 	float FbPeak = FbConfig.peak_nits / FbConfig.game_nits;
 		if(FbConfig.gamma_correction == 1.f){
 	FbPeak = renodx::color::correct::Gamma(FbPeak, true);
@@ -82,11 +82,11 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig, uint huePr
 	  if (FbConfig.reno_drt_dechroma != 0.f || FbConfig.saturation != 1.f) {
     float3 perceptual_new;
 
-      if (hueProcessor == 0u) {
+      if (FbConfig.reno_drt_hue_correction_method == 0u) {
         perceptual_new = renodx::color::oklab::from::BT709(color);
-      } else if (hueProcessor == 1u) {
+      } else if (FbConfig.reno_drt_hue_correction_method == 1u) {
         perceptual_new = renodx::color::ictcp::from::BT709(color);
-      } else if (hueProcessor == 2u) {
+      } else if (FbConfig.reno_drt_hue_correction_method == 2u) {
         perceptual_new = renodx::color::dtucs::uvY::from::BT709(color).zxy;
       }
 
@@ -97,11 +97,11 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig, uint huePr
 
     perceptual_new.yz *= FbConfig.saturation;
 
-    if (hueProcessor == 0u) {
+    if (FbConfig.reno_drt_hue_correction_method == 0u) {
       color = renodx::color::bt709::from::OkLab(perceptual_new);
-    } else if (hueProcessor == 1u) {
+    } else if (FbConfig.reno_drt_hue_correction_method == 1u) {
       color = renodx::color::bt709::from::ICtCp(perceptual_new);
-    } else if (hueProcessor == 2u) {
+    } else if (FbConfig.reno_drt_hue_correction_method == 2u) {
       color = renodx::color::bt709::from::dtucs::uvY(perceptual_new.yzx);
     }
   }
@@ -109,7 +109,7 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig, uint huePr
     return color;
 }
 
-float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig, uint hueProcessor){
+float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig){
 	DICESettings DICEconfig = DefaultDICESettings();
 	DICEconfig.Type = 3;
 	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
@@ -127,11 +127,11 @@ float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig, uint hueProce
 	  if (DiceConfig.reno_drt_dechroma != 0.f || DiceConfig.saturation != 1.f) {
     float3 perceptual_new;
 
-      if (hueProcessor == 0u) {
+      if (DiceConfig.reno_drt_hue_correction_method == 0u) {
         perceptual_new = renodx::color::oklab::from::BT709(color);
-      } else if (hueProcessor == 1u) {
+      } else if (DiceConfig.reno_drt_hue_correction_method == 1u) {
         perceptual_new = renodx::color::ictcp::from::BT709(color);
-      } else if (hueProcessor == 2u) {
+      } else if (DiceConfig.reno_drt_hue_correction_method == 2u) {
         perceptual_new = renodx::color::dtucs::uvY::from::BT709(color).zxy;
       }
 
@@ -141,11 +141,11 @@ float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig, uint hueProce
 
     perceptual_new.yz *= DiceConfig.saturation;
 
-    if (hueProcessor == 0u) {
+    if (DiceConfig.reno_drt_hue_correction_method == 0u) {
       color = renodx::color::bt709::from::OkLab(perceptual_new);
-    } else if (hueProcessor == 1u) {
+    } else if (DiceConfig.reno_drt_hue_correction_method == 1u) {
       color = renodx::color::bt709::from::ICtCp(perceptual_new);
-    } else if (hueProcessor == 2u) {
+    } else if (DiceConfig.reno_drt_hue_correction_method == 2u) {
       color = renodx::color::bt709::from::dtucs::uvY(perceptual_new.yzx);
     }
   }
@@ -157,9 +157,11 @@ float3 applyUserTonemap(float3 untonemapped){
 		
 		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = RenoDRTSmoothClamp(outputColor);
-		int hueProcessor = abs((int)injectedData.toneMapType - 4);
-			if(injectedData.forceHueProcessor != 0.f){
-		hueProcessor = abs((int)injectedData.forceHueProcessor - 1);
+		int hueProcessor;
+			if(injectedData.forceHueProcessor == 0.f){
+		hueProcessor = abs((int)injectedData.toneMapType - 4);
+		} else {
+		hueProcessor = (int)injectedData.forceHueProcessor - 1;
 		}
 		
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
@@ -186,10 +188,10 @@ float3 applyUserTonemap(float3 untonemapped){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, hueProcessor);
 			}
 				if (injectedData.toneMapType == 2.f){	// Frostbite
-			outputColor = applyFrostbite(outputColor, config, hueProcessor);
+			outputColor = applyFrostbite(outputColor, config);
 
 			} else if (injectedData.toneMapType == 4.f){		// DICE
-			outputColor = applyDICE(outputColor, config, hueProcessor);
+			outputColor = applyDICE(outputColor, config);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}

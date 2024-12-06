@@ -52,7 +52,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x67B5C47D),  // worldmap
     CustomShaderEntry(0xD8EECF85),  // time travel
     //CustomShaderEntry(0x8A6BCB4C),  // pre-rendered cutscenes
-    CustomSwapchainShader(0x20133A8B),  // Final
+    CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;

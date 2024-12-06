@@ -46,7 +46,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0x459D4153),  // colour correction
 
-    CustomSwapchainShader(0x20133A8B),  // Final
+    CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;

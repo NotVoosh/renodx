@@ -1,4 +1,3 @@
-#include "./shared.h"
 #include "./common.hlsl"
 
 SamplerState BlitSampler_s : register(s0);

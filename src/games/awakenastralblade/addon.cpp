@@ -33,7 +33,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
   CustomShaderEntry(0x8A6BCB4C),  // videos
 
-  CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -174,8 +174,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Blowout",
         .section = "Color Grading",
-        .tooltip = "Controls highlight desaturation due to overexposure."
-                   "\nDefault: RenoDRT = 50 | Frostbite/DICE = 0",
+        .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x432A26,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
@@ -307,7 +306,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);

@@ -1,4 +1,4 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
 Texture2DArray<float4> t0 : register(t0);
 
