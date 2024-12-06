@@ -7,27 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xF5AC76A9.h>   // LutBuilder3D
-#include <embed/0xB2C2262A.h>   // LutBuilder3D 2 (B&W)
-
-#include <embed/0xF1A75575.h>   // uberpost (vignette)
-#include <embed/0xCF6E0603.h>   // uberpost 2
-#include <embed/0x9B5C1401.h>   // uberpost 3 (fish EYE)
-
-#include <embed/0xBDEF4B88.h>   // HDRP final (DR + grain)
-#include <embed/0x99DC845A.h>   // HDRP final 2 (DR + grain + dither)
-#include <embed/0xD723C6F4.h>   // HDRP final 3 (FXAA)
-#include <embed/0x228A2030.h>   // HDRP final 4
-#include <embed/0x214D1051.h>   // HDRP final 5 (DR)
-#include <embed/0x9BDBCC02.h>   // HDRP final 6 (DR + dither)
-#include <embed/0x0736E454.h>   // HDRP final 8 (grain)
-#include <embed/0x2CE4C824.h>   // HDRP final 9 (grain + dither)
-#include <embed/0xAE5E9F10.h>   // HDRP final 10 (dither)
-#include <embed/0xEDF2CCA5.h>   // HDRP final 11 (FXAA + grain)
-#include <embed/0x5AE952EB.h>   // HDRP final 12 (FXAA + grain + dither)
-#include <embed/0xE222056C.h>   // HDRP final 13 (FXAA + dither)
-
-#include <embed/0x20133A8B.h>   // final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -61,7 +41,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x5AE952EB),  // HDRP final 12 (FXAA + grain + dither)
   CustomShaderEntry(0xE222056C),  // HDRP final 13 (FXAA + dither)
 
-  CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -275,7 +255,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Dithering Noise",
         .section = "Effects",
         .tint = 0xEC4E1B,
@@ -319,7 +299,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -329,7 +309,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -339,7 +319,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{

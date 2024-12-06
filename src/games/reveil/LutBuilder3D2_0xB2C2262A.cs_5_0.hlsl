@@ -1,40 +1,25 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
 Texture2D<float4> t8 : register(t8);
-
 Texture2D<float4> t7 : register(t7);
-
 Texture2D<float4> t6 : register(t6);
-
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture3D<float4> t0 : register(t0);
 
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
 RWTexture3D<float4> u0 : register(u0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[18];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 [numthreads(4, 4, 4)] void main(uint3 vThreadID : SV_DispatchThreadID) {
 // Needs manual fix for instruction:
@@ -49,7 +34,9 @@ cbuffer cb0 : register(b0)
   r0.w = cmp(0 < cb0[17].x);
   if (r0.w != 0) {
     r1.xyz = r0.xyz * cb0[0].yyy;
-    r1.rgb = renodx::color::pq::Decode(r1.rgb, 100.f);
+
+      r1.rgb = lutShaper(r1.rgb, true);
+
     r2.x = dot(float3(0.390404999,0.549941003,0.00892631989), r1.xyz);
     r2.y = dot(float3(0.070841603,0.963172019,0.00135775004), r1.xyz);
     r2.z = dot(float3(0.0231081992,0.128021002,0.936245024), r1.xyz);
@@ -249,12 +236,14 @@ cbuffer cb0 : register(b0)
     r2.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r1.xyz);
   } else {
     r0.xyz = r0.xyz * cb0[0].yyy;
-    r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
+
+      r0.rgb = lutShaper(r0.rgb, true);
+      
     r2.x = dot(float3(1.70504999,-0.621789992,-0.0832599998), r0.xyz);
     r2.y = dot(float3(-0.130260006,1.1408,-0.0105499998), r0.xyz);
     r2.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r0.xyz);
   }
-  r0.xyz = max(float3(0,0,0), r2.xyz);
+  r0.xyz = r2.xyz;
   /*r1.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
   r1.xyz = log2(r1.xyz);
   r1.xyz = r1.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009);

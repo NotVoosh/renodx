@@ -1,34 +1,21 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2DArray<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2DArray<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[80];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[4];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -112,18 +99,14 @@ void main(
   r0.xyzw = t0.Load(r0.xyzw).xyzw;
   r5.w = min(r0.w, r3.w);
   r5.z = min(r5.w, r5.z);
-  //r3.xyz = saturate(r3.xyz);
   r0.w = max(r0.w, r3.w);
-  r3.x = dot(r3.xyz, float3(0.212672904,0.715152204,0.0721750036));
-  //r4.xyz = saturate(r4.xyz);
+    r3.x = renodx::color::y::from::BT709(r3.rgb);
   r1.w = max(r1.w, r4.w);
-  //r1.xyz = saturate(r1.xyz);
-  r1.x = dot(r1.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r1.x = renodx::color::y::from::BT709(r1.rgb);
   r1.y = max(r1.w, r2.w);
-  //r2.xyz = saturate(r2.xyz);
-  r1.z = dot(r2.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r1.z = renodx::color::y::from::BT709(r2.rgb);
   r0.w = max(r1.y, r0.w);
-  r1.y = dot(r4.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r1.y = renodx::color::y::from::BT709(r4.rgb);
   r1.w = r3.x + r1.y;
   r2.x = r1.x + r1.z;
   r2.yw = -r2.xx + r1.ww;
@@ -149,23 +132,19 @@ void main(
   r7.xy = r4.zw;
   r7.z = 0;
   r3.yzw = t0.SampleLevel(s2_s, r7.xyz, 0).xyz;
-  //r3.yzw = saturate(r3.yzw);
   r7.xy = r2.zw;
   r7.z = 0;
   r7.xyz = t0.SampleLevel(s2_s, r7.xyz, 0).xyz;
-  //r7.xyz = saturate(r7.xyz);
   r3.yzw = r7.xyz + r3.yzw;
   r3.yzw = float3(0.25,0.25,0.25) * r3.yzw;
   r4.z = 0;
   r4.xyz = t0.SampleLevel(s2_s, r4.xyz, 0).xyz;
-  //r4.xyz = saturate(r4.xyz);
   r2.z = 0;
   r2.xyz = t0.SampleLevel(s2_s, r2.xyz, 0).xyz;
-  //r2.xyz = saturate(r2.xyz);
   r2.xyz = r4.xyz + r2.xyz;
   r3.yzw = r2.xyz * float3(0.25,0.25,0.25) + r3.yzw;
   r2.xyz = float3(0.5,0.5,0.5) * r2.xyz;
-  r1.w = dot(r3.yzw, float3(0.212672904,0.715152204,0.0721750036));
+    r1.w = renodx::color::y::from::BT709(r3.gba);
   r2.w = cmp(r1.w < r5.z);
   r0.w = cmp(r0.w < r1.w);
   r0.w = (int)r0.w | (int)r2.w;
@@ -175,9 +154,8 @@ void main(
   r1.x = max(r1.x, r1.y);
   r1.x = max(r1.x, r1.z);
   r1.y = min(r2.w, r1.z);
-  //r5.xyz = saturate(r0.xyz);
     r5.rgb = r0.rgb;
-  r1.z = dot(r5.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r1.z = renodx::color::y::from::BT709(r5.rgb);
   r2.w = min(r1.z, r3.x);
   r1.z = max(r1.z, r3.x);
   r1.x = max(r1.z, r1.x);
@@ -186,7 +164,6 @@ void main(
   r1.x = (int)r1.x | (int)r1.y;
   r1.xyz = r1.xxx ? r2.xyz : r3.yzw;
   r4.xyz = r0.www ? r1.xyz : r0.xyz;
-  //r4.xyzw = saturate(r4.xyzw);
   r0.xy = r6.xy * cb0[1].xy + cb0[1].zw;
   r1.xy = cb1[48].xy * r6.xy;
   r0.x = t1.SampleBias(s1_s, r0.xy, cb1[79].y).w;
@@ -194,21 +171,18 @@ void main(
   r0.x = r0.x + r0.x;
   r0.xyz = r4.xyz * r0.xxx;
   r0.xyz = cb0[0].xxx * r0.xyz * injectedData.fxFilmGrain;
-  r0.w = dot(r4.xyz, float3(0.212672904,0.715152204,0.0721750036));
-  //r0.w = sqrt(r0.w);
-    r0.a = sign(r0.a) * sqrt(abs(r0.a));
+    r0.w = renodx::color::y::from::BT709(r4.rgb);
+    r0.a = renodx::math::SqrtSafe(r0.a);
   r0.w = cb0[0].y * -r0.w + 1;
-  r0.xyz = injectedData.fxFilmGrainType ? applyFilmGrain(r4.rgb, v1) : r0.xyz * r0.www + r4.xyz;
+    if(injectedData.fxFilmGrainType == 0.f){
+  r0.xyz = r0.xyz * r0.www + r4.xyz;
+  } else {
+    r0.rgb = applyFilmGrain(r4.rgb, v1);
+  }
   o0.w = r4.w;
   r1.z = 0;
   r1.xyzw = t2.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
-		  	if(injectedData.toneMapGammaCorrection == 1) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-        } else {
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        }
+		o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }
