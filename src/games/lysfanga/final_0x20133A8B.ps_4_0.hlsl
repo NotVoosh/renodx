@@ -1,12 +1,9 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
 SamplerState BlitSampler_s : register(s0);
 Texture2D<float4> BlitTexture : register(t0);
 
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float2 v0 : TEXCOORD0,
@@ -14,17 +11,6 @@ void main(
   out float4 o0 : SV_Target0)
 {
   o0.xyzw = BlitTexture.Sample(BlitSampler_s, v0.xy).xyzw;
-        if(injectedData.toneMapGammaCorrection == 1.f){
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-    }
-    o0.rgb *= injectedData.toneMapUINits / 80.f;
-    
-		if(injectedData.toneMapType > 1.f){							// if not "untonemapped"
-	float y_max = injectedData.toneMapPeakNits;
-	float y = renodx::color::y::from::BT709(abs(o0.rgb));
-			if (y > y_max) {
-		o0.rgb *= y_max / y;
-		}
-	}
+    o0.rgb = FinalizeOutput(o0.rgb);
   return;
 }

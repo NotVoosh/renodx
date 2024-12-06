@@ -1,25 +1,16 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[139];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -34,14 +25,18 @@ void main(
   r0.w = cmp(0 < cb0[138].z);
   if (r0.w != 0) {
     r1.xy = -cb0[138].xy + v1.xy;
-    r1.yz = cb0[138].zz * abs(r1.xy) * injectedData.fxVignette;
+
+    r1.yz = cb0[138].zz * abs(r1.xy) * min(1, injectedData.fxVignette);
+
     r1.x = cb0[137].w * r1.y;
     r0.w = dot(r1.xz, r1.xz);
     r0.w = 1 + -r0.w;
     r0.w = max(0, r0.w);
+
     r0.w = log2(r0.w);
-    r0.w = cb0[138].w * r0.w;
+    r0.w = cb0[138].w * r0.w * max(1, injectedData.fxVignette);
     r0.w = exp2(r0.w);
+
     r1.xyz = float3(1,1,1) + -cb0[137].xyz;
     r1.xyz = r0.www * r1.xyz + cb0[137].xyz;
     r0.xyz = r1.xyz * r0.xyz;
@@ -241,20 +236,18 @@ void main(
   r0.yzw = r2.xyz + -r3.xyz;
   o0.xyz = r0.xxx * r0.yzw + r3.xyz;
   o0.w = 1;
-        if(injectedData.toneMapType != 0.f){
-      o0.rgb = sampleLUT(preLUT, t1, s0_s, cb0[128].rgb);
-      }
-        if(injectedData.fxFilmGrain > 0.f){
-      o0.rgb = applyFilmGrain(o0.rgb, v1);
-      }
-          if(injectedData.fxBlooom == 0.f){
-        if(injectedData.toneMapGammaCorrection == 1.f){
-      o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-      o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-      } else {
-      o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      }
+      if(injectedData.toneMapType == 0.f){
+    o0.rgb = lerp(preLUT, o0.rgb, injectedData.colorGradeLUTStrength);
+    } else if(injectedData.toneMapType == 1.f){
+    o0.rgb = preLUT;
+    } else {
+    o0.rgb = sampleLUT(preLUT, t1, s0_s, cb0[128].rgb);
+    }
+      if(injectedData.fxFilmGrain > 0.f){
+    o0.rgb = applyFilmGrain(o0.rgb, v1);
+    }
+      if(injectedData.fxBlooom == 0.f){
+    o0.rgb = PostToneMapScale(o0.rgb);
     }
   return;
 }

@@ -1,33 +1,21 @@
 #include "./shared.h"
 
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[1];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[27];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -81,14 +69,8 @@ void main(
   r1.x = r1.x * r1.y;
   r0.xyzw = r1.xxxx * r0.xyzw;
   o0.xyzw = v1.wwww * r0.xyzw;
-        if(injectedData.fxBlooom > 0.f){
-      if(injectedData.toneMapGammaCorrection == 1.f) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-    o0.rgb *= injectedData.toneMapUINits / injectedData.toneMapGameNits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-    } else {
-    o0.rgb *= injectedData.toneMapUINits / injectedData.toneMapGameNits;
+      if(injectedData.fxBlooom > 0.f){
+    o0.rgb = UIScale(o0.rgb);
     }
-  }
   return;
 }

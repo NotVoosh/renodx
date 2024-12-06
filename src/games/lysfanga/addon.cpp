@@ -7,18 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xE651D798.h>   // uberpost
-#include <embed/0x2C36979C.h>   // uberpost 2
-#include <embed/0x9A27FDCD.h>   // uberpost 3
-#include <embed/0x9D2A9AD7.h>   // uberpost 4
-
-#include <embed/0x55B0DCB7.h>   // UI text
-#include <embed/0xC1457489.h>   // UI text 2
-#include <embed/0x36588C4F.h>   // UI True Shadow something
-#include <embed/0x5FDD841D.h>   // blooom
-#include <embed/0xBB09D0B3.h>   // UI uberpost (LUT/blooom)
-
-#include <embed/0x20133A8B.h>   // final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -43,7 +32,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x5FDD841D),  // blooom
   CustomShaderEntry(0xBB09D0B3),  // uberpost (LUT/blooom)
 
-  CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -308,7 +297,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -318,7 +307,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -328,7 +317,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
