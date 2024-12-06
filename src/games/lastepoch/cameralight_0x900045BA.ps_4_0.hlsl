@@ -1,51 +1,30 @@
 #include "./shared.h"
 
-// ---- Created with 3Dmigoto v1.3.16 on Sun Sep 29 06:14:12 2024
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb2 : register(b2)
-{
+cbuffer cb2 : register(b2){
   float4 cb2[9];
 }
-
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[9];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[18];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -161,7 +140,11 @@ void main(
   r0.x = r0.x * r1.x;
   r1.xyz = r2.xyz * r0.xxx;
   r2.xyzw = t3.Sample(s3_s, v1.xy).xyzw;
-  o0.xyz = injectedData.fxCameraLight ? r2.xyz * r1.xyz + r0.yzw : 0;
+    if(injectedData.fxCameraLight == 1.f){
+  o0.xyz = r2.xyz * r1.xyz + r0.yzw;
+    } else {
+  o0.rgb = 0;
+    }
   o0.w = 1;
   return;
 }

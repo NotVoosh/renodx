@@ -7,38 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x900045BA.h>   // camera light
-
-#include <embed/0x6EA48EC8.h>   // LUT3DBaker
-
-#include <embed/0x43621B25.h>   // uberpost
-#include <embed/0xFF4E4EF2.h>   // uberpost (title menu)
-
-#include <embed/0x366EE13E.h>   // postfinal
-#include <embed/0xCC8B6ACF.h>   // postfinal (FXAA)
-#include <embed/0x15096C7B.h>   // outline
-
-#include <embed/0x4B83BA2B.h>   // SMAA 2
-#include <embed/0xB5EA3401.h>   // TAA
-
-#include <embed/0xB11B9B50.h>   // UI alpha
-#include <embed/0x5CC882AB.h>   // UI cutout 1
-#include <embed/0xA4CF5BB8.h>   // UI cutout 2
-#include <embed/0xAD82901B.h>   // UI cutout globe
-#include <embed/0x2B868B21.h>   // UI default 1
-#include <embed/0x5A045DE6.h>   // UI default 2
-#include <embed/0xAB67D6D3.h>   // UI default 3
-#include <embed/0x40D3C83D.h>   // UI dmap
-#include <embed/0xF18BD84B.h>   // UI effect shiny
-#include <embed/0x55B0DCB7.h>   // UI text 1
-#include <embed/0x915C6643.h>   // UI text 2
-#include <embed/0xB4EB8715.h>   // UI text 3
-#include <embed/0x49EB4070.h>   // UI dmg digits
-
-#include <embed/0x67B5C47D.h>   // worldmap
-#include <embed/0xD8EECF85.h>   // time travel
-//#include <embed/0x8A6BCB4C.h>   // pre-rendered cutscenes
-#include <embed/0x20133A8B.h>   // Final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -289,7 +258,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Dithering Noise",
         .section = "Effects",
         .tint = 0x452f7A,
@@ -345,7 +314,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -355,7 +324,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -365,7 +334,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{

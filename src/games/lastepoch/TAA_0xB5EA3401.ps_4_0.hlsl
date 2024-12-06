@@ -1,36 +1,21 @@
-// ---- Created with 3Dmigoto v1.3.16 on Fri Sep 27 05:56:08 2024
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[8];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[7];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
