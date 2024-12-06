@@ -1,45 +1,27 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t6 : register(t6);
-
 Texture3D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s6_s : register(s6);
-
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[43];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -55,7 +37,9 @@ void main(
   r0.yz = v1.xy * float2(2,2) + float2(-1,-1);
   r0.w = dot(r0.yz, r0.yz);
   r0.yz = r0.yz * r0.ww;
+
   r0.yz = cb0[35].ww * r0.yz * injectedData.fxChroma;
+
   r1.xy = cb0[31].zw * -r0.yz;
   r1.xy = float2(0.5,0.5) * r1.xy;
   r0.w = dot(r1.xy, r1.xy);
@@ -119,7 +103,9 @@ void main(
   r0.xy = cb0[26].xx * r0.xy;
   r0.xyzw = t2.Sample(s2_s, r0.xy).xyzw;
   r0.xyzw = r2.xyzw + r0.xyzw;
+
   r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+
   r2.xy = v1.xy * cb0[33].xy + cb0[33].zw;
   r2.xyzw = t3.Sample(s3_s, r2.xy).xyzw;
   r3.xyzw = float4(0.0625,0.0625,0.0625,0.0625) * r0.xyzw;
@@ -172,30 +158,22 @@ void main(
   }
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
 
-      float3 untonemapped = r0.rgb;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.xyz = cb0[36].yyy * r0.xyz;
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t5.Sample(s5_s, r0.xyz).wxyz;
-    r1.gba = sampleLUT(untonemapped, t5, s5_s);
-
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {
-    r0.xyz = saturate(r1.yzw);
-    r1.x = dot(r0.xyz, float3(0.212672904,0.715152204,0.0721750036));
+      r1.x = renodx::color::y::from::BT709(r1.gba);
   } else {
     r1.x = r0.w;
   }
   o0.xyzw = r1.yzwx;
-      if(injectedData.toneMapGammaCorrection == 1.f){
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-    } else {
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    }
+      if(injectedData.fxFilmGrain > 0.f){
+    o0.rgb = applyFilmGrain(o0.rgb, v1);
+      }
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }
