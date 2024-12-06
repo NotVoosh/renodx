@@ -1,50 +1,28 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Fri Oct  4 05:49:16 2024
 Texture2D<float4> t7 : register(t7);
-
 Texture2D<float4> t6 : register(t6);
-
 Texture3D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s7_s : register(s7);
-
 SamplerState s6_s : register(s6);
-
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[42];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -89,21 +67,27 @@ void main(
   r0.xy = cb0[26].xx * r0.xy;
   r0.xyzw = t3.Sample(s3_s, r0.xy).xyzw;
   r0.xyzw = r2.xyzw + r0.xyzw;
-  r0.xyzw = cb0[34].yyyy * r0.xyzw;
+
+  r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+
   r2.xy = v1.xy * cb0[33].xy + cb0[33].zw;
   r2.xyzw = t4.Sample(s4_s, r2.xy).xyzw;
   r3.xyzw = float4(0.0625,0.0625,0.0625,0.0625) * r0.xyzw;
-  r2.xyz = cb0[34].zzz * r2.xyz;
+
+  r2.xyz = cb0[34].zzz * r2.xyz * injectedData.fxLensFlare;
+
   r2.w = 0;
   r0.xyzw = float4(0.0625,0.0625,0.0625,1) * r0.xyzw;
   r4.xyz = cb0[35].xyz * r0.xyz;
   r4.w = 0.0625 * r0.w;
-  r0.xyzw = r4.xyzw * injectedData.fxBloom + r1.xyzw;   // bloom
-  r0.xyzw = r2.xyzw * r3.xyzw * injectedData.fxLensFlare + r0.xyzw;   // flare
+  r0.xyzw = r4.xyzw + r1.xyzw;
+  r0.xyzw = r2.xyzw * r3.xyzw + r0.xyzw;
   r1.x = cmp(cb0[40].y < 0.5);
   if (r1.x != 0) {
     r1.xy = -cb0[38].xy + v1.xy;
-    r1.yz = cb0[39].xx * abs(r1.yx) * injectedData.fxVignette;    // vignette
+
+    r1.yz = cb0[39].xx * abs(r1.yx) * min(1, injectedData.fxVignette);
+
     r1.w = cb0[22].x / cb0[22].y;
     r1.w = -1 + r1.w;
     r1.w = cb0[39].w * r1.w + 1;
@@ -115,9 +99,11 @@ void main(
     r1.x = dot(r1.xy, r1.xy);
     r1.x = 1 + -r1.x;
     r1.x = max(0, r1.x);
+
     r1.x = log2(r1.x);
-    r1.x = cb0[39].y * r1.x;
+    r1.x = cb0[39].y * r1.x * max(1, injectedData.fxVignette);
     r1.x = exp2(r1.x);
+
     r1.yzw = float3(1,1,1) + -cb0[37].xyz;
     r1.yzw = r1.xxx * r1.yzw + cb0[37].xyz;
     r1.yzw = r1.yzw * r0.xyz;
@@ -143,26 +129,22 @@ void main(
   }
   r0.xy = w1.xy * cb0[41].xy + cb0[41].zw;
   r0.xyzw = t7.Sample(s7_s, r0.xy).xyzw;
-  r3.xyz = saturate(r1.yzw);
-  r0.w = dot(r3.xyz, float3(0.212672904,0.715152204,0.0721750036));
-  //r0.w = sqrt(r0.w);
-    r0.a = sign(r0.a) * sqrt(abs(r0.a));
+    r0.w = renodx::color::y::from::BT709(r1.gba);
+    r0.a = renodx::math::SqrtSafe(r1.a);
   r0.w = cb0[40].z * -r0.w + 1;
   r0.xyz = r1.yzw * r0.xyz;
-  r0.xyz = cb0[40].www * r0.xyz;
-  r2.xyz = injectedData.fxFilmGrainType ? r1.yzw : r0.xyz * r0.www * injectedData.fxFilmGrain + r1.yzw;         // vanilla grain
+  r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
+    if(injectedData.fxFilmGrainType == 0.f){
+  r2.xyz = r1.yzw : r0.xyz * r0.www + r1.yzw;
+  }
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
 
-    float3 untonemapped = r0.rgb;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.xyz = cb0[36].yyy * r0.xyz;
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
-  r1.xyzw = t5.Sample(s5_s, r0.xyz).xyzw;                       // log LUT
-    r1.rgb = sampleLUT(untonemapped, t5, s5_s);
-    
+  r1.xyzw = t5.Sample(s5_s, r0.xyz).xyzw;    
   r0.xy = v1.xy * cb0[30].xy + cb0[30].zw;
   r2.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
   r0.x = r2.w * 2 + -1;
@@ -172,39 +154,15 @@ void main(
   r0.x = sqrt(r0.x);
   r0.x = 1 + -r0.x;
   r0.x = r0.y * r0.x;
-  //r2.xyz = float3(12.9200001,12.9200001,12.9200001) * r1.xyz;
-  //r3.xyz = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r1.xyz));
-  //r3.xyz = log2(r3.xyz);
-  //r3.xyz = float3(0.416666657,0.416666657,0.416666657) * r3.xyz;
-  //r3.xyz = exp2(r3.xyz);
-  //r3.xyz = r3.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
-  //r1.xyz = cmp(float3(0.00313080009,0.00313080009,0.00313080009) >= r1.xyz);
-  //r1.xyz = r1.xyz ? r2.xyz : r3.xyz;
-  //r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) + r1.xyz;
-  //r1.xyz = float3(0.0773993805,0.0773993805,0.0773993805) * r0.xyz;
-  //r2.xyz = float3(0.0549999997,0.0549999997,0.0549999997) + r0.xyz;
-  //r2.xyz = float3(0.947867334,0.947867334,0.947867334) * r2.xyz;
-  //r2.xyz = max(float3(1.1920929e-07,1.1920929e-07,1.1920929e-07), abs(r2.xyz));
-  //r2.xyz = log2(r2.xyz);
-  //r2.xyz = float3(2.4000001,2.4000001,2.4000001) * r2.xyz;
-  //r2.xyz = exp2(r2.xyz);
-  //r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
-  //o0.xyz = r0.xyz ? r1.xyz : r2.xyz;
     r1.rgb = renodx::color::srgb::Encode(r1.rgb);
     r1.rgb = r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886) * injectedData.fxNoise + r1.rgb;
     r1.rgb = renodx::color::srgb::Decode(r1.rgb);
-        if (injectedData.fxFilmGrainType == 1){
+    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
+      if(injectedData.fxFilmGrainType == 1.f){
     r1.rgb = applyFilmGrain(r1.rgb, v1);
     }
-        if (injectedData.toneMapGammaCorrection == 1) {
-    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb);
-    r1.rgb *= injectedData.toneMapGameNits / 80.f;
-    r1.rgb = renodx::color::correct::GammaSafe(r1.rgb, true);
-    } else {
-    r1.rgb *= injectedData.toneMapGameNits / 80.f;
-    }
+    r1.rgb = PostToneMapScale(r1.rgb);
     o0.rgb = r1.rgb;
-    
   o0.w = r0.w;
   return;
 }
