@@ -1,54 +1,30 @@
 Texture2D<float4> t9 : register(t9);
-
 Texture2D<float4> t8 : register(t8);
-
 Texture2D<float4> t7 : register(t7);
-
 Texture2D<float4> t6 : register(t6);
-
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s9_s : register(s9);
-
 SamplerState s8_s : register(s8);
-
 SamplerState s7_s : register(s7);
-
 SamplerState s6_s : register(s6);
-
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[20];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -426,6 +402,6 @@ void main(
   r0.x = cmp(r0.x < 0);
   if (r0.x != 0) discard;
   o0.w = r1.x * r0.y;
-  o0 = saturate(o0);
+    o0 = saturate(o0);
   return;
 }

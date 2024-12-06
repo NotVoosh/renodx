@@ -1,5 +1,5 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/e42df452b62857a60944aed34f02efa1bda50018/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Lut3DBaker.compute
 // KGenLUT3D_AcesTonemap
@@ -10,8 +10,7 @@ SamplerState s0_s : register(s0);
 
 RWTexture3D<float4> u0 : register(u0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[10];
 }
 
@@ -30,11 +29,8 @@ cbuffer cb0 : register(b0)
   if (r0.a != 0) {
 // (start) ColorGrade  
   r0.rgb = r0.rgb * cb0[0].ggg;
-      if(injectedData.colorGradeLUTSampling == 0.f){
-    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb, false);
-    } else {
-    r0.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
-    }
+    
+    r0.rgb = lutShaper(r0.rgb, true);
 
     // unity_to_ACES(r0.rgb)
     r1.r = dot(float3(0.439701, 0.382978, 0.177335), r0.rgb);

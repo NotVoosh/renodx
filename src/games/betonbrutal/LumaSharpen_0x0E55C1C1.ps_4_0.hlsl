@@ -1,26 +1,18 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[7];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[3];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float2 v0 : TEXCOORD0,
@@ -37,19 +29,25 @@ void main(
   r0.xyzw = v0.xyxy + r0.zyxz;
   r2.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
   r1.xyzw = t0.Sample(s0_s, r1.zw).xyzw;
-  //r1.x = dot(r1.xyz, float3(0.298999995,0.587000012,0.114));
+    if(injectedData.toneMapType == 0.f){
+  r1.x = dot(r1.xyz, float3(0.298999995,0.587000012,0.114));
+  r1.y = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
+  r2.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
+  r0.xyzw = t0.Sample(s0_s, r0.zw).xyzw;
+  r0.x = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
+  r0.y = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
+  r2.xyzw = t0.Sample(s0_s, v0.xy).xyzw;
+  r0.z = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
+    } else {
     r1.x = renodx::color::y::from::BT709(r1.rgb);
-  //r1.y = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
     r1.y = renodx::color::y::from::BT709(r2.rgb);
   r2.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
   r0.xyzw = t0.Sample(s0_s, r0.zw).xyzw;
-  //r0.x = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
     r0.x = renodx::color::y::from::BT709(r0.rgb);
-  //r0.y = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
     r0.y = renodx::color::y::from::BT709(r2.rgb);
   r2.xyzw = t0.Sample(s0_s, v0.xy).xyzw;
-  //r0.z = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
     r0.z = renodx::color::y::from::BT709(r2.rgb);
+    }
   r0.y = r0.z * 5 + -r0.y;
   r0.zw = r2.zx + -r0.zz;
   r0.y = r0.y + -r1.y;
@@ -67,12 +65,6 @@ void main(
       if(injectedData.fxFilmGrainType == 1.f){
     o0.rgb = applyFilmGrain(o0.rgb, v0);
     }
-		  	if(injectedData.toneMapGammaCorrection == 1.f) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-        } else {
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        }
+		o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

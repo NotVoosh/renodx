@@ -1,49 +1,29 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t7 : register(t7);  // grain
-
 Texture2D<float4> t6 : register(t6);  // 16x16 something
-
 Texture3D<float4> t5 : register(t5);  // log lut 33³
-
 Texture2D<float4> t4 : register(t4);  // CA
-
 Texture2D<float4> t3 : register(t3);  // dirt
-
 Texture2D<float4> t2 : register(t2);  // bloom
-
 Texture2D<float4> t1 : register(t1);  // white
-
 Texture2D<float4> t0 : register(t0);  // color
 
 SamplerState s7_s : register(s7);
-
 SamplerState s6_s : register(s6);
-
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[43];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -59,7 +39,9 @@ void main(
   r1.xyzw = v1.xyxy * float4(2,2,2,2) + float4(-1,-1,-1,-1);
   r0.y = dot(r1.zw, r1.zw);
   r1.xyzw = r1.xyzw * r0.yyyy;
-  r1.xyzw = cb0[35].wwww * r1.xyzw;
+
+  r1.xyzw = cb0[35].wwww * r1.xyzw * injectedData.fxChroma;
+
   r2.xyzw = t4.SampleLevel(s4_s, float2(0.166666999,0), 0).xyzw;
   r3.xyzw = t4.SampleLevel(s4_s, float2(0.5,0), 0).xyzw;
   r4.xyzw = t4.SampleLevel(s4_s, float2(0.833333015,0), 0).xyzw;
@@ -109,7 +91,9 @@ void main(
   r2.xy = cb0[26].xx * r2.xy;
   r2.xyzw = t2.Sample(s2_s, r2.xy).xyzw;
   r0.xyzw = r2.xyzw + r0.xyzw;
+
   r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+
   r2.xy = v1.xy * cb0[33].xy + cb0[33].zw;
   r2.xyzw = t3.Sample(s3_s, r2.xy).xyzw;
   r3.xyzw = float4(0.0625,0.0625,0.0625,0.0625) * r0.xyzw;
@@ -123,7 +107,9 @@ void main(
   r1.x = cmp(cb0[40].y < 0.5);
   if (r1.x != 0) {
     r1.xy = -cb0[38].xy + v1.xy;
-    r1.yz = cb0[39].xx * abs(r1.yx) * injectedData.fxVignette;
+
+    r1.yz = cb0[39].xx * abs(r1.yx) * min(1, injectedData.fxVignette);
+
     r1.w = cb0[22].x / cb0[22].y;
     r1.w = -1 + r1.w;
     r1.w = cb0[39].w * r1.w + 1;
@@ -135,9 +121,11 @@ void main(
     r1.x = dot(r1.xy, r1.xy);
     r1.x = 1 + -r1.x;
     r1.x = max(0, r1.x);
+
     r1.x = log2(r1.x);
-    r1.x = cb0[39].y * r1.x;
+    r1.x = cb0[39].y * r1.x * max(1, injectedData.fxVignette);
     r1.x = exp2(r1.x);
+
     r1.yzw = float3(1,1,1) + -cb0[37].xyz;
     r1.yzw = r1.xxx * r1.yzw + cb0[37].xyz;
     r1.yzw = r1.yzw * r0.xyz;
@@ -161,31 +149,30 @@ void main(
     r0.x = -1 + r0.w;
     r2.w = r1.x * r0.x + 1;
   }
+      if(injectedData.fxFilmGrainType == 0.f){ 
   r0.xy = w1.xy * cb0[41].xy + cb0[41].zw;
   r0.xyzw = t7.Sample(s7_s, r0.xy).xyzw;
-  r3.xyz = saturate(r1.yzw);
-  r0.w = dot(r3.xyz, float3(0.212672904,0.715152204,0.0721750036));
-  r0.w = sqrt(r0.w);
+    r0.a = renodx::color::y::from::BT709(r1.gba);
+    r0.a = renodx::math::SqrtSafe(r0.a);
   r0.w = cb0[40].z * -r0.w + 1;
   r0.xyz = r1.yzw * r0.xyz;
   r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
-  r2.xyz = injectedData.fxFilmGrainType ? r1.gba : r0.xyz * r0.www + r1.yzw;
+  r2.xyz = r0.xyz * r0.www + r1.yzw;
+    } else {
+    r2.rgb = r1.gba;
+    }
+  
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
 
-    float3 untonemapped = r0.rgb;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.xyz = cb0[36].yyy * r0.xyz;
   r1.x = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t5.Sample(s5_s, r0.xyz).wxyz;
-    r1.gba = sampleLUT(untonemapped, t5, s5_s);
-
   r0.x = cmp(0.5 < cb0[42].x);
   if (r0.x != 0) {
-    r0.xyz = saturate(r1.yzw);
-    r1.x = dot(r0.xyz, float3(0.212672904,0.715152204,0.0721750036));
+      r1.x = renodx::color::y::from::BT709(r1.gba);
   } else {
     r1.x = r0.w;
   }

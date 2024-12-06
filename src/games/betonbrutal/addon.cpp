@@ -7,18 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x47A1239F.h>   // LUTBuilder3D
-
-#include <embed/0x440F1911.h>   // uberpost (CA + bloom)
-#include <embed/0x9CC447BF.h>   // uberpost 2 (CA)
-#include <embed/0xC63B24BB.h>   // uberpost 3
-#include <embed/0xCF7B19D4.h>   // uberpost 4 (bloom)
-
-#include <embed/0xCC8B6ACF.h>   // postfinal
-#include <embed/0x0E55C1C1.h>   // Luma Sharpen
-#include <embed/0x84D86903.h>   // UI
-
-#include <embed/0x20133A8B.h>   // Final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -247,9 +236,19 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxChroma",
+        .binding = &shader_injection.fxChroma,
+        .default_value = 50.f,
+        .label = "Chromatic Aberration",
+        .section = "Effects",
+        .tint = 0x1D130A,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Dithering Noise",
         .section = "Effects",
         .tint = 0x1D130A,
@@ -270,7 +269,7 @@ renodx::utils::settings::Settings settings = {
         .key = "fxFilmGrainType",
         .binding = &shader_injection.fxFilmGrainType,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
+        .default_value = 0,
         .can_reset = false,
         .label = "Film Grain Type",
         .section = "Effects",
@@ -309,7 +308,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -319,7 +318,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -329,7 +328,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -358,6 +357,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
+  renodx::utils::settings::UpdateSetting("fxChroma", 50.f);
   renodx::utils::settings::UpdateSetting("fxNoise", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrainType", 0.f);
