@@ -116,9 +116,6 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
-				if(injectedData.toneMapType == 0.f){
-			outputColor = saturate(outputColor);
-			}
 				if(injectedData.toneMapType >= 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
