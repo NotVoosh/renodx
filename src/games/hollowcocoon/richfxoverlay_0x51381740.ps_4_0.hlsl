@@ -2,22 +2,14 @@
 
 Texture2DArray<float4> t0 : register(t0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[43];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[6];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -46,27 +38,13 @@ void main(
   r1.xy = (uint2)r1.xy;
   r1.zw = float2(0,0);
   r1.xyzw = t0.Load(r1.xyzw).xyzw;
-  //r2.xyz = log2(abs(r1.xyz));
-  //r2.xyz = float3(0.416666657,0.416666657,0.416666657) * r2.xyz;
-  //r2.xyz = exp2(r2.xyz);
-  //r2.xyz = r2.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
-  //r3.xyz = float3(12.9200001,12.9200001,12.9200001) * r1.xyz;
-  //r4.xyz = cmp(float3(0.00313080009,0.00313080009,0.00313080009) >= r1.xyz);
-  //r1.xyz = r4.xyz ? r3.xyz : r2.xyz;
-      r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
+
+    r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
   r2.xyzw = float4(1,1,1,1) + -r1.xyzw;
   r0.xyzw = -r2.xyzw * r0.xyzw + -r1.xyzw;
   r0.xyzw = float4(1,1,1,1) + r0.xyzw;
   r0.xyzw = cb0[0].wwww * r0.xyzw + r1.xyzw;    // extra color correction
-  //r1.xyz = float3(0.0549999997,0.0549999997,0.0549999997) + r0.xyz;
-  //r1.xyz = float3(0.947867334,0.947867334,0.947867334) * r1.xyz;
-  //r1.xyz = log2(abs(r1.xyz));
-  //r1.xyz = float3(2.4000001,2.4000001,2.4000001) * r1.xyz;
-  //r1.xyz = exp2(r1.xyz);
-  //r2.xyz = float3(0.0773993805,0.0773993805,0.0773993805) * r0.xyz;
-  //r0.xyz = cmp(float3(0.0404499993,0.0404499993,0.0404499993) >= r0.xyz);
   o0.w = r0.w;
-  //o0.xyz = r0.xyz ? r2.xyz : r1.xyz;
     o0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
   return;
 }

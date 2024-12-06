@@ -1,37 +1,24 @@
 #include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t7 : register(t7);
-
 Texture2D<float4> t6 : register(t6);
-
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
 RWTexture3D<float4> u0 : register(u0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[18];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 [numthreads(4, 4, 4)] void main(uint3 vThreadID : SV_DispatchThreadID) {
 // Needs manual fix for instruction:
@@ -46,11 +33,8 @@ cbuffer cb0 : register(b0)
   r0.w = cmp(0 < cb0[17].x);
   if (r0.w != 0) {
     r0.xyz = r0.xyz * cb0[0].yyy;
-      if(injectedData.colorGradeLUTSampling == 0.f){
-    r1.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb, false);
-    } else {
-    r1.rgb = renodx::color::pq::Decode(r0.rgb, 100.f);
-    }
+    
+      r1.rgb = lutShaper(r0.rgb, true);
       float3 preCG = mul(renodx::color::BT709_TO_AP1_MAT, r1.rgb);
 
     // WhiteBalance
@@ -269,11 +253,8 @@ cbuffer cb0 : register(b0)
     r1.xyz = max(float3(0,0,0), r1.xyz);
       r1.rgb = lerp(preCG, r1.rgb, injectedData.colorGradeLUTStrength);
   } else {
-      if(injectedData.colorGradeLUTSampling == 0.f){
-    r0.rgb = renodx::color::arri::logc::c1000::Decode(r0.rgb * cb0[0].ggg, false);
-    } else {
-    r0.rgb = renodx::color::pq::Decode(r0.rgb * cb0[0].ggg, 100.f);
-    }
+    r0.xyz = r0.xyz * cb0[0].yyy;
+      r0.rgb = lutShaper(r0.rgb, true);
     // unity_to_ACES
     r2.x = dot(float3(0.439700991,0.382977992,0.177334994), r0.xyz);
     r2.y = dot(float3(0.0897922963,0.813422978,0.0967615992), r0.xyz);

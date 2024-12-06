@@ -7,20 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x6811A33B.h>   // LUTBuilder3D ACES
-#include <embed/0x5BD02347.h>   // LUTBuilder3D no tonemap
-
-#include <embed/0xFDF96092.h>   // uberpost
-#include <embed/0xD6B5AD4A.h>   // uberpost 2
-
-#include <embed/0x51381740.h>   // color filter
-#include <embed/0x54DC7E29.h>   // color filter 2
-
-#include <embed/0x20F00CF5.h>   // HDRPfinal
-#include <embed/0xF507A307.h>   // HDRPfinal 2
-#include <embed/0x4C2AF525.h>   // HDRPfinal 3
-
-#include <embed/0x20133A8B.h>   // Final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -253,7 +240,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "fxNoise",
         .binding = &shader_injection.fxNoise,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Dithering Noise",
         .section = "Effects",
         .tint = 0x75906B,
@@ -318,7 +305,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -328,7 +315,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -338,7 +325,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
