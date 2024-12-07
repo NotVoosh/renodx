@@ -29,7 +29,6 @@ void main(
   r0.z = dot(r1.xzw, float3(1.16412354,2.01782227,-1.08166885));   
   o0.xyzw = v1.xyzw * r0.xyzw;
   
-  	//o0.rgba = saturate(r0.rgba);									// clean invalid colors
     o0 = saturate(o0);
     o0.rgb = InverseToneMap(o0.rgb);
     o0.rgb = PostToneMapScale(o0.rgb);
