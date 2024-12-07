@@ -43,7 +43,7 @@ void main(
   r0.xyz = r2.xyz * r0.xxx;
   r0.xyz = cb0[0].xxx * r0.xyz * injectedData.fxFilmGrain;
     r0.w = renodx::color::y::from::BT709(r2.rgb);
-    r0.a = renodx::math::SqrtSafe(r1.a);
+    r0.a = renodx::math::SqrtSafe(r0.a);
   r0.w = cb0[0].y * -r0.w + 1;
     if(injectedData.fxFilmGrainType == 0.f){
   r0.xyz = r0.xyz * r0.www + r2.xyz;
