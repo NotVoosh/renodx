@@ -1,6 +1,7 @@
 #include "./shared.h"
 #include "./DICE.hlsl"
 
+//-----EFFECTS-----//
 float3 applyFilmGrain(float3 outputColor, float2 screen)
 {
     float3 grainedColor = renodx::effects::ApplyFilmGrain(
@@ -21,20 +22,7 @@ float3 applyVignette(float3 color, float2 xy, float intensity){
 	return color;
 }
 
-float3 InverseToneMap(float3 color) {
-	float scaling = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
-	float videoPeak = scaling * 203.f;
-      if(injectedData.toneMapGammaCorrection == 1.f){
-    videoPeak = renodx::color::correct::Gamma(videoPeak, true);
-    scaling = renodx::color::correct::Gamma(scaling, true);
-    }
-    color = renodx::color::gamma::Decode(color, 2.4f);
-	color = renodx::tonemap::inverse::bt2446a::BT709(color, 100.f, videoPeak);
-	color /= videoPeak;
-	color *= scaling;
-	return color;
-}
-
+//-----SCALING-----//
 float3 PostToneMapScale(float3 color) {
   if (injectedData.toneMapGammaCorrection == 1.f) {
     color = renodx::color::srgb::EncodeSafe(color);
@@ -60,6 +48,21 @@ float3 FinalizeOutput(float3 color) {
   return color;
 }
 
+float3 InverseToneMap(float3 color) {
+	float scaling = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
+	float videoPeak = scaling * 203.f;
+      if(injectedData.toneMapGammaCorrection == 1.f){
+    videoPeak = renodx::color::correct::Gamma(videoPeak, true);
+    scaling = renodx::color::correct::Gamma(scaling, true);
+    }
+    color = renodx::color::gamma::Decode(color, 2.4f);
+	color = renodx::tonemap::inverse::bt2446a::BT709(color, 100.f, videoPeak);
+	color /= videoPeak;
+	color *= scaling;
+	return color;
+}
+
+//-----TONEMAP-----//
 float3 RenoDRTSmoothClamp(float3 untonemapped) {
   renodx::tonemap::renodrt::Config renodrtSC_config = renodx::tonemap::renodrt::config::Create();
   renodrtSC_config.nits_peak = 100.f;

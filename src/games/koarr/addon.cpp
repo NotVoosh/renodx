@@ -168,7 +168,6 @@ renodx::utils::settings::Settings settings = {
         .label = "Blowout",
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure."
-                   "\nDefault: RenoDRT = 50 | Frostbite/DICE = 0",
         .tint = 0x38F6FC,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
