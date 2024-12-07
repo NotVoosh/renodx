@@ -7,17 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x916B1D65.h>   // tonemap
-
-#include <embed/0x747C6210.h>   // loading screen
-#include <embed/0xA7799306.h>   // videos
-#include <embed/0x00D96EAE.h>   // videos 2
-
-#include <embed/0x3EB9D976.h>   // DoF 7
-#include <embed/0xD980FA68.h>   // low health effect
-
-#include <embed/0xFFFFFFFD.h> // Custom final VS
-#include <embed/0xFFFFFFFE.h> // Custom final PS
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -33,8 +23,7 @@ namespace {
 ShaderInjectData shader_injection;
 
 renodx::mods::shader::CustomShaders custom_shaders = {
-    //CustomShaderEntry(0x916B1D65),  // tonemap (+ post-processing)
-    CustomShaderEntryCallback(0x916B1D65, [](reshade::api::command_list* cmd_list) {
+    CustomShaderEntryCallback(0x916B1D65, [](reshade::api::command_list* cmd_list) {  // tonemap (+ post-processing)
       if (renodx::utils::swapchain::HasBackBufferRenderTarget(cmd_list)) {
         shader_injection.is_swapchain_write = true;
       } else {
@@ -49,6 +38,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomSwapchainShader(0x3EB9D976),  // DoF 7
     CustomSwapchainShader(0xD980FA68),  // low health effect
+    CustomSwapchainShader(0xD47322A6),  // something (likely some effect. used in Bon Appetit after bad guys dead)
   };
 
 renodx::utils::settings::Settings settings = {
@@ -111,7 +101,7 @@ renodx::utils::settings::Settings settings = {
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -123,7 +113,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tooltip = "Selects hue correction processor",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -249,21 +239,10 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
-        .key = "fxFilmGrainSize",
-        .binding = &shader_injection.fxFilmGrainSize,
-        .default_value = 50.f,
-        .label = "Film Grain Size",
-        .section = "Effects",
-        .min = 1.f,
-        .max = 100.f,
-        .is_enabled = []() { return shader_injection.fxFilmGrainType == 0; },
-        .parse = [](float value) { return value * 0.02f; },
-    },
-    new renodx::utils::settings::Setting{
         .key = "fxFilmGrainType",
         .binding = &shader_injection.fxFilmGrainType,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
+        .default_value = 0,
         .can_reset = false,
         .label = "Film Grain Type",
         .section = "Effects",
@@ -300,7 +279,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -310,7 +289,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -320,7 +299,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -336,7 +315,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0);
+  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
   renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
@@ -389,13 +368,13 @@ void OnInitDevice(reshade::api::device* device) {
     std::vector<reshade::api::pipeline_subobject> subobjects;
 
     reshade::api::shader_desc vs_desc = {};
-    vs_desc.code = _0xFFFFFFFD;
-    vs_desc.code_size = sizeof(_0xFFFFFFFD);
+    vs_desc.code = _final_vertex_shader;
+    vs_desc.code_size = sizeof(_final_vertex_shader);
     subobjects.push_back({reshade::api::pipeline_subobject_type::vertex_shader, 1, &vs_desc});
 
     reshade::api::shader_desc ps_desc = {};
-    ps_desc.code = _0xFFFFFFFE;
-    ps_desc.code_size = sizeof(_0xFFFFFFFE);
+    ps_desc.code = _final_pixel_shader;
+    ps_desc.code_size = sizeof(_final_pixel_shader);
     subobjects.push_back({reshade::api::pipeline_subobject_type::pixel_shader, 1, &ps_desc});
 
     reshade::api::format format = reshade::api::format::r16g16b16a16_float;

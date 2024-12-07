@@ -1,31 +1,19 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[3];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
@@ -69,9 +57,7 @@ void main(
         if(injectedData.fxFilmGrainType == 1.f){
       r2.rgb = applyFilmGrain(r2.rgb, v1.xy);
       }
-      r2.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      r2.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r2.rgb)
-                                                   : renodx::color::srgb::EncodeSafe(r2.rgb);
+      r2.rgb = PostToneMapScale(r2.rgb);
 
   o0.xyzw = r2.xyzw;
   return;

@@ -1,49 +1,29 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
+// https://www.elopezr.com/the-rendering-of-mafia-definitive-edition/
 
-// ---- Created with 3Dmigoto v1.3.16 on Sat Aug 17 17:55:47 2024
 Texture3D<float4> t9 : register(t9);            // LUT
-
 Texture2D<float4> t8 : register(t8);            // grain
-
 Texture2D<float4> t7 : register(t7);
-
 Texture2D<float4> t6 : register(t6);
-
 Texture2D<float4> t5 : register(t5);            // noise
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);            // untonemapped unexposed
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[7];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[9];
 }
 
-
-// https://www.elopezr.com/the-rendering-of-mafia-definitive-edition/
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
@@ -364,11 +344,11 @@ void main(
       r0.w = saturate(cb1[6].y);
       r4.xyz = -r1.xyz * r2.xyz + r4.xyz;
       r0.xyz = r0.www * r4.xyz + r0.xyz;
-                 if(injectedData.toneMapType == 0){
-            r0.rgb = lerp(preLUT, r0.rgb, injectedData.colorGradeLUTStrength);
-            } else {
-            r0.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
-            }
+          if (cb1[6].y == 1.f) {
+        r1.rgb = applyUserTonemapNoir(untonemapped, t9, s2_s, linearWhite);
+        } else {
+        r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
+        }
       r1.xyz = r0.xyz / r2.xyz;
     } else {
       // color grading LUT
@@ -383,14 +363,11 @@ void main(
       r0.xyz = r0.xyz + -r1.xyz;
       //r1.xyz = saturate(r0.www * r0.xyz + r1.xyz);
         r1.xyz = r0.www * r0.xyz + r1.xyz;
-                 if(injectedData.toneMapType == 0){
-            r1.rgb = lerp(preLUT, r1.rgb, injectedData.colorGradeLUTStrength);
-            r1.rgb = saturate(r1.rgb);
-            } else if (cb1[6].y == 1.f) {
-            r1.rgb = applyUserTonemapNoir(untonemapped, t9, s2_s, linearWhite);
-            } else {
-            r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
-            }
+          if (cb1[6].y == 1.f) {
+        r1.rgb = applyUserTonemapNoir(untonemapped, t9, s2_s, linearWhite);
+        } else {
+        r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
+        }
     }
   }
     
@@ -408,7 +385,6 @@ void main(
   // film grain
   if (r3.w != 0) {
     r0.xy = cb0[0].xx * v1.yz;
-    r0.xy *= injectedData.fxFilmGrainType ? 1 : (1 / injectedData.fxFilmGrainSize);
     r2.x = dot(cb0[1].xy, r0.xy);
     r2.y = dot(cb0[1].zw, r0.xy);
     r0.xyz = t8.Sample(s0_s, r2.xy).xyz;
@@ -437,16 +413,13 @@ void main(
     r0.zw = float2(0,0);
     r0.xyz = t5.Load(r0.xyz).xyz;
     r0.xyz = r0.xyz * float3(2,2,2) + float3(-1,-1,-1);
-    //r2.xyz = max(float3(0,0,0), r1.xyz);
-      r2.rgb = sign(r1.rgb) * sqrt(abs(r1.rgb));
-    //r2.xyz = sqrt(r2.xyz);
+      r2.rgb = renodx::math::SqrtSafe(r1.rgb);
     r3.xyz = cb0[8].www + r2.xyz;
     r3.xyz = min(cb0[8].zzz, r3.xyz);
     r0.xyz = r0.xyz * r3.xyz * injectedData.fxNoise + r2.xyz;
-    //r1.xyz = r0.xyz * r0.xyz;
-      r1.rgb = sign(r0.rgb) * pow(abs(r0.rgb), 2.f);
+      r1.rgb = renodx::math::PowSafe(r0.rgb, 2.f);
+      r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
     }
-    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
 
     // This shader writes on swapchain most of the time.
     // Intermediate fp11 resources spawn temporarily during cutscenes (Depth of Field/Blur effects)
@@ -454,9 +427,7 @@ void main(
     // Inverse conversion is done in latest DoF shader (samples everything, writes on swapchain)
     // + same with "low health" effect
         if(injectedData.is_swapchain_write == true){
-      r1.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      r1.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r1.rgb)
-                                                   : renodx::color::srgb::EncodeSafe(r1.rgb);
+      r1.rgb = PostToneMapScale(r1.rgb);
       } else {
       r1.rgb = renodx::color::ap1::from::BT709(r1.rgb);
       }

@@ -1,27 +1,17 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Sat Aug 17 17:55:50 2024
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[1];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
@@ -49,15 +39,9 @@ void main(
   r0.w = exp2(r0.w);
   o0.xyz = r1.xxx ? r0.www : r0.xyz;
   
-    o0.rgba = saturate(o0.rgba);
-        float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
-    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::Decode(o0.rgb)
-                                                 : renodx::color::srgb::Decode(o0.rgb);
-    o0.rgb = renodx::tonemap::inverse::bt2446a::BT709(o0.rgb, 100.f, videoPeak);
-    o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
-    o0.rgb /= injectedData.toneMapUINits;
-    o0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(o0.rgb)
-                                                 : renodx::color::srgb::EncodeSafe(o0.rgb);
+    o0 = saturate(o0);
+    o0.rgb = InverseToneMap(o0.rgb);
+    o0.rgb = PostToneMapScale(o0.rgb);
   
   r0.x = t3.Sample(s0_s, v1.xy).x;
   o0.w = r0.x;
