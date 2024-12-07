@@ -95,7 +95,7 @@ renodx::utils::settings::Settings settings = {
         .can_reset = false,
         .label = "Gamma Correction",
         .section = "Tone Mapping",
-        .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)"
+        .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
         .tint = 0x182939,
     },
     new renodx::utils::settings::Setting{
