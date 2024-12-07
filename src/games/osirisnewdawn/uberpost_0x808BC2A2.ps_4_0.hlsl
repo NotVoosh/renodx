@@ -184,7 +184,7 @@ void main(
       if(injectedData.fxFilmGrainType == 1.f){
     r1.rgb = applyFilmGrain(r1.rgb, v1);
     }
-    r1.rgb = PostToneMapScale(r1.rgb)
+    r1.rgb = PostToneMapScale(r1.rgb);
     o0.rgb = r1.rgb;
   o0.w = r0.w;
   return;
