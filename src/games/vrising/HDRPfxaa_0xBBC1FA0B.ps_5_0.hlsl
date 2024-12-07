@@ -1,29 +1,18 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Tue Sep 24 02:07:15 2024
 Texture2DArray<float4> t1 : register(t1);
-
 Texture2DArray<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[52];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[9];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -48,8 +37,7 @@ void main(
   r3.xy = r2.zw;
   r3.zw = float2(0,0);
   r3.xyz = t0.Load(r3.xyzw).xyz;
-  //r3.xyz = saturate(r3.xyz);
-  r3.x = dot(r3.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r3.x = renodx::color::y::from::BT709(r3.rgb);
   r4.xyzw = (int4)r0.xyxy + int4(-1,1,1,1);
   r4.xyzw = (int4)r4.xyzw;
   r1.xyzw = min(r4.xyzw, r1.xyzw);
@@ -57,17 +45,14 @@ void main(
   r4.xy = r1.zw;
   r4.zw = float2(0,0);
   r3.yzw = t0.Load(r4.xyzw).xyz;
-  //r3.yzw = saturate(r3.yzw);
-  r3.y = dot(r3.yzw, float3(0.212672904,0.715152204,0.0721750036));
+    r3.y = renodx::color::y::from::BT709(r3.gba);
   r3.z = r3.x + r3.y;
   r2.zw = float2(0,0);
   r2.xyz = t0.Load(r2.xyzw).xyz;
-  //r2.xyz = saturate(r2.xyz);
-  r2.x = dot(r2.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r2.x = renodx::color::y::from::BT709(r2.rgb);
   r1.zw = float2(0,0);
   r1.xyz = t0.Load(r1.xyzw).xyz;
-  //r1.xyz = saturate(r1.xyz);
-  r1.x = dot(r1.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r1.x = renodx::color::y::from::BT709(r1.rgb);
   r1.y = r2.x + r1.x;
   r4.yw = r3.zz + -r1.yy;
   r1.y = r3.x + r2.x;
@@ -93,23 +78,19 @@ void main(
   r6.xy = r5.zw;
   r6.z = 0;
   r1.yzw = t0.SampleLevel(s0_s, r6.xyz, 0).xyz;
-  //r1.yzw = saturate(r1.yzw);
   r6.xy = r4.zw;
   r6.z = 0;
   r2.yzw = t0.SampleLevel(s0_s, r6.xyz, 0).xyz;
-  //r2.yzw = saturate(r2.yzw);
   r1.yzw = r2.yzw + r1.yzw;
   r1.yzw = float3(0.25,0.25,0.25) * r1.yzw;
   r5.z = 0;
   r2.yzw = t0.SampleLevel(s0_s, r5.xyz, 0).xyz;
-  //r2.yzw = saturate(r2.yzw);
   r4.z = 0;
   r4.xyz = t0.SampleLevel(s0_s, r4.xyz, 0).xyz;
-  //r4.xyz = saturate(r4.xyz);
   r2.yzw = r4.xyz + r2.yzw;
   r1.yzw = r2.yzw * float3(0.25,0.25,0.25) + r1.yzw;
   r2.yzw = float3(0.5,0.5,0.5) * r2.yzw;
-  r3.z = dot(r1.yzw, float3(0.212672904,0.715152204,0.0721750036));
+    r3.z = renodx::color::y::from::BT709(r1.gba);
   r3.w = min(r2.x, r3.y);
   r2.x = max(r2.x, r3.y);
   r2.x = max(r2.x, r1.x);
@@ -117,8 +98,7 @@ void main(
   r0.zw = float2(0,0);
   r4.xyz = t0.Load(r0.xyww).xyz;
   r0.x = t1.Load(r0.xyzw).x;
-  //r4.xyz = saturate(r4.xyz);
-  r0.y = dot(r4.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r0.y = renodx::color::y::from::BT709(r4.rgb);
   r0.z = min(r0.y, r3.x);
   r0.y = max(r0.y, r3.x);
   r0.y = max(r0.y, r2.x);
@@ -137,14 +117,10 @@ void main(
   //r0.yzw = log2(r0.yzw);
   //r0.yzw = cb0[8].yyy * r0.yzw;
   //o0.xyz = exp2(r0.yzw);
-        o0.rgb = applyFilmGrain(r0.gba, v1.xy);
-          	if(injectedData.toneMapGammaCorrection == 1) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-            } else {
-        o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        }
+      if(injectedData.fxFilmGrain > 0.f){
+		o0.rgb = applyFilmGrain(r1.rgb, v1.xy);
+    }
+		o0.rgb = PostToneMapScale(o0.rgb);
   r0.y = cmp(cb0[8].x == 1.000000);
   o0.w = r0.y ? r0.x : 1;
   return;

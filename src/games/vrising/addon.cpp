@@ -7,21 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xF5AC76A9.h>   // LutBuilder3D
-
-#include <embed/0x8A6BCB4C.h>   // videos
-
-#include <embed/0xE6B97032.h>   // uberpost
-#include <embed/0x8FEBA362.h>   // uberpost (title menu)
-//#include <embed/0xE59F5A45.h>   // uberpost (FSR)
-
-#include <embed/0x6D3B4FF0.h>   // HDRP final
-#include <embed/0xBBC1FA0B.h>   // HDRP final (FXAA)
-//#include <embed/0xB0B50F1F.h>   // HDRP final (FSR)
-
-#include <embed/0xE52188B2.h>   // gamma
-
-#include <embed/0x20133A8B.h>   // final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -36,6 +22,7 @@ namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xF5AC76A9),  // LutBuilder3D
+  //CustomShaderEntry(0xE6786595),  // LutBuilder3D 2 (title menu)
   CustomShaderEntry(0x8A6BCB4C),  // videos
 
   CustomShaderEntry(0xE6B97032),  // uberpost = tonemap/LUT/postprocess
@@ -48,7 +35,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
   CustomShaderEntry(0xE52188B2),  // gamma
 
-  CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -108,7 +95,8 @@ renodx::utils::settings::Settings settings = {
         .can_reset = false,
         .label = "Gamma Correction",
         .section = "Tone Mapping",
-        .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
+        .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)"
+                   "\nOnly UI is corrected here.",
         .tint = 0x182939,
     },
     new renodx::utils::settings::Setting{
@@ -275,7 +263,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -285,7 +273,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -295,7 +283,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -311,7 +299,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
+  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
