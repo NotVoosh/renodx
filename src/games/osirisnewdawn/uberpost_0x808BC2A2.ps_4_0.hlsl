@@ -157,8 +157,10 @@ void main(
   r0.w = cb0[40].z * -r0.w + 1;
   r0.xyz = r1.yzw * r0.xyz;
   r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
-    if(injectedData.fxFilmGrainType == 0.f){
-      r2.xyz = r0.xyz * r0.www + r1.yzw;
+      if(injectedData.fxFilmGrainType == 0.f){
+    r2.xyz = r0.xyz * r0.www + r1.yzw;
+    } else {
+      r2.rgb = r1.gba;
     }
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
 

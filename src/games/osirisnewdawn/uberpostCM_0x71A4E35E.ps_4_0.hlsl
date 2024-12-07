@@ -130,12 +130,14 @@ void main(
   r0.xy = w1.xy * cb0[41].xy + cb0[41].zw;
   r0.xyzw = t7.Sample(s7_s, r0.xy).xyzw;
     r0.w = renodx::color::y::from::BT709(r1.gba);
-    r0.a = renodx::math::SqrtSafe(r1.a);
+    r0.a = renodx::math::SqrtSafe(r0.a);
   r0.w = cb0[40].z * -r0.w + 1;
   r0.xyz = r1.yzw * r0.xyz;
   r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
     if(injectedData.fxFilmGrainType == 0.f){
   r2.xyz = r0.xyz * r0.www + r1.yzw;
+  } else {
+    r2.rgb = r1.gba;
   }
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
 
