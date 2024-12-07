@@ -1,4 +1,4 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
 cbuffer g_databuffer : register(b0){
   struct
