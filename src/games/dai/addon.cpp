@@ -7,24 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0xFFFFFFFD.h>     // Custom final VS
-#include <embed/0xFFFFFFFE.h>     // Custom final PS
-
-#include <embed/0x5545BDF0.h>     // Title Menu background video / pre-rendered cutscenes
-#include <embed/0xE8AAA41F.h>     // UI alpha
-
-#include <embed/0x39C155AA.h>     // tonemapper 1
-#include <embed/0x59D67072.h>     // tonemapper 2
-#include <embed/0xA6483DBE.h>     // tonemapper 3
-#include <embed/0x4A22EBE7.h>     // tonemapper 4
-#include <embed/0x83C78E9A.h>     // tonemapper 5
-#include <embed/0x74DD925C.h>     // tonemapper 6
-#include <embed/0x848FA77D.h>     // tonemapper 7
-
-#include <embed/0xB3B5916C.h>     // tonemapper Cutscene 1
-#include <embed/0x298147DD.h>     // tonemapper Cutscene 2
-#include <embed/0xEE7DEA72.h>     // tonemapper Cutscene 3
-#include <embed/0xE30CE1FB.h>     // tonemapper Cutscene 4
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -41,18 +24,18 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x5545BDF0),      // Title Menu background video, pre-rendered cutscenes
     CustomShaderEntry(0xE8AAA41F),      // UI alpha
 
-    CustomShaderEntry(0x39C155AA),      // tonemapper 1                                          basic gameplay
-    CustomShaderEntry(0x59D67072),      // tonemapper 2                                          same here
-    CustomShaderEntry(0xA6483DBE),      // tonemapper 3                                          "nightmare" vision
-    CustomShaderEntry(0x4A22EBE7),      // tonemapper 4                                               //
-    CustomShaderEntry(0x83C78E9A),      // tonemapper 5                                          Ocularum
-    CustomShaderEntry(0x74DD925C),      // tonemapper 6                                             //
-    CustomShaderEntry(0x848FA77D),      // tonemapper 7                                          Archer's flask of lighting
+    CustomShaderEntry(0x39C155AA),      // tonemapper 1                                     basic gameplay
+    CustomShaderEntry(0x59D67072),      // tonemapper 2                                           //
+    CustomShaderEntry(0xA6483DBE),      // tonemapper 3                                    "nightmare" vision
+    CustomShaderEntry(0x4A22EBE7),      // tonemapper 4                                           //
+    CustomShaderEntry(0x83C78E9A),      // tonemapper 5                                       Ocularum
+    CustomShaderEntry(0x74DD925C),      // tonemapper 6                                           //
+    CustomShaderEntry(0x848FA77D),      // tonemapper                                   Archer's flask of lighting
 
-    CustomShaderEntry(0xB3B5916C),      // tonemapper Cutscene 1                                 Cutscenes only I think?
-    CustomShaderEntry(0x298147DD),      // tonemapper Cutscene 2                                          //
-    CustomShaderEntry(0xEE7DEA72),      // tonemapper Cutscene 3                                 same but why is it different...
-    CustomShaderEntry(0xE30CE1FB),      // tonemapper Cutscene 4                                          //
+    CustomShaderEntry(0xB3B5916C),      // tonemapper Cutscene 1                        Cutscenes only I think?
+    CustomShaderEntry(0x298147DD),      // tonemapper Cutscene 2                                 //
+    CustomShaderEntry(0xEE7DEA72),      // tonemapper Cutscene 3                      same but different tonemapper
+    CustomShaderEntry(0xE30CE1FB),      // tonemapper Cutscene 4                                  //
   };
 
 ShaderInjectData shader_injection;
@@ -124,7 +107,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tint = 0xEC4E1B,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -137,7 +120,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Selects hue correction processor",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
         .tint = 0xEC4E1B,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -291,7 +274,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -301,7 +284,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -311,7 +294,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -327,7 +310,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0);
+  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
   renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
@@ -434,13 +417,13 @@ void OnInitDevice(reshade::api::device* device) {
     std::vector<reshade::api::pipeline_subobject> subobjects;
 
     reshade::api::shader_desc vs_desc = {};
-    vs_desc.code = _0xFFFFFFFD;
-    vs_desc.code_size = sizeof(_0xFFFFFFFD);
+    vs_desc.code = _final_vertex_shader;
+    vs_desc.code_size = sizeof(_final_vertex_shader);
     subobjects.push_back({reshade::api::pipeline_subobject_type::vertex_shader, 1, &vs_desc});
 
     reshade::api::shader_desc ps_desc = {};
-    ps_desc.code = _0xFFFFFFFE;
-    ps_desc.code_size = sizeof(_0xFFFFFFFE);
+    ps_desc.code = _final_pixel_shader;
+    ps_desc.code_size = sizeof(_final_pixel_shader);
     subobjects.push_back({reshade::api::pipeline_subobject_type::pixel_shader, 1, &ps_desc});
 
     reshade::api::format format = reshade::api::format::r16g16b16a16_float;

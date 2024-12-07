@@ -1,11 +1,6 @@
-// UI core stuff, icons and buttons and all
+#include "./common.hlsl"
 
-#include "./shared.h"
-
-// ---- Created with 3Dmigoto v1.3.16 on Tue Sep 17 22:32:09 2024
-
-cbuffer _Globals : register(b0)
-{
+cbuffer _Globals : register(b0){
   float2 invPixelSize : packoffset(c0);
   float4x4 mvp : packoffset(c1);
   float4 texgen0 : packoffset(c5);
@@ -39,10 +34,7 @@ cbuffer _Globals : register(b0)
 SamplerState mainTextureSampler_s : register(s0);
 Texture2D<float4> mainTexture : register(t0);
 
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
@@ -61,6 +53,6 @@ void main(
   r0.xyzw = r0.xyzw * cxmul.xyzw + cxadd.xyzw;
   o0.w = v2.w * r0.w;
   o0.xyz = r0.xyz;
-	o0.a = max(0, o0.a);
+	  o0.a = max(0, o0.a);
   return;
 }

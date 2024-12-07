@@ -1,12 +1,6 @@
-// flask of lightning
+#include "./common.hlsl"
 
-#include "./shared.h"
-#include "./tonemapper.hlsl"
-
-// ---- Created with 3Dmigoto v1.3.16 on Tue Sep 17 22:27:15 2024
-
-cbuffer _Globals : register(b0)
-{
+cbuffer _Globals : register(b0){
   float2 invPixelSize : packoffset(c0);
   float4 depthFactors : packoffset(c1);
   float2 fadeParams : packoffset(c2);
@@ -58,10 +52,7 @@ Texture3D<float4> colorGradingTexture : register(t1);
 Texture2D<float4> distortionTexture : register(t2);
 Texture2D<float4> tonemapBloomTexture : register(t3);
 
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
@@ -89,33 +80,37 @@ void main(
   r0.x = mainTexture.Sample(mainTextureSampler_s, r0.zw).z;
   r0.x = r0.x + -r1.z;
   r1.z = chromostereopsisParams.x * r0.x + r1.z;
-  r0.xyz = r2.xyz * bloomScale.xyz * injectedData.fxBloom + r1.xyz;   // bloom
+
+  r0.xyz = r2.xyz * bloomScale.xyz * injectedData.fxBloom + r1.xyz;
+
   r0.xyz = colorScale.xyz * r0.xyz;
   r1.xy = float2(-0.5,-0.5) + v2.xy;
-  r1.xy = vignetteParams.xy * r1.xy;
+
+  r1.xy = vignetteParams.xy * r1.xy * min(1, injectedData.fxVignette);
+
   r0.w = dot(r1.xy, r1.xy);
   r0.w = saturate(-r0.w * vignetteColor.w + 1);
+
   r0.w = log2(r0.w);
-  r0.w = vignetteParams.z * r0.w * injectedData.fxVignette;   // vignette
+  r0.w = vignetteParams.z * r0.w * max(1, injectedData.fxVignette);
   r0.w = exp2(r0.w);
+
   r0.xyz = r0.xyz * r0.www;
 
-      float3 untonemapped = r0.rgb;
+    float3 untonemapped = r0.rgb;
+		float midGray = 0.18f;
 
   r0.xyz = log2(r0.xyz);
   r0.xyz = invGamma.xyz * r0.xyz;
   r0.xyz = exp2(r0.xyz);
-
-		float vanillaGray = 0.18f;
-		float3 LUTless = r0.xyz;
-
   r0.xyz = r0.xyz * float3(0.96875,0.96875,0.96875) + float3(0.015625,0.015625,0.015625);
   r0.xyz = colorGradingTexture.Sample(colorGradingTextureSampler_s, r0.xyz).xyz;
-  o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
-  o0.xyz = r0.xyz;
 
-		float3 vanilla = o0.rgb;
-
-  o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, screen.xy, vanillaGray);
+  o0.rgb = applyUserTonemap(untonemapped, colorGradingTexture, colorGradingTextureSampler_s, untonemapped, midGray);
+    o0.a = renodx::color::y::from::BT709(o0.rgb);
+		  if (injectedData.fxFilmGrain > 0.f) {
+		o0.rgb = applyFilmGrain(o0.rgb, screen);
+		}
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

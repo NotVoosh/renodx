@@ -1,12 +1,6 @@
-// used in gameplay, switches with tonemap2
+#include "./common.hlsl"
 
-#include "./shared.h"
-#include "./tonemapper.hlsl"																			// custom tonemapper
-
-// ---- Created with 3Dmigoto v1.3.16 on Wed Jul 31 01:54:39 2024
-
-cbuffer _Globals : register(b0)
-{
+cbuffer _Globals : register(b0){
   float2 invPixelSize : packoffset(c0);
   float4 depthFactors : packoffset(c1);
   float2 fadeParams : packoffset(c2);
@@ -56,10 +50,7 @@ Texture2D<float4> mainTexture : register(t0);
 Texture3D<float4> colorGradingTexture : register(t1);
 Texture2D<float4> tonemapBloomTexture : register(t2);
 
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,
@@ -72,37 +63,36 @@ void main(
   float4 fDest;
 
   r0.xy = float2(-0.5,-0.5) + v2.xy;
-  r0.xy = vignetteParams.xy * r0.xy;
+
+  r0.xy = vignetteParams.xy * r0.xy * min(1, injectedData.fxVignette);
+
   r0.x = dot(r0.xy, r0.xy);
   r0.x = saturate(-r0.x * vignetteColor.w + 1);
+
   r0.x = log2(r0.x);
-  r0.x = vignetteParams.z * r0.x * injectedData.fxVignette;													// Vignette slider
+  r0.x = vignetteParams.z * r0.x * max(1, injectedData.fxVignette);
   r0.x = exp2(r0.x);
+
   r0.yzw = mainTexture.Sample(mainTextureSampler_s, v2.xy).xyz;
   r1.xyz = tonemapBloomTexture.Sample(tonemapBloomTextureSampler_s, v2.xy).xyz;
-  r0.yzw = r1.xyz * bloomScale.xyz * injectedData.fxBloom + r0.yzw;											// Bloom slider
+
+  r0.yzw = r1.xyz * bloomScale.xyz * injectedData.fxBloom + r0.yzw;
+
   r0.yzw = colorScale.xyz * r0.yzw;
   r0.xyz = r0.yzw * r0.xxx;
 
-		float3 untonemapped = r0.xyz;
-		
-  r0.xyz += float3(-0.00400000019,-0.00400000019,-0.00400000019);
-  r0.xyz = max(float3(0,0,0), r0.xyz);
-  r1.xyz = r0.xyz * float3(6.19999981,6.19999981,6.19999981) + float3(0.5,0.5,0.5);							// OG tonemapper start ???
-  r1.xyz = r1.xyz * r0.xyz;
-  r2.xyz = r0.xyz * float3(6.19999981,6.19999981,6.19999981) + float3(1.70000005,1.70000005,1.70000005);
-  r0.xyz = r0.xyz * r2.xyz + float3(0.0599999987,0.0599999987,0.0599999987);
-  r0.xyz = r1.xyz / r0.xyz;
-		
-		float vanillaGray = renodx::tonemap::HejlDawson(0.18f);
-		float3 LUTless = r0.rgb;
+		float3 untonemapped = r0.rgb;
+		float midGray = renodx::color::y::from::BT709(renodx::tonemap::HejlDawson(0.18f));
+		float3 LUTless = renodx::tonemap::HejlDawson(untonemapped);
 
   r0.xyz = r0.xyz * float3(0.96875,0.96875,0.96875) + float3(0.015625,0.015625,0.015625);	
-  r0.xyz = colorGradingTexture.Sample(colorGradingTextureSampler_s, r0.xyz).xyz;							// OG LUT
-  o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
-  o0.xyz = r0.xyz;																							// vanilla output
-	
-		float3 vanilla = o0.rgb;
-    o0.rgb = applyUserTonemap(untonemapped.rgb, colorGradingTexture, colorGradingTextureSampler_s, LUTless.rgb, vanilla.rgb, v2.xy, vanillaGray);
+  r0.xyz = colorGradingTexture.Sample(colorGradingTextureSampler_s, r0.xyz).xyz;
+
+    o0.rgb = applyUserTonemap(untonemapped, colorGradingTexture, colorGradingTextureSampler_s, LUTless, midGray);
+    o0.a = renodx::color::y::from::BT709(o0.rgb);
+		  if (injectedData.fxFilmGrain > 0.f) {
+		o0.rgb = applyFilmGrain(o0.rgb, v2);
+		}
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }
