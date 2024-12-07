@@ -96,7 +96,6 @@ renodx::utils::settings::Settings settings = {
         .label = "Gamma Correction",
         .section = "Tone Mapping",
         .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)"
-                   "\nOnly UI is corrected here.",
         .tint = 0x182939,
     },
     new renodx::utils::settings::Setting{
@@ -299,7 +298,7 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
   renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0.f);
+  renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1.f);
   renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
   renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);

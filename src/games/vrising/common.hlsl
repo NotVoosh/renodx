@@ -19,7 +19,6 @@ float3 PostToneMapScale(float3 color) {
     color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
     color = renodx::color::correct::GammaSafe(color, true);
     } else {
-	color = renodx::color::correct::GammaSafe(color);
     color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
     }
   return color;
@@ -46,10 +45,10 @@ return color;
 float3 InverseToneMap(float3 color) {
 	float scaling = injectedData.toneMapPeakNits / injectedData.toneMapGameNits;
 	float videoPeak = scaling * 203.f;
-    //  if(injectedData.toneMapGammaCorrection == 1.f){
+      if(injectedData.toneMapGammaCorrection == 1.f){
     videoPeak = renodx::color::correct::Gamma(videoPeak, true);
     scaling = renodx::color::correct::Gamma(scaling, true);
-    //}
+    }
     color = renodx::color::correct::GammaSafe(color, false, 2.4f);
 	color = renodx::tonemap::inverse::bt2446a::BT709(color, 100.f, videoPeak);
 	color /= videoPeak;
@@ -109,7 +108,7 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.type = injectedData.toneMapType;
 			config.peak_nits = injectedData.toneMapPeakNits;
 			config.game_nits = injectedData.toneMapGameNits;
-			config.gamma_correction = 1.f;
+			config.gamma_correction = injectedData.toneMapGammaCorrection;
 			config.exposure = injectedData.colorGradeExposure;
 			config.highlights = injectedData.colorGradeHighlights;
 			config.shadows = injectedData.colorGradeShadows;
