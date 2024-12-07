@@ -1,21 +1,13 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Tue Sep 24 09:31:05 2024
 Texture2D<float4> t0 : register(t0);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[3];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -29,19 +21,10 @@ void main(
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
-    o0.rgba = saturate(o0.rgba);
-    float videoPeak = injectedData.toneMapPeakNits / (injectedData.toneMapGameNits / 203.f);
-        if(injectedData.toneMapGammaCorrection == 1) {
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-    o0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(o0.rgb, 100.f, videoPeak);
-	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
-    o0.rgb /= injectedData.toneMapUINits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-        } else {
-    o0.rgb = renodx::tonemap::inverse::bt2446a::BT2020(o0.rgb, 100.f, videoPeak);
-	o0.rgb *= injectedData.toneMapPeakNits / videoPeak;
-    o0.rgb /= injectedData.toneMapUINits;
-    } 
-      	
+    o0 = saturate(o0);
+      if(injectedData.toneMapType != 0.f){
+    o0.rgb = InverseToneMap(o0.rgb);
+    }
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

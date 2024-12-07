@@ -1,39 +1,24 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Sat Aug 31 10:36:04 2024
 Texture2D<float4> t4 : register(t4);
-
 Texture3D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2DArray<float4> t1 : register(t1);
-
 Texture2DArray<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
 RWTexture2DArray<float4> u0 : register(u0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[13];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[51];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
 
 [numthreads(8, 8, 1)] void main(uint3 vThreadID : SV_DispatchThreadID) {
@@ -108,7 +93,9 @@ cbuffer cb0 : register(b0)
     r3.xyz = -r2.xyz * r0.www + r2.xyz;
     r3.xyz = r0.xyz * cb1[9].xyz + r3.xyz;
     r3.xyz = r3.xyz + -r2.xyz;
-    r2.xyz = cb1[7].xxx * r3.xyz * injectedData.fxBloom + r2.xyz;          // Bloom
+
+    r2.xyz = cb1[7].xxx * r3.xyz * injectedData.fxBloom + r2.xyz;
+
     r0.w = cmp(0 != cb1[7].w);
     if (r0.w != 0) {
       r3.xy = r1.zw * cb1[10].xy + cb1[10].zw;
@@ -120,7 +107,9 @@ cbuffer cb0 : register(b0)
   r0.x = (uint)cb1[1].z;
   if (r0.x == 0) {
     r0.xy = r1.xy * cb0[47].zw + -cb1[1].xy;
-    r0.yz = cb1[2].xx * abs(r0.yx) * injectedData.fxVignette; // vignette
+
+    r0.yz = cb1[2].xx * abs(r0.yx) * min(1, injectedData.fxVignette);
+
     r0.w = cb0[47].x / cb0[47].y;
     r0.w = -1 + r0.w;
     r0.w = cb1[2].w * r0.w + 1;
@@ -132,9 +121,11 @@ cbuffer cb0 : register(b0)
     r0.x = dot(r0.xy, r0.xy);
     r0.x = 1 + -r0.x;
     r0.x = max(0, r0.x);
+
     r0.x = log2(r0.x);
-    r0.x = cb1[2].y * r0.x;
+    r0.x = cb1[2].y * r0.x * max(1, injectedData.fxVignette);
     r0.x = exp2(r0.x);
+
     r0.yzw = float3(1,1,1) + -cb1[3].xyz;
     r0.xyz = r0.xxx * r0.yzw + cb1[3].xyz;
     r0.xyz = r2.xyz * r0.xyz;
@@ -148,29 +139,28 @@ cbuffer cb0 : register(b0)
     r1.xyz = r2.xyz * r1.xyz + -r2.xyz;
     r0.xyz = cb1[3].www * r1.xyz + r2.xyz;
   }
-        float3 untonemapped;
   r0.w = cmp(0 != cb1[12].x);		
   if (r0.w != 0) {
-    r1.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-    r1.xyz = max(float3(0,0,0), r1.xyz);
-    r1.xyz = log2(r1.xyz);
-    r0.xyz = saturate(r1.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));		
+
+      r0.rgb = lutShaper(r0.rgb);
+
   } else {
     r0.w = cmp(0 != cb1[6].w);
     if (r0.w != 0) {
       r1.xyz = cb1[6].zzz * r0.xyz;
-          untonemapped = r1.rgb;
-      r1.xyz = r1.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-      r1.xyz = max(float3(0,0,0), r1.xyz);
-      r1.xyz = log2(r1.xyz);
-      r1.xyz = saturate(r1.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));		
+
+        float3 preCG = r1.rgb;
+        r1.rgb = lutShaper(r1.rgb);	
+
       r1.xyz = cb1[6].yyy * r1.xyz;
       r0.w = 0.5 * cb1[6].x;
       r1.xyz = r1.xyz * cb1[6].xxx + r0.www;
       r0.xyz = t3.SampleLevel(s1_s, r1.xyz, 0).xyz;
-          r0.rgb = applyUserTonemap(untonemapped, t3, s1_s);
+      
+        r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
     }
   }
+    r0.rgb = applyUserTonemap(r0.rgb);
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzx
 	u0[vThreadID.xyz] = r0.xyzw;

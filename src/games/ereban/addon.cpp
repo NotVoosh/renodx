@@ -7,22 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x7F27D36D.h>   // LutBuilder3D
-
-#include <embed/0x8A6BCB4C.h>   // videos
-#include <embed/0x0EBC87AB.h>   // screenLUT (game brightness)
-
-#include <embed/0xE363E5C8.h>   // uberpost (bloom + vignette)
-#include <embed/0x3BD8B8FD.h>   // uberpost title menu (CA + bloom + vignette)
-
-#include <embed/0x192EEB27.h>   // HDRP final
-#include <embed/0x02AB22C6.h>   // HDRP (title menu)
-#include <embed/0x0FA783B7.h>   // HDRP2 (title menu)
-#include <embed/0xCF6A37F9.h>   // HDRP final (DLSS/TAAU)
-#include <embed/0x9A3E0141.h>   // HDRP final (FXAA)
-#include <embed/0x38B55FCE.h>   // HDRP final 6 (FXAA + grain)
-
-#include <embed/0x20133A8B.h>   // Final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -54,7 +39,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x9A3E0141),  // HDRPfinal (FXAA)
     CustomShaderEntry(0x38B55FCE),  // HDRPfinal6 (FXAA + grain)
 
-    CustomSwapchainShader(0x20133A8B),  // Final
+    CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -293,7 +278,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -303,7 +288,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -313,7 +298,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{

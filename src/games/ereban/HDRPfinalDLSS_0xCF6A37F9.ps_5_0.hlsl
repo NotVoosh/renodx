@@ -1,35 +1,21 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Fri Sep 20 06:47:29 2024
 Texture2DArray<float4> t3 : register(t3);
-
 Texture2DArray<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2DArray<float4> t0 : register(t0);
 
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[80];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[6];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -50,24 +36,23 @@ void main(
   r1.xy = (uint2)r1.xy;
   r1.zw = float2(0,0);
   r0.xyw = t0.Load(r1.xyzw).xyz;
-  //r0.xyw = saturate(r0.xyw);
   r1.xyz = r0.xyw * r0.zzz;
-  r1.xyz = cb0[0].xxx * r1.xyz;
-  r0.z = dot(r0.xyw, float3(0.212672904,0.715152204,0.0721750036));
-  //r0.z = sqrt(r0.z);
-    r0.b = sign(r0.b) * sqrt(abs(r0.b));
+  r1.xyz = cb0[0].xxx * r1.xyz * injectedData.fxFilmGrain;
+    r0.z = renodx::color::y::from::BT709(r0.rga);
+    r0.b = renodx::math::SqrtSafe(r0.b);
   r0.z = cb0[0].y * -r0.z + 1;
-  r0.xyz = injectedData.fxFilmGrainType ? applyFilmGrain(r0.xyw, v1) : r1.xyz * r0.zzz * injectedData.fxFilmGrain + r0.xyw;        // vanilla grain
+
+      if(injectedData.fxFilmGrainType == 0.f){
+        r0.xyz = r1.xyz * r0.zzz + r0.xyw;
+    } else {
+      r0.rgb = applyFilmGrain(r0.rga, v1);
+    }
+
   r2.z = 0;
   r1.xyzw = t2.SampleLevel(s0_s, r2.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
-		  	if(injectedData.toneMapGammaCorrection == 1) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-		o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-        } else {
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        }
+  
+    o0.rgb = PostToneMapScale(o0.rgb);
 		
   r0.xy = cb1[46].xy * v1.xy;
   r0.xy = (uint2)r0.xy;

@@ -1,35 +1,21 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Sat Aug 31 10:43:36 2024
 Texture2DArray<float4> t3 : register(t3);
-
 Texture2DArray<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2DArray<float4> t0 : register(t0);
 
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[80];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[6];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -56,25 +42,23 @@ void main(
   r2.zw = float2(0,0);
   r0.yzw = t0.Load(r2.xyww).xyz;
   r1.w = t3.Load(r2.xyzw).x;
-  //r0.yzw = saturate(r0.yzw);
   r2.xyz = r0.yzw * r0.xxx;
-  r2.xyz = cb0[0].xxx * r2.xyz;
-  r0.x = dot(r0.yzw, float3(0.212672904,0.715152204,0.0721750036));
-  //r0.x = sqrt(r0.x);
-    r0.r = sign(r0.r) * sqrt(abs(r0.r));
+  r2.xyz = cb0[0].xxx * r2.xyz * injectedData.fxFilmGrain;
+    r0.r = renodx::color::y::from::BT709(r0.gba);
+    r0.x = renodx::math::SqrtSafe(r0.x);
   r0.x = cb0[0].y * -r0.x + 1;
-  r0.xyz = injectedData.fxFilmGrainType ? applyFilmGrain(r0.yzw, v1) : r2.xyz * r0.xxx * injectedData.fxFilmGrain + r0.yzw;                // vanilla grain
+
+      if(injectedData.fxFilmGrainType == 0.f){
+  r0.xyz = r2.xyz * r0.xxx + r0.yzw;
+    } else {
+    r0.rgb = applyFilmGrain(r0.gba, v1);
+    }
+
   r1.z = 0;
   r2.xyzw = t2.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r2.www * r0.xyz + r2.xyz;
-		  	if(injectedData.toneMapGammaCorrection == 1) {
-		o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    o0.rgb = renodx::color::correct::GammaSafe(o0.rgb, true);
-        } else {
-    o0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-        }
   r0.x = cmp(cb0[5].x == 1.000000);
   o0.w = r0.x ? r1.w : 1;
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }
