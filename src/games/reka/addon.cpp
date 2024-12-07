@@ -7,14 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x3B4291E8.h>   // LutBuilder3D
-
-#include <embed/0xE363E5C8.h>   // uberpost
-
-#include <embed/0x02AB22C6.h>   // post final
-#include <embed/0x3DA6127F.h>   // post final 2
-
-#include <embed/0x20133A8B.h>   // final
+#include <embed/shaders.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -35,7 +28,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x02AB22C6),  // post final
   CustomShaderEntry(0x3DA6127F),  // post final 2
 
-  CustomSwapchainShader(0x20133A8B),  // Final
+  CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -106,7 +99,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .tint = 0x434C36,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -119,7 +112,7 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Selects hue correction processor",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
         .tint = 0x434C36,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_enabled = []() { return shader_injection.toneMapType >= 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -274,7 +267,7 @@ renodx::utils::settings::Settings settings = {
         .section = "About",
         .group = "button-line-1",
         .on_change = []() {
-          system("start https://github.com/clshortfuse/renodx");
+  ShellExecute(0, "open", "https://github.com/clshortfuse/renodx", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -284,7 +277,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/shortfuse");
+  ShellExecute(0, "open", "https://ko-fi.com/shortfuse", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{
@@ -294,7 +287,7 @@ renodx::utils::settings::Settings settings = {
         .group = "button-line-1",
         .tint = 0xFF5F5F,
         .on_change = []() {
-          system("start https://ko-fi.com/hdrden");
+  ShellExecute(0, "open", "https://ko-fi.com/hdrden", 0, 0, SW_SHOW);
         },
     },
     new renodx::utils::settings::Setting{

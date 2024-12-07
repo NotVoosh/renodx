@@ -1,39 +1,25 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 // https://github.com/Unity-Technologies/Graphics/blob/master/Packages/com.unity.render-pipelines.high-definition/Runtime/PostProcessing/Shaders/LutBuilder3D.compute
 
 Texture2D<float4> t7 : register(t7);
-
 Texture2D<float4> t6 : register(t6);
-
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
 RWTexture3D<float4> u0 : register(u0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[25];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 [numthreads(4, 4, 4)] void main(uint3 vThreadID : SV_DispatchThreadID) {
 // Needs manual fix for instruction:
@@ -48,12 +34,10 @@ cbuffer cb0 : register(b0)
   r0.w = cmp(0 < cb0[17].x);
   if (r0.w != 0) {
     r1.xyz = r0.xyz * cb0[0].yyy;
-      if(injectedData.colorGradeLUTSampling == 0.f){
-    r1.rgb = renodx::color::arri::logc::c1000::Decode(r1.rgb, false);
-    } else {
-    r1.rgb = renodx::color::pq::Decode(r1.rgb, 100.f);
-    }
+    
+      r1.rgb = lutShaper(r1.rgb, true);
       float3 preCG = r1.rgb;
+
     // WhiteBalance
     r2.x = dot(float3(0.390404999,0.549941003,0.00892631989), r1.xyz);
     r2.y = dot(float3(0.070841603,0.963172019,0.00135775004), r1.xyz);
@@ -244,20 +228,15 @@ cbuffer cb0 : register(b0)
     r0.w = 1 + -r0.w;
     r0.w = rcp(r0.w);
     r1.xyz = r2.xyz * r0.www;
-    r1.xyz = max(float3(0,0,0), r1.xyz);
-
       r1.rgb = lerp(preCG, r1.rgb, injectedData.colorGradeLUTStrength);
   } else {
     r1.xyz = r0.xyz * cb0[0].yyy;
-      if(injectedData.colorGradeLUTSampling == 0.f){
-    r1.rgb = renodx::color::arri::logc::c1000::Decode(r1.rgb, false);
-    } else {
-    r1.rgb = renodx::color::pq::Decode(r1.rgb, 100.f);
-    }
+    
+      r1.rgb = lutShaper(r1.rgb, true);
   }
-  r0.xyz = max(float3(0,0,0), r1.xyz);
     if(injectedData.toneMapType == 0.f){
 // CustomTonemap
+  r0.xyz = max(float3(0,0,0), r1.xyz);
   r1.xyz = cb0[18].xxx * r0.xyz;                    // 0.25, 0, 0, 0.24999750
   r2.xyzw = cmp(r1.xxyy < cb0[18].yzyz);
   r3.xyzw = r2.yyyy ? cb0[21].xyzw : cb0[23].xyzw;  // -0, 0, 0, 0 ::: 5, 1.01946783, -1, -0.50973392
@@ -303,7 +282,7 @@ cbuffer cb0 : register(b0)
   r3.z = r0.x * r1.w + r1.y;
   r0.xyz = max(float3(0,0,0), r3.xyz);
   } else {
-    r0.rgb = applyUserTonemap(r0.rgb);
+    r0.rgb = applyUserTonemap(r1.rgb);
   }
   r0.w = 1;
 // No code for instruction (needs manual fix):
