@@ -100,11 +100,9 @@ void main(
   }
       r0.rgb = renodx::color::bt709::from::AP1(r0.rgb);   // writing on swapchain here, back to bt709
         if(injectedData.fxFilmGrainType == 1.f){
-      //r0.rgb = applyFilmGrain(r0.rgb, v1.xy);
+      r0.rgb = applyFilmGrain(r0.rgb, v1.xy);
       }
-      r0.rgb *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-      r0.rgb = injectedData.toneMapGammaCorrection ? renodx::color::gamma::EncodeSafe(r0.rgb)
-                                                   : renodx::color::srgb::EncodeSafe(r0.rgb);
+      r0.rgb = PostToneMapScale(r0.rgb);
 
   o0.xyz = r0.xyz;
   o0.w = 1;
