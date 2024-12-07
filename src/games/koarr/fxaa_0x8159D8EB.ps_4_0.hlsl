@@ -1,7 +1,6 @@
 #include "./shared.h"
 
-cbuffer g_databuffer : register(b0)
-{
+cbuffer g_databuffer : register(b0){
   struct
   {
     float4 pixelData;

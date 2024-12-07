@@ -1,7 +1,6 @@
 #include "./common.hlsl"
 
-cbuffer g_constantsbuffer : register(b0)
-{
+cbuffer g_constantsbuffer : register(b0){
   struct
   {
     float4 rawUVadjust;

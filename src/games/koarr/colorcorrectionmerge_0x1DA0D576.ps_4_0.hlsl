@@ -1,5 +1,4 @@
-cbuffer g_constantsbuffer : register(b0)
-{
+cbuffer g_constantsbuffer : register(b0){
   struct
   {
     float4 transition_amounts;
@@ -18,10 +17,7 @@ Texture3D<float4> g_correctionSampler1_texture : register(t1);
 Texture3D<float4> g_correctionSampler2_texture : register(t2);
 Texture3D<float4> g_correctionSampler3_texture : register(t3);
 
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_Position0,

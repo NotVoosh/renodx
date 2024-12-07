@@ -13,13 +13,20 @@ float3 applyFilmGrain(float3 outputColor, float2 screen)
     return grainedColor;
 }
 
-float3 applyVignette(float3 color, float2 xy, float intensity){
-	xy = xy - 0.5f;
-	float v = dot(xy, xy);
-	v = saturate(1-v);
-	v = pow(v, intensity);
-	color *= v.xxx;
-	return color;
+float3 applyVignette(float3 inputColor, float2 screen, float slider) {
+  static float intensity = 1.f;	// internal
+  static float roundness = 1.f;	// parameters
+  static float light = 0.f;		// for now
+  
+	float Vintensity = intensity * min(1, slider);	// Slider below 1 to Vintensity
+	float Vroundness = roundness * max(1, slider);	// Slider above 1 to Vroundness
+	float2 Vcoord = screen - 0.5f;					// get screen center
+	Vcoord *= Vintensity;
+	float v = dot(Vcoord, Vcoord);
+	v = saturate(1 - v);
+	v = pow(v, Vroundness);
+	float3 output = inputColor * min(1, v + light);
+	return output;
 }
 
 //-----SCALING-----//
