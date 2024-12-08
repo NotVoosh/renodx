@@ -213,11 +213,10 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			renodx::lut::config::type::SRGB,
 			16.f);
 
-				if(injectedData.toneMapType >= 3.f){
+				if(injectedData.toneMapType >= 2.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection / 2, hueProcessor);
 			}
 				if (injectedData.toneMapType == 2.f){			// Frostbite
-			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, hueProcessor);
 				float3 sdrColor = applyFrostbite(outputColor, config, true);
 			outputColor = applyFrostbite(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
