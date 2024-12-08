@@ -42,9 +42,9 @@ void main(
     o0 = saturate(o0);
       if(injectedData.toneMapType != 0.f){
     o0.rgb = InverseToneMap(o0.rgb);
-    }
     o0.rgb = PostToneMapScale(o0.rgb);
-  
+    }
+    
   r0.x = t3.Sample(s0_s, v1.xy).x;
   o0.w = r0.x;
   return;
