@@ -1,30 +1,18 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Tue Oct 15 12:35:46 2024
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[4];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -64,12 +52,9 @@ void main(
   r2.xyz = r0.xxx * r0.yzw + r2.xyz;
   //o0.xyzw = cb0[3].zzzz * r2.xyzw;      // game "gamma" setting
     o0.rgba = r2.rgba;
-      o0.rgb = applyFilmGrain(o0.rgb, v1.xy);
-      if(injectedData.toneMapGammaCorrection == 1){
-      o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-      o0.rgb *= injectedData.toneMapGameNits / 80.f;
-      } else {
-      o0.rgb *= injectedData.toneMapGameNits / 80.f;
-      }
+      if(injectedData.fxFilmGrain > 0.f){
+    o0.rgb = applyFilmGrain(o0.rgb, v1);
+    }
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

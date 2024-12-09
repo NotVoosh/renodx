@@ -1,21 +1,14 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Tue Oct 15 13:20:35 2024
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[5];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -40,12 +33,7 @@ void main(
   r0.x = r1.w * r0.x;
   o0.xyz = r1.xyz;
   o0.w = r0.x;
-      if(injectedData.toneMapGammaCorrection == 1){
-      o0.rgb = renodx::color::correct::GammaSafe(o0.rgb);
-      o0.rgb *= injectedData.toneMapUINits / 80.f;
-      } else {
-      o0.rgb *= injectedData.toneMapUINits / 80.f;
-      }
+    o0.rgb = UIScale(o0.rgb);
   r0.x = cmp(r0.y < 0);
   if (r0.x != 0) discard;
   return;

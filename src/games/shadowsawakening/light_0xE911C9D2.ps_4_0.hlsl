@@ -1,60 +1,34 @@
-#include "./shared.h"
+#include "./common.hlsl"
 
-// ---- Created with 3Dmigoto v1.3.16 on Tue Oct 15 16:23:50 2024
 Texture2D<float4> t6 : register(t6);
-
 Texture2D<float4> t5 : register(t5);
-
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
-
 SamplerState s6_s : register(s6);
-
 SamplerState s5_s : register(s5);
-
 SamplerState s4_s : register(s4);
-
 SamplerComparisonState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb3 : register(b3)
-{
+cbuffer cb3 : register(b3){
   float4 cb3[26];
 }
-
-cbuffer cb2 : register(b2)
-{
+cbuffer cb2 : register(b2){
   float4 cb2[22];
 }
-
-cbuffer cb1 : register(b1)
-{
+cbuffer cb1 : register(b1){
   float4 cb1[8];
 }
-
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[11];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -70,7 +44,11 @@ void main(
   r0.y = cb1[5].z / v2.z;
   r0.yzw = v2.xyz * r0.yyy;
   r1.xy = v1.xy / v1.ww;
-  r2.xyzw = injectedData.fxCameraLight ? t0.Sample(s0_s, r1.xy).xyzw : 0;
+    if(injectedData.fxCameraLight == 0.f){
+      r2.rgba = 0;
+    } else {
+  r2.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
+  }
   r1.z = cb1[7].x * r2.x + cb1[7].y;
   r1.z = 1 / r1.z;
   r2.xyz = r1.zzz * r0.yzw;
