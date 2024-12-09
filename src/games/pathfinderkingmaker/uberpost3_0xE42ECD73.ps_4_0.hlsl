@@ -1,29 +1,18 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[16];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -38,33 +27,32 @@ void main(
   float4 fDest;
 
   r0.xy = -cb0[14].xy + v1.xy;
-  r0.xy = cb0[15].xx * abs(r0.xy) * injectedData.fxVignette;
+
+  r0.xy = cb0[15].xx * abs(r0.xy) * min(1, injectedData.fxVignette);
+
   r0.xy = log2(r0.xy);
   r0.xy = cb0[15].zz * r0.xy;
   r0.xy = exp2(r0.xy);
   r0.x = dot(r0.xy, r0.xy);
   r0.x = 1 + -r0.x;
   r0.x = max(0, r0.x);
+
   r0.x = log2(r0.x);
-  r0.x = cb0[15].y * r0.x;
+  r0.x = cb0[15].y * r0.x * max(1, injectedData.fxVignette);
   r0.x = exp2(r0.x);
+
   r0.yzw = float3(1,1,1) + -cb0[13].zxy;
   r0.xyz = r0.xxx * r0.yzw + cb0[13].zxy;
   r1.xyzw = t0.Sample(s0_s, w1.xy).xyzw;
-  //r2.xyz = r1.zxy * float3(0.305306017,0.305306017,0.305306017) + float3(0.682171106,0.682171106,0.682171106);  // fast SRGBToLinear
-  //r2.xyz = r1.zxy * r2.xyz + float3(0.0125228781,0.0125228781,0.0125228781);
-  //r1.xyz = r2.xyz * r1.zxy;
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.brg);
-
   r2.xyzw = t1.Sample(s1_s, w2.xy).xyzw;
   r1.xyz = r1.xyz * r2.www + r2.zxy;
   r0.xyz = r1.xyz * r0.xyz;
   r0.xyz = cb0[9].www * r0.xyz;
 
-      float3 untonemapped = r0.gbr;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    float3 preLUT = r0.gbr;
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.yzw = cb0[9].zzz * r0.xyz;
   r0.y = floor(r0.y);
   r0.x = r0.x * cb0[9].z + -r0.y;
@@ -77,14 +65,11 @@ void main(
   r1.xyzw = t2.Sample(s2_s, r1.xz).xyzw;
   r2.xyzw = t2.Sample(s2_s, r0.yz).xyzw;
   r0.yzw = r2.xyz + -r1.xyz;
-  r0.xyz = saturate(r0.xxx * r0.yzw + r1.xyz);
-      r0.rgb = applyUserTonemap(untonemapped, t2, s2_s, cb0[9].xyz);
-
-  //r0.xyz = log2(r0.xyz);            // fast LinearToSRGB
-  //r0.xyz = float3(0.416666657,0.416666657,0.416666657) * r0.xyz;
-  //r0.xyz = exp2(r0.xyz);
-  //r0.xyz = r0.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
-  //o0.xyz = max(float3(0,0,0), r0.xyz);
+  //r0.xyz = saturate(r0.xxx * r0.yzw + r1.xyz);
+    r0.rgb = r0.xxx * r0.yzw + r1.xyz;
+    r0.rgb = lerp(preLUT, r0.rgb, injectedData.colorGradeLUTStrength);
+    r0.rgb = applyUserTonemap(r0.rgb);
+      
     o0.rgb = renodx::color::srgb::EncodeSafe(r0.rgb);
   o0.w = 1;
   return;

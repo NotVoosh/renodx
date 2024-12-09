@@ -1,37 +1,22 @@
-#include "./shared.h"
-#include "./tonemapper.hlsl"
+#include "./common.hlsl"
 
 Texture2D<float4> t4 : register(t4);
-
 Texture2D<float4> t3 : register(t3);
-
 Texture2D<float4> t2 : register(t2);
-
 Texture2D<float4> t1 : register(t1);
-
 Texture2D<float4> t0 : register(t0);
 
 SamplerState s4_s : register(s4);
-
 SamplerState s3_s : register(s3);
-
 SamplerState s2_s : register(s2);
-
 SamplerState s1_s : register(s1);
-
 SamplerState s0_s : register(s0);
 
-cbuffer cb0 : register(b0)
-{
+cbuffer cb0 : register(b0){
   float4 cb0[16];
 }
 
-
-
-
-// 3Dmigoto declarations
 #define cmp -
-
 
 void main(
   float4 v0 : SV_POSITION0,
@@ -68,36 +53,37 @@ void main(
   r1.xyz = r3.zxy + r1.xyz;
   r1.xyz = r2.zxy * float3(2,2,2) + r1.xyz;
   r0.xyz = r1.xyz + r0.zxy;
-  r0.xyz = cb0[8].yyy * r0.xyz * injectedData.fxBloom;    // bloom
-  r1.xyzw = t0.Sample(s0_s, w1.xy).xyzw;
-  //r2.xyz = r1.zxy * float3(0.305306017,0.305306017,0.305306017) + float3(0.682171106,0.682171106,0.682171106);  // fast SRGBToLinear
-  //r2.xyz = r1.zxy * r2.xyz + float3(0.0125228781,0.0125228781,0.0125228781);
-  //r1.xyz = r2.xyz * r1.zxy;
-    r1.rgb = renodx::color::srgb::DecodeSafe(r1.brg);
 
+  r0.xyz = cb0[8].yyy * r0.xyz * injectedData.fxBloom;
+
+  r1.xyzw = t0.Sample(s0_s, w1.xy).xyzw;
+    r1.rgb = renodx::color::srgb::DecodeSafe(r1.brg);
   r2.xyzw = t1.Sample(s1_s, w2.xy).xyzw;
   r1.xyz = r1.xyz * r2.www + r2.zxy;
   r0.xyz = r0.xyz * float3(0.0625,0.0625,0.0625) + r1.xyz;
   r1.xy = -cb0[14].xy + v1.xy;
-  r1.xy = cb0[15].xx * abs(r1.xy) * injectedData.fxVignette;
+
+  r1.xy = cb0[15].xx * abs(r1.xy) * min(1, injectedData.fxVignette);
+
   r1.xy = log2(r1.xy);
   r1.xy = cb0[15].zz * r1.xy;
   r1.xy = exp2(r1.xy);
   r0.w = dot(r1.xy, r1.xy);
   r0.w = 1 + -r0.w;
   r0.w = max(0, r0.w);
+
   r0.w = log2(r0.w);
-  r0.w = cb0[15].y * r0.w;
+  r0.w = cb0[15].y * r0.w * max(1, injectedData.fxVignette);
   r0.w = exp2(r0.w);
+
   r1.xyz = float3(1,1,1) + -cb0[13].zxy;
   r1.xyz = r0.www * r1.xyz + cb0[13].zxy;
   r0.xyz = r1.xyz * r0.xyz;
   r0.xyz = cb0[9].www * r0.xyz;
 
-      float3 untonemapped = r0.gbr;
-  r0.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = saturate(r0.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009));
+    float3 preLUT = r0.gbr;
+    r0.rgb = lutShaper(r0.rgb);
+
   r0.yzw = cb0[9].zzz * r0.xyz;
   r0.y = floor(r0.y);
   r0.x = r0.x * cb0[9].z + -r0.y;
@@ -110,26 +96,23 @@ void main(
   r1.xyzw = t3.Sample(s3_s, r1.xz).xyzw;
   r2.xyzw = t3.Sample(s3_s, r0.yz).xyzw;
   r0.yzw = r2.xyz + -r1.xyz;
-  r0.xyz = saturate(r0.xxx * r0.yzw + r1.xyz);
-      r0.rgb = applyUserTonemap(untonemapped, t3, s3_s, cb0[9].xyz);
+  // r0.xyz = saturate(r0.xxx * r0.yzw + r1.xyz);
+    r0.rgb = r0.xxx * r0.yzw + r1.xyz;
+    r0.rgb = lerp(preLUT, r0.rgb, injectedData.colorGradeLUTStrength);
+    r0.rgb = applyUserTonemap(r0.rgb);
 
   r1.xy = v1.xy * cb0[12].xy + cb0[12].zw;
   r1.xyzw = t4.Sample(s4_s, r1.xy).xyzw;
   r1.xyz = r1.xyz * r0.xyz;
-  r1.xyz = cb0[11].yyy * r1.xyz;
-  r0.w = dot(r0.xyz, float3(0.212599993,0.715200007,0.0722000003));
-  //r0.w = sqrt(r0.w);
-    r0.a = sign(r0.a) * sqrt(abs(r0.a));
+  r1.xyz = cb0[11].yyy * r1.xyz * injectedData.fxFilmGrain;
+  r0.w = renodx::color::y::from::BT709(r0.rgb);
+    r0.a = renodx::math::SqrtSafe(r0.a);
   r0.w = cb0[11].x * -r0.w + 1;
-  r0.xyz = injectedData.fxFilmGrainType ? applyFilmGrain(r0.rgb, w1.xy) : r1.xyz * r0.www * injectedData.fxFilmGrain + r0.xyz;
-  //r0.xyz = max(float3(0,0,0), r0.xyz);
-  //r0.xyz = log2(r0.xyz);            // Fast LinearToSRGB
-  //r0.xyz = float3(0.416666657,0.416666657,0.416666657) * r0.xyz;
-  //r0.xyz = exp2(r0.xyz);
-    //r0.rgb = sign(r0.rgb) * pow(abs(r0.rgb), 1 / 2.4f);
-  //r0.xyz = r0.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
- // o0.xyz = max(float3(0,0,0), r0.xyz);
-    //o0.rgb = r0.rgb;
+    if(injectedData.fxFilmGrainType == 0.f){
+  r0.xyz = r1.xyz * r0.www + r0.xyz;
+  } else {
+    r0.rgb = applyFilmGrain(r0.rgb, w1);
+  }
     o0.rgb = renodx::color::srgb::EncodeSafe(r0.rgb);
   o0.w = 1;
   return;
