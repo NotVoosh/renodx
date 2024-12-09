@@ -35,9 +35,11 @@ void main(
   o0.xyz = r1.xyz * r0.xyz;
   o0.w = 1;
     o0 = saturate(o0);
-      if(injectedData.toneMapType != 0.f && injectedData.hasLoadedTitleMenu == true){
-    o0.rgb = InverseToneMap(o0.rgb);
+      if(injectedData.hasLoadedTitleMenu == true){
+        if(injectedData.toneMapType != 0.f){
+      o0.rgb = InverseToneMap(o0.rgb);
+      }  
     o0.rgb = ITMScale(o0.rgb);
-    }  
+    }
   return;
 }
