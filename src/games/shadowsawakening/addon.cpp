@@ -261,11 +261,6 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Game Screen Render quality should be 100%.",
-        .section = "Notes",
-    },
-    new renodx::utils::settings::Setting{
-        .value_type = renodx::utils::settings::SettingValueType::TEXT,
         .label = "RenoDX by ShortFuse, game mod by Voosh (or Not). Shout-out to HDR Den!",
         .section = "About",
     },
@@ -365,7 +360,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = false;
-      renodx::mods::swapchain::prevent_full_screen = false;
+      renodx::mods::swapchain::prevent_full_screen = true;
         
       //  RGBA8_typeless
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
@@ -373,22 +368,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .new_format = reshade::api::format::r16g16b16a16_typeless,
           .ignore_size = true,
       });
-      /*
-      //  RGBA8_typeless
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_typeless,
-          .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .index = 9,
-          .ignore_size = false,
-      });
-      //  RGBA8_typeless
-      renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
-          .old_format = reshade::api::format::r8g8b8a8_typeless,
-          .new_format = reshade::api::format::r16g16b16a16_typeless,
-          .index = 10,
-          .ignore_size = false,
-      });
-*/
+
       reshade::register_event<reshade::addon_event::present>(OnPresent);
 
       break;
