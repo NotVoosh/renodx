@@ -130,7 +130,7 @@ return color;
 }
 
 float3 applyUserTonemap(float3 untonemapped){
-		
+
 		float3 outputColor = untonemapped;
 		float midGray = renodx::color::y::from::BT709(applyVanillaTonemap(float3(0.18f,0.18f,0.18f)));
 		float3 hueCorrectionColor = applyVanillaTonemap(untonemapped);
@@ -148,12 +148,11 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.saturation = injectedData.colorGradeSaturation;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 0.9f;
-			config.reno_drt_shadows = 1.2f;
-			config.reno_drt_contrast = 1.1f;
-			//config.reno_drt_saturation = 1.15f;
+			config.reno_drt_highlights = 0.95f;
+			config.reno_drt_shadows = 1.1f;
+			config.reno_drt_contrast = 0.9f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.0025 * injectedData.colorGradeFlare;
+			config.reno_drt_flare = 0.0025 * pow(injectedData.colorGradeFlare, 2.f);
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
@@ -164,10 +163,7 @@ float3 applyUserTonemap(float3 untonemapped){
 			outputColor = saturate(hueCorrectionColor);
 			}
 				if (injectedData.toneMapType == 4.f) {		// Reinhard+
-			config.highlights *= 0.8f;
-			config.shadows *= 1.15f;
-			config.contrast *= 1.15f;
-			config.saturation *= 1.05f;
+			config.contrast *= 0.9f;
 			outputColor = applyReinhardPlus(outputColor, config);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);

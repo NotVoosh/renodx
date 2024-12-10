@@ -32,8 +32,9 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x30261E46),  // lutbuilder 2 (no tonemap)
   CustomShaderEntry(0xF70A0EED),  // lutbuilder 3 (aces)
 
-  CustomShaderEntry(0x9B5F961E),  // something (saturate 2nd RTV alpha to clear artifacts :shrug:)
-  CustomShaderEntry(0xD4C8CCF7),  // something 2 (same)
+  CustomShaderEntry(0x9B5F961E),  // something            (saturate 2nd RTV alpha to clear artifacts :shrug:)
+  CustomShaderEntry(0xD4C8CCF7),  // something 2                               (same)
+  CustomShaderEntry(0xD4C8CCF7),  // something 3 ambient occlusion something (same-ish)
 
   CustomShaderEntry(0xF804335C),  // in-game videos (ITM)
   CustomShaderEntry(0x8A6BCB4C),  // opening videos (scale)
@@ -113,7 +114,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xFEC553,
