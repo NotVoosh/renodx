@@ -97,12 +97,28 @@ void main(
   r1.x = r0.y * cb0[12].y + r1.y;
   r2.x = cb0[12].y;
   r2.y = 0;
-  r0.yz = r2.xy + r1.xz;
+  r0.yz = r2.xy + r1.xz;  
   r1.xyzw = t3.Sample(s3_s, r1.xz).xyzw;
   r2.xyzw = t3.Sample(s3_s, r0.yz).xyzw;
   r0.yzw = r2.xyz + -r1.xyz;
   //o0.xyz = saturate(r0.xxx * r0.yzw + r1.xyz);
     o0.rgb = r0.xxx * r0.yzw + r1.xyz;
+        if(injectedData.colorGradeLUTStrength > 0.f && injectedData.colorGradeLUTScaling > 0.f){
+      float3 uvw = float3(0,0,0);
+      uvw.z *= cb0[12].zzz;
+      float shift = floor(uvw.z);
+      uvw.xy = uvw.xy * cb0[12].zz * cb0[12].xy + cb0[12].xy * 0.5;
+      uvw.x += shift * cb0[12].y;
+
+      float3 minBlack = t3.Sample(s3_s, uvw.xy).rgb;
+      float3 minBlack1 = t3.Sample(s3_s, uvw.xy + float2(cb0[12].y, 0)).rgb;
+          minBlack = lerp(minBlack, minBlack1, uvw.z - shift);
+      float lutMinY = renodx::color::y::from::BT709(abs(minBlack));
+          if (lutMinY > 0) {
+        float3 correctedBlack = renodx::lut::CorrectBlack(preLUT, o0.rgb, lutMinY, 0.f);
+        o0.rgb = lerp(o0.rgb, correctedBlack, injectedData.colorGradeLUTScaling);
+        }
+      }
     o0.w = 1;
     o0.rgb = lerp(preLUT, o0.rgb, injectedData.colorGradeLUTStrength);
     o0.rgb = applyUserTonemap(o0.rgb);

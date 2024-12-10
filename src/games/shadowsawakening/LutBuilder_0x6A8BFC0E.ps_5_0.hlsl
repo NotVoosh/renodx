@@ -46,7 +46,7 @@ void main(
   r2.xyz = float3(9.72000027,9.72000027,9.72000027) + r2.xyz;
   r2.xyz = float3(0.0570776239,0.0570776239,0.0570776239) * r2.xyz;
   r0.xyz = r0.xyz ? r1.xyz : r2.xyz;
-  // Lift, gamma, gain
+  // Offset, Power, Slope
   r0.xyz = r0.xyz * cb0[10].xyz + cb0[8].xyz;
   r1.xyz = log2(r0.xyz);
   r1.xyz = cb0[9].xyz * r1.xyz;
@@ -176,10 +176,10 @@ void main(
   r1.y = dot(r0.xyz, cb0[13].xyz);
   r1.z = dot(r0.xyz, cb0[14].xyz);
   // AP1_to_sRGB
-  r0.x = dot(float3(1.70504999,-0.621789992,-0.0832599998), r1.xyz);
-  r0.y = dot(float3(-0.130260006,1.1408,-0.0105499998), r1.xyz);
-  r0.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r1.xyz);
-
+  //r0.x = dot(float3(1.70504999,-0.621789992,-0.0832599998), r1.xyz);
+  //r0.y = dot(float3(-0.130260006,1.1408,-0.0105499998), r1.xyz);
+  //r0.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r1.xyz);
+    r0.rgb = r1.rgb;
     // FastTonemap
     r0.a = max(r0.r, r0.g);
     r0.a = max(r0.a, r0.b);
@@ -211,7 +211,12 @@ void main(
     r0.a = 1 + -r0.a;
     r0.a = rcp(r0.a);
     r1.rgb = o0.rgb * r0.aaa;
-    o0.rgb = r1.rgb;
+    //o0.rgb = r1.rgb;
+
+  // AP1_to_sRGB
+    o0.x = dot(float3(1.70504999,-0.621789992,-0.0832599998), r1.xyz);
+    o0.y = dot(float3(-0.130260006,1.1408,-0.0105499998), r1.xyz);
+    o0.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r1.xyz);
 
   o0.w = 1;
   return;
