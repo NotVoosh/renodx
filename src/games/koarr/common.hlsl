@@ -58,7 +58,6 @@ float3 InverseToneMap(float3 color) {
     videoPeak = renodx::color::correct::Gamma(videoPeak, true);
     scaling = renodx::color::correct::Gamma(scaling, true);
     }
-    //color = renodx::color::gamma::Decode(color, 2.4f);
 	color = renodx::color::correct::Gamma(color, 2.4f);
 	color = renodx::tonemap::inverse::bt2446a::BT709(color, 100.f, videoPeak);
 	color /= videoPeak;

@@ -28,7 +28,6 @@ struct ShaderInjectData {
   float fxVignette;
   float fxFilmGrain;
   float forceHueProcessor;
-  float unlockWCG;
   float elapsedTime;
 };
 
