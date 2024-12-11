@@ -28,14 +28,18 @@ float3 PostToneMapScale(float3 color) {
 
 float3 FinalizeOutput(float3 color) {
   	if (injectedData.toneMapGammaCorrection == 1.f) {
-    color = renodx::color::gamma::DecodeSafe(color, 2.2f);
+  color = renodx::color::gamma::DecodeSafe(color, 2.2f);
   } else {
-    color = renodx::color::srgb::DecodeSafe(color);
+  color = renodx::color::srgb::DecodeSafe(color);
   }
+  	if(injectedData.toneMapType == 0.f){
+  color = renodx::color::bt709::clamp::BT709(color);
+  } else {
   color = renodx::color::bt709::clamp::AP1(color);
+  }
   color *= injectedData.toneMapUINits;
   color /= 80.f;
-  return color;
+return color;
 }
 
 float3 InverseToneMap(float3 color) {
@@ -112,8 +116,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.saturation = injectedData.colorGradeSaturation;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 1.1f;
-			config.reno_drt_contrast = 1.1f;
+			config.reno_drt_highlights = 0.95f;
+			config.reno_drt_contrast = 1.3f;
 			config.reno_drt_saturation = 1.15f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.0025 * injectedData.colorGradeFlare;
@@ -131,15 +135,12 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(hueCorrectionColor);
 			}
-				if(injectedData.toneMapGammaCorrection == 0.f){
-			outputColor = renodx::color::correct::Gamma(outputColor, true);
-			}
 				if(injectedData.toneMapType >= 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
-			config.shadows *= 0.9f;
-			config.contrast *= 1.15f;
+			config.highlights *= 0.9f;
+			config.contrast *= 1.3f;
 			config.saturation *= 1.2f;
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			outputColor = applyReinhardPlus(outputColor, config);
@@ -168,8 +169,8 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			config.contrast = injectedData.colorGradeContrast;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 1.1f;
-			config.reno_drt_contrast = 1.1f;
+			config.reno_drt_highlights = 0.95f;
+			config.reno_drt_contrast = 1.3f;
 			config.reno_drt_flare = 0.0025 * injectedData.colorGradeFlare;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 	
@@ -186,8 +187,8 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			}
 
 		if (injectedData.toneMapType == 4.f){				// Reinhard+
-			config.shadows *= 0.95f;
-			config.contrast *= 1.15f;
+			config.highlights *= 0.9f;
+			config.contrast *= 1.3f;
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			outputColor = applyReinhardPlus(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
