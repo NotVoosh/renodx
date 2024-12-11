@@ -369,6 +369,17 @@ void OnPresetOff() {
 
 auto start = std::chrono::steady_clock::now();
 
+void OnPresent(
+    reshade::api::command_queue* queue,
+    reshade::api::swapchain* swapchain,
+    const reshade::api::rect* source_rect,
+    const reshade::api::rect* dest_rect,
+    uint32_t dirty_rect_count,
+    const reshade::api::rect* dirty_rects) {
+  auto end = std::chrono::steady_clock::now();
+  shader_injection.elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+}
+
 }  // namespace
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -404,6 +415,8 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .new_format = reshade::api::format::r16g16b16a16_float,
           .dimensions = {256,16},
       });
+
+      reshade::register_event<reshade::addon_event::present>(OnPresent);
       break;
     case DLL_PROCESS_DETACH:
       reshade::unregister_addon(h_module);
