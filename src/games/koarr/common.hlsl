@@ -1,6 +1,5 @@
 #include "./shared.h"
 #include "./DICE.hlsl"
-#include "./ColorGradingLUT.hlsl"
 
 //-----EFFECTS-----//
 float3 applyFilmGrain(float3 outputColor, float2 screen)
@@ -173,9 +172,12 @@ float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig, bool sdr = fa
     return color;
 }
 
-float3 applyUserTonemap(float3 untonemapped){
+float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState lutSampler){
 		
-		float3 outputColor = untonemapped;
+		float3 outputColor = renodx::color::srgb::DecodeSafe(untonemapped);
+			if(injectedData.toneMapType == 0.f){
+		outputColor = saturate(outputColor);
+			}
 		float3 hueCorrectionColor = RenoDRTSmoothClamp(outputColor);
 		int hueProcessor;
 			if(injectedData.forceHueProcessor == 0.f){
@@ -199,38 +201,35 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_contrast = 1.04f;
 			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.0025 * pow(injectedData.colorGradeFlare, 2.f);
+			config.reno_drt_flare = 0.001 * pow(injectedData.colorGradeFlare, 2.3f);
 			config.reno_drt_hue_correction_method = hueProcessor;
+
+			renodx::lut::Config lut_config = renodx::lut::config::Create(
+			lutSampler,
+			injectedData.colorGradeLUTStrength,
+			injectedData.colorGradeLUTScaling,
+			renodx::lut::config::type::SRGB,
+			renodx::lut::config::type::SRGB,
+			16.f);
 
 				if(injectedData.toneMapType >= 2.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, hueProcessor);
 			}
 				if (injectedData.toneMapType == 2.f){			// Frostbite
+				float3 sdrColor = applyFrostbite(outputColor, config, true);
 			outputColor = applyFrostbite(outputColor, config);
+				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 
 			} else if (injectedData.toneMapType == 4.f){		// DICE
+				float3 sdrColor = applyDICE(outputColor, config, true);
 			outputColor = applyDICE(outputColor, config);
+				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
+			outputColor = renodx::tonemap::UpgradeToneMap(outputColor, sdrColor, lutColor, 1.f);
 
 			} else {
-			outputColor = renodx::tonemap::config::Apply(outputColor, config);
+			outputColor = renodx::tonemap::config::Apply(outputColor, config, lut_config, lutTexture);
 			}
-
+			outputColor = renodx::color::bt709::clamp::BT709(outputColor);
 	return outputColor;
-}
-
-float3 sampleLUT(float3 color, Texture2D lutTexture, SamplerState lutSampler){
-			
-			renodx::lut::Config lut_config = renodx::lut::config::Create(
-			lutSampler,
-			injectedData.colorGradeLUTStrength,
-			1.f,
-			renodx::lut::config::type::LINEAR,
-			renodx::lut::config::type::LINEAR,
-			16.f);
-		
-		float3 input = color;
-		float3 lutColor = renodx::lut::Sample(saturate(input), lut_config, lutTexture);
-		float3 output = RestorePostProcess(input, saturate(input), lutColor);
-
-	return output;
 }

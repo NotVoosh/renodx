@@ -30,7 +30,7 @@ void main(
 
   r0.xyzw = g_colorSampler_texture.Sample(g_colorSampler_sampler_s, v1.xy).xyzw;
 
-      float3 preLUT = applyUserTonemap(r0.rgb);
+      float3 preLUT = r0.rgb;
       
   r0.xyz = saturate(r0.xyz * g_constants.rawUVadjust.xyy + g_constants.rawUVadjust.zww);
   r0.zw = r0.zz * g_constants.transitionAmounts.zz + float2(-0.5,0.5);
@@ -44,13 +44,7 @@ void main(
   r0.xyw = r2.xyz + -r1.xyz;
   r0.xyz = r0.zzz * r0.xyw + r1.xyz;
 
-      if(injectedData.toneMapType == 0.f){
-    r0.rgb = lerp(preLUT, r0.rgb, injectedData.colorGradeLUTStrength);
-    } else if(injectedData.toneMapType == 1.f){
-    r0.rgb = preLUT;
-    } else {
-    r0.rgb = sampleLUT(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s);
-    }
+    r0.rgb = applyUserTonemap(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s);
     
     o0.a = renodx::color::y::from::BT709(r0.rgb);
   o0.xyz = r0.xyz;
