@@ -180,7 +180,7 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_contrast = 1.04f;
 			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.0025 * pow(injectedData.colorGradeFlare, 2.f);
+			config.reno_drt_flare = 0.001 * pow(injectedData.colorGradeFlare, 2.3f);
 			config.reno_drt_hue_correction_method = hueProcessor;
 
 				if(injectedData.toneMapType == 0.f){
