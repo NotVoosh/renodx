@@ -33,21 +33,38 @@ float3 applyVignette(float3 inputColor, float2 screen, float slider) {
 //-----SCALING-----//
 float3 PostToneMapScale(float3 color) {
   if (injectedData.toneMapGammaCorrection == 1.f) {
-    color = renodx::color::correct::GammaSafe(color);
-    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits, true;
-    color = renodx::color::correct::GammaSafe(color, true);
+    color = renodx::color::srgb::EncodeSafe(color);
+    color = renodx::color::gamma::DecodeSafe(color, 2.2f);
+    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::gamma::EncodeSafe(color, 2.2f);
   } else {
     color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::srgb::EncodeSafe(color);
   }
   return color;
 }
 
 float3 FinalizeOutput(float3 color) {
   	if (injectedData.toneMapGammaCorrection == 1.f) {
-	color = renodx::color::correct::GammaSafe(color);
+	color = renodx::color::gamma::DecodeSafe(color);
+  } else {
+	color = renodx::color::srgb::DecodeSafe(color);
   }
   color *= injectedData.toneMapUINits;
   color /= 80.f;
+  return color;
+}
+
+float3 videoScale(float3 color) {
+  	if (injectedData.toneMapGammaCorrection == 1.f) {
+    color = renodx::color::gamma::Decode(color, 2.2f);
+    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::gamma::Encode(color, 2.2f);
+  } else {
+    color = renodx::color::srgb::Decode(color);
+    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::srgb::Encode(color);
+  }
   return color;
 }
 
