@@ -30,7 +30,8 @@ void main(
 
   r0.xyzw = g_colorSampler_texture.Sample(g_colorSampler_sampler_s, v1.xy).xyzw;
 
-        float3 preLUT = r0.rgb;
+      float3 preLUT = applyUserTonemap(r0.rgb);
+      
   r0.xyz = saturate(r0.xyz * g_constants.rawUVadjust.xyy + g_constants.rawUVadjust.zww);
   r0.zw = r0.zz * g_constants.transitionAmounts.zz + float2(-0.5,0.5);
   r1.xy = floor(r0.zw);
@@ -42,16 +43,21 @@ void main(
   r1.xyzw = g_correctionSampler_texture.Sample(g_correctionSampler_sampler_s, r1.xy).xyzw;
   r0.xyw = r2.xyz + -r1.xyz;
   r0.xyz = r0.zzz * r0.xyw + r1.xyz;
-  
-    r0.rgb = applyUserTonemap(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s);
+
+      if(injectedData.toneMapType == 0.f){
+    r0.rgb = lerp(preLUT, r0.rgb, injectedData.colorGradeLUTStrength);
+    } else if(injectedData.toneMapType == 1.f){
+    r0.rgb = preLUT;
+    } else {
+    r0.rgb = sampleLUT(preLUT, g_correctionSampler_texture, g_correctionSampler_sampler_s);
+    }
     
-  //o0.w = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
     o0.a = renodx::color::y::from::BT709(r0.rgb);
   o0.xyz = r0.xyz;
-			  if (injectedData.fxVignette > 0.f){
+			  if(injectedData.fxVignette > 0.f){
 		  o0.rgb = applyVignette(o0.rgb, v1, injectedData.fxVignette);
 			}
-				if (injectedData.fxFilmGrain > 0.f) {
+				if(injectedData.fxFilmGrain > 0.f) {
 			o0.rgb = applyFilmGrain(o0.rgb, v1);
 			}
 		o0.rgb = PostToneMapScale(o0.rgb);

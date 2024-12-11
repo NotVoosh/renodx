@@ -150,7 +150,6 @@ void main(
     r0.z = r0.z ? r0.w : 0;
     r1.y = v1.y + r0.z;
     r1.xyzw = g_color_buffer_texture.SampleLevel(g_color_buffer_sampler_s, r1.xy, 0).xyzw;
-    //r0.z = dot(r1.xyz, float3(0.298999995,0.587000012,0.114));
       r0.b = renodx::color::y::from::BT709(r1.rgb);
     r0.z = 5.96046448e-08 + r0.z;
     r0.y = r0.y * 0.25 + -r0.z;

@@ -1,3 +1,5 @@
+#include "./common.hlsl"
+
 cbuffer g_constantsbuffer : register(b0){
   struct
   {
@@ -31,6 +33,7 @@ void main(
   r0.xy = frac(v1.xy);
   r0.w = v1.x + -r0.x;
   r0.z = r0.w * g_constants.raw_uv_adjust.x + g_constants.raw_uv_adjust.y;
+
   r1.xyzw = g_correctionSampler3_texture.Sample(g_correctionSampler3_sampler_s, r0.xyz).xyzw;
   r2.xyzw = g_correctionSampler2_texture.Sample(g_correctionSampler2_sampler_s, r0.xyz).xyzw;
   r1.xyz = -r2.xyz + r1.xyz;
@@ -41,14 +44,15 @@ void main(
   r0.xyz = g_constants.transition_amounts.xxx * r2.xyz + r0.xyz;
   r1.xyz = r1.xyz + -r0.xyz;
   r0.xyz = g_constants.transition_amounts.yyy * r1.xyz + r0.xyz;
-  r0.xyz = log2(r0.xyz);
-  r0.xyz = g_constants.brightness_factor.xxx * r0.xyz;
-  r0.xyz = exp2(r0.xyz);
-  r0.w = dot(r0.xyz, float3(0.212599993,0.715200007,0.0722000003));
+  //r0.xyz = log2(r0.xyz);
+  //r0.xyz = g_constants.brightness_factor.xxx * r0.xyz;
+  //r0.xyz = exp2(r0.xyz);
+    r0.w = renodx::color::y::from::BT709(r0.rgb);
   r0.xyz = g_constants.color_transition.www * r0.xyz;
   r0.w = r0.w * g_constants.brightness_factor.y + g_constants.brightness_factor.z;
   r0.xyz = r0.www * g_constants.color_transition.xyz + r0.xyz;
-  o0.w = dot(r0.xyz, float3(0.212599993,0.715200007,0.0722000003));
+
+    o0.w = renodx::color::y::from::BT709(r0.rgb);
   o0.xyz = r0.xyz;
   return;
 }

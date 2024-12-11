@@ -25,6 +25,8 @@ namespace {
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x138CBA83),  // videos (pre-rendered)
 
+    CustomShaderEntry(0x1DA0D576),  // colorcorrectionmerge (lutbaker)
+
     CustomShaderEntry(0xD11C77B6),  // combineeffects (color grading, dof, bloom)
     CustomShaderEntry(0x70CEAF26),  // combineeffects 2 (color grading)
     CustomShaderEntry(0x8159D8EB),  // FXAA
@@ -92,7 +94,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xAC7C38,
@@ -176,7 +178,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Flare",
         .section = "Color Grading",
         .tooltip = "Embrace the darkness... (Gently.)",
@@ -191,17 +193,6 @@ renodx::utils::settings::Settings settings = {
         .default_value = 100.f,
         .label = "LUT Strength",
         .section = "Color Grading",
-        .tint = 0x38F6FC,
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.01f; },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "colorGradeLUTScaling",
-        .binding = &shader_injection.colorGradeLUTScaling,
-        .default_value = 100.f,
-        .label = "LUT Scaling",
-        .section = "Color Grading",
-        .tooltip = "Scales the color grade LUT to full range when size is clamped.",
         .tint = 0x38F6FC,
         .max = 100.f,
         .parse = [](float value) { return value * 0.01f; },
@@ -248,12 +239,11 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 78.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 66.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
-          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
     },
     new renodx::utils::settings::Setting{
@@ -266,13 +256,12 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeShadows", 55.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 55.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 33.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 5.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
-          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
     },
     new renodx::utils::settings::Setting{
@@ -289,9 +278,8 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
-          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
     },
     new renodx::utils::settings::Setting{
@@ -374,7 +362,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
-  renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 0.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 0.f);
@@ -390,7 +377,7 @@ extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
 extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Kingdoms of Amalur: Re-Reckoning";
 
 // NOLINTEND(readability-identifier-naming)
-
+/*
 // Begin custom final copy pasta [ty Ersh/FF14]
 struct __declspec(uuid("1228220F-364A-46A2-BB29-1CCE591A018A")) DeviceData {
   reshade::api::effect_runtime* main_runtime = nullptr;
@@ -588,7 +575,8 @@ void OnPresent(reshade::api::command_queue* queue, reshade::api::swapchain* swap
 
   cmd_list->barrier(back_buffer_resource, reshade::api::resource_usage::render_target, reshade::api::resource_usage::shader_resource);
 }
-// End custom final copy pasta
+// End custom final copy pasta*/
+
 const float screen_width = GetSystemMetrics(SM_CXSCREEN);
 const float screen_height = GetSystemMetrics(SM_CYSCREEN);
 BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
@@ -597,14 +585,12 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       if (!reshade::register_addon(h_module)) return FALSE;
       renodx::mods::swapchain::force_borderless = true;
       renodx::mods::swapchain::prevent_full_screen = true;
+      renodx::mods::swapchain::use_resource_cloning = true;
+      renodx::mods::swapchain::swapchain_proxy_vertex_shader = std::vector<uint8_t>(
+          _final_vertex_shader, _final_vertex_shader + sizeof(_final_vertex_shader));
+      renodx::mods::swapchain::swapchain_proxy_pixel_shader = std::vector<uint8_t>(
+          _final_pixel_shader, _final_pixel_shader + sizeof(_final_pixel_shader));
 
-      //  final shader copy pasta start
-      reshade::register_event<reshade::addon_event::init_device>(OnInitDevice);
-      reshade::register_event<reshade::addon_event::destroy_device>(OnDestroyDevice);
-      reshade::register_event<reshade::addon_event::init_swapchain>(OnInitSwapchain);
-      reshade::register_event<reshade::addon_event::destroy_swapchain>(OnDestroySwapchain);
-      reshade::register_event<reshade::addon_event::present>(OnPresent);
-      // final shader copy pasta end
       // RGBA8_unorm
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
           .old_format = reshade::api::format::r8g8b8a8_unorm,
@@ -619,21 +605,12 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       });
       break;
     case DLL_PROCESS_DETACH:
-      // Final shader copy pasta start
-      reshade::unregister_event<reshade::addon_event::init_device>(OnInitDevice);
-      reshade::unregister_event<reshade::addon_event::destroy_device>(OnDestroyDevice);
-      reshade::unregister_event<reshade::addon_event::init_swapchain>(OnInitSwapchain);
-      reshade::unregister_event<reshade::addon_event::destroy_swapchain>(OnDestroySwapchain);
-      reshade::unregister_event<reshade::addon_event::present>(OnPresent);
-      // final shader copy pasta end
       reshade::unregister_addon(h_module);
       break;
   }
 
   renodx::utils::settings::Use(fdw_reason, &settings, &OnPresetOff);
-
-  renodx::mods::swapchain::Use(fdw_reason);
-
+  renodx::mods::swapchain::Use(fdw_reason, &shader_injection);
   renodx::mods::shader::Use(fdw_reason, custom_shaders, &shader_injection);
 
   return TRUE;
