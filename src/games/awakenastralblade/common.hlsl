@@ -58,7 +58,7 @@ float3 RenoDRTSmoothClamp(float3 untonemapped) {
   renodrtSC_config.highlights = 1.f;
   renodrtSC_config.shadows = 1.f;
   renodrtSC_config.contrast = 1.05f;
-  renodrtSC_config.saturation = 1.05f;
+  renodrtSC_config.saturation = 1.04f;
   renodrtSC_config.dechroma = 0.f;
   renodrtSC_config.flare = 0.f;
   renodrtSC_config.hue_correction_strength = 0.f;
@@ -175,10 +175,12 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.reno_drt_contrast = 1.1f;
+			config.mid_gray_value = 0.19f;
+			config.mid_gray_nits = 19.f;
+			config.reno_drt_contrast = 1.04f;
 			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
+			config.reno_drt_flare = 0.0025 * pow(injectedData.colorGradeFlare, 2.f);
 			config.reno_drt_hue_correction_method = hueProcessor;
 
 				if(injectedData.toneMapType == 0.f){
