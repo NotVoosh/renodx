@@ -9,8 +9,11 @@
 #include <include/reshade_api_pipeline.hpp>
 #include <shared_mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace renodx::utils::pipeline_layout {
+
+static bool is_primary_hook = false;
 
 struct PipelineLayoutData {
   std::vector<reshade::api::pipeline_layout_param> params;
@@ -23,10 +26,16 @@ struct __declspec(uuid("96f1f53b-90cb-4929-92d7-9a7a1a5c2493")) DeviceData {
 };
 
 static void OnInitDevice(reshade::api::device* device) {
-  device->create_private_data<DeviceData>();
+  auto* data = &device->get_private_data<DeviceData>();
+  if (data != nullptr) return;
+
+  data = &device->create_private_data<DeviceData>();
+
+  is_primary_hook = true;
 }
 
 static void OnDestroyDevice(reshade::api::device* device) {
+  if (!is_primary_hook) return;
   device->destroy_private_data<DeviceData>();
 }
 
@@ -35,6 +44,7 @@ static void OnInitPipelineLayout(
     const uint32_t param_count,
     const reshade::api::pipeline_layout_param* params,
     reshade::api::pipeline_layout layout) {
+  if (!is_primary_hook) return;
   auto& data = device->get_private_data<DeviceData>();
   const std::unique_lock lock(data.mutex);
 
@@ -45,10 +55,12 @@ static void OnInitPipelineLayout(
   for (uint32_t i = 0; i < param_count; ++i) {
     const auto& param = params[i];
     if (param.type == reshade::api::pipeline_layout_param_type::descriptor_table) {
-      layout_data.ranges[i].assign(
+      auto& ranges = layout_data.ranges[i];
+      ranges.assign(
           param.descriptor_table.ranges,
           param.descriptor_table.ranges + param.descriptor_table.count);
-      layout_data.params[i].descriptor_table.ranges = layout_data.ranges[i].data();
+      layout_data.params[i] = param;
+      layout_data.params[i].descriptor_table.ranges = ranges.data();
     }
   }
 }
@@ -56,6 +68,7 @@ static void OnInitPipelineLayout(
 static void OnDestroyPipelineLayout(
     reshade::api::device* device,
     reshade::api::pipeline_layout layout) {
+  if (!is_primary_hook) return;
   auto& data = device->get_private_data<DeviceData>();
   const std::unique_lock lock(data.mutex);
   data.pipeline_layout_data.erase(layout.handle);
