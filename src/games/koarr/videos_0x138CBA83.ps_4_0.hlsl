@@ -33,11 +33,7 @@ void main(
   //o0.xyz = exp2(r0.xyz);
     o0.xyz = r0.xyz;
   o0.w = v2.w;
-    
 	  o0 = saturate(o0);
-      if(injectedData.toneMapType != 0.f){
-    o0.rgb = InverseToneMap(o0.rgb);
     o0.rgb = PostToneMapScale(o0.rgb);
-    }
   return;
 }
