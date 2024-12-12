@@ -56,6 +56,19 @@ float3 InverseToneMap(float3 color) {
 	return color;
 }
 
+float3 introVideoScale(float3 color) {
+  if (injectedData.toneMapGammaCorrection == 1.f) {
+    color = renodx::color::gamma::DecodeSafe(color, 2.2f);
+    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::gamma::EncodeSafe(color, 2.2f);
+  } else {
+    color = renodx::color::srgb::DecodeSafe(color);
+    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::srgb::EncodeSafe(color);
+  }
+  return color;
+}
+
 //-----TONEMAP-----//
 float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig, bool sdr = false){
 	float RhPeak = sdr ? 1.f : RhConfig.peak_nits / RhConfig.game_nits;
@@ -182,10 +195,6 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			renodx::lut::config::type::LINEAR,
 			16.f);
 
-				if(injectedData.toneMapGammaCorrection == 0.f){
-			outputColor = renodx::color::correct::Gamma(outputColor, true);
-			}
-
 		if (injectedData.toneMapType == 4.f){				// Reinhard+
 			config.highlights *= 0.9f;
 			config.contrast *= 1.3f;
@@ -226,9 +235,6 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 			
-				if(injectedData.toneMapGammaCorrection == 0.f){
-			outputColor = renodx::color::correct::Gamma(outputColor, true);
-			}
 				if(injectedData.toneMapType >= 2.f){
 			//outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
