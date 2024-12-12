@@ -412,10 +412,14 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::force_borderless = true;
       renodx::mods::swapchain::prevent_full_screen = true;
       renodx::mods::swapchain::use_resource_cloning = true;
-      renodx::mods::swapchain::swapchain_proxy_vertex_shader = std::vector<uint8_t>(
-          _final_vertex_shader, _final_vertex_shader + sizeof(_final_vertex_shader));
-      renodx::mods::swapchain::swapchain_proxy_pixel_shader = std::vector<uint8_t>(
-          _final_pixel_shader, _final_pixel_shader + sizeof(_final_pixel_shader));
+      renodx::mods::swapchain::swap_chain_proxy_vertex_shader = {
+          _swap_chain_proxy_vertex_shader,
+          _swap_chain_proxy_vertex_shader + sizeof(_swap_chain_proxy_vertex_shader),
+      };
+      renodx::mods::swapchain::swap_chain_proxy_pixel_shader = {
+          _swap_chain_proxy_pixel_shader,
+          _swap_chain_proxy_pixel_shader + sizeof(_swap_chain_proxy_pixel_shader),
+      };
 
       // RGBA8_unorm
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
