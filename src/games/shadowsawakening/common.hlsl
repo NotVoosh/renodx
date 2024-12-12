@@ -151,6 +151,7 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.reno_drt_highlights = 0.95f;
 			config.reno_drt_shadows = 1.1f;
 			config.reno_drt_contrast = 0.9f;
+			config.reno_drt_saturation = 0.9f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.0025 * pow(injectedData.colorGradeFlare, 2.f);
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
@@ -164,6 +165,7 @@ float3 applyUserTonemap(float3 untonemapped){
 			}
 				if (injectedData.toneMapType == 4.f) {		// Reinhard+
 			config.contrast *= 0.9f;
+			config.saturation *= 0.95f;
 			outputColor = applyReinhardPlus(outputColor, config);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
