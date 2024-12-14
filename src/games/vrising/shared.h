@@ -27,6 +27,8 @@ struct ShaderInjectData {
   float fxVignette;
   float fxFilmGrain;
   float elapsedTime;
+
+  bool hasLoadedTitleMenu;
 };
 
 #ifndef __cplusplus

@@ -18,6 +18,8 @@
 #include "../../utils/date.hpp"
 #include "./shared.h"
 
+ShaderInjectData shader_injection;
+
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
@@ -26,7 +28,10 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x8A6BCB4C),  // videos
 
   CustomShaderEntry(0xE6B97032),  // uberpost = tonemap/LUT/postprocess
-  CustomShaderEntry(0x8FEBA362),  // uberpost (title menu)
+  CustomShaderEntryCallback(0x8FEBA362, [](reshade::api::command_list* cmd_list) {  // uberpost (title menu)
+    shader_injection.hasLoadedTitleMenu = 1.f;
+    return true;
+    }),
   //CustomShaderEntry(0xE59F5A45),  // uberpost (FSR)
 
   CustomShaderEntry(0x6D3B4FF0),  // HDRP final
@@ -37,8 +42,6 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
   CustomShaderEntry(0x20133A8B),  // Final
 };
-
-ShaderInjectData shader_injection;
 
 renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
@@ -101,7 +104,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0x182939,
