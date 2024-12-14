@@ -30,8 +30,6 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xE363E5C8),  // uberpost (bloom + vignette)
     CustomShaderEntry(0x3BD8B8FD),  // uberpost title menu (CA + bloom + vignette)
 
-    //BypassShaderEntry(0x222A387F),
-
     CustomShaderEntry(0x192EEB27),  // HDRPfinal (grain)
     CustomShaderEntry(0x02AB22C6),  // HDRPfinal (title menu)
     CustomShaderEntry(0x0FA783B7),  // HDRPfinal2 (title menu)
@@ -106,7 +104,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xC24608,

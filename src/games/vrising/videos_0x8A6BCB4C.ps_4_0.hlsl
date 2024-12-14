@@ -22,7 +22,7 @@ void main(
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
-      if(injectedData.toneMapType != 0.f){
+      if(injectedData.toneMapType != 0.f && injectedData.hasLoadedTitleMenu == true){
     o0.rgb = InverseToneMap(o0.rgb);
     }
   return;
