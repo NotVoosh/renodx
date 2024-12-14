@@ -35,6 +35,7 @@
 
 #include <crc32_hash.hpp>
 #include "../mods/swapchain.hpp"
+#include "../utils/bitwise.hpp"
 #include "../utils/descriptor.hpp"
 #include "../utils/pipeline_layout.hpp"
 #include "../utils/shader.hpp"
@@ -65,6 +66,15 @@ namespace {
 
 std::atomic_bool is_snapshotting = false;
 
+std::atomic_bool snapshot_pane_show_vertex_shaders = true;
+std::atomic_bool snapshot_pane_show_pixel_shaders = true;
+std::atomic_bool snapshot_pane_show_compute_shaders = true;
+std::atomic_bool snapshot_pane_show_blends = true;
+
+std::atomic_bool shaders_pane_show_vertex_shaders = true;
+std::atomic_bool shaders_pane_show_pixel_shaders = true;
+std::atomic_bool shaders_pane_show_compute_shaders = true;
+
 struct ShaderDetails {
   uint32_t shader_hash;
   std::vector<uint8_t> shader_data;
@@ -73,6 +83,7 @@ struct ShaderDetails {
   std::optional<renodx::utils::shader::compiler::directx::DxilProgramVersion> program_version = std::nullopt;
   std::vector<uint8_t> addon_shader;
   std::optional<renodx::utils::shader::compiler::watcher::CustomShader> disk_shader = std::nullopt;
+  reshade::api::pipeline_stage shader_type = static_cast<reshade::api::pipeline_stage>(0);
   bool bypass_draw = false;
 
   enum class ShaderSource : std::uint8_t {
@@ -174,6 +185,7 @@ struct __declspec(uuid("0190ec1a-2e19-74a6-ad41-4df0d4d8caed")) DeviceData {
   }
 
   ShaderDetails& GetShaderDetails(uint32_t shader_hash) {
+    assert(shader_hash != 0u);
     if (auto pair = shader_details.find(shader_hash);
         pair != shader_details.end()) {
       return pair->second;
@@ -406,26 +418,92 @@ void OnInitPipelineTrackAddons(
 
 void OnBindPipeline(
     reshade::api::command_list* cmd_list,
-    reshade::api::pipeline_stage stages,
+    reshade::api::pipeline_stage stage,
     reshade::api::pipeline pipeline) {
   if (!is_snapshotting) return;
 
-  auto& data = cmd_list->get_private_data<CommandListData>();
-  auto& details = data.GetCurrentDrawDetails();
+  auto& cmd_list_data = cmd_list->get_private_data<CommandListData>();
+  auto& details = cmd_list_data.GetCurrentDrawDetails();
 
   PipelineBindDetails bind_details = {
       .pipeline = pipeline,
-      .pipeline_stage = stages,
+      .pipeline_stage = stage,
   };
+
+  std::vector<uint32_t> added_shaders;
   auto shader_state = renodx::utils::shader::GetCurrentState(cmd_list);
   for (auto compatible_stage : renodx::utils::shader::COMPATIBLE_STAGES) {
-    if ((stages & compatible_stage) != 0u) {
-      auto shader_hash = shader_state.GetCurrentShaderHash(compatible_stage);
-      bind_details.shader_hashes.push_back(shader_hash);
+    if (renodx::utils::bitwise::HasFlag(stage, compatible_stage)) {
+      if (pipeline.handle == 0u) {
+        bind_details.shader_hashes.push_back(0);
+      } else {
+        auto shader_hash = shader_state.GetCurrentShaderHash(compatible_stage);
+        bind_details.shader_hashes.push_back(shader_hash);
+        added_shaders.push_back(shader_hash);
+      }
     }
   }
-
   details.pipeline_binds.push_back(bind_details);
+
+  if (added_shaders.empty()) return;
+
+  auto* device = cmd_list->get_device();
+  auto pipeline_details = renodx::utils::shader::GetPipelineShaderDetails(device, pipeline);
+  if (!pipeline_details.has_value()) return;
+
+  auto& device_data = device->get_private_data<DeviceData>();
+  std::unique_lock lock(device_data.mutex);
+
+  for (const auto shader_hash : added_shaders) {
+    if (shader_hash == 0u) continue;
+    auto& shader_details = device_data.GetShaderDetails(shader_hash);
+    if (static_cast<uint32_t>(shader_details.shader_type) != 0u) continue;
+    if (!shader_details.program_version.has_value()) {
+      if (shader_details.shader_data.empty()) {
+        try {
+          auto shader_data = pipeline_details->GetShaderData(shader_hash);
+          if (!shader_data.has_value()) {
+            throw std::exception("Failed to get shader data");
+          }
+          shader_details.shader_data = shader_data.value();
+        } catch (const std::exception& e) {
+          reshade::log::message(reshade::log::level::error, e.what());
+        }
+      }
+      if (renodx::utils::device::IsDirectX(device)) {
+        try {
+          shader_details.program_version = renodx::utils::shader::compiler::directx::DecodeShaderVersion(shader_details.shader_data);
+        } catch (const std::exception& e) {
+          reshade::log::message(reshade::log::level::error, e.what());
+        }
+      }
+    }
+
+    if (shader_details.program_version.has_value()) {
+      switch (shader_details.program_version->GetKind()) {
+        case D3D11_SHVER_VERTEX_SHADER:
+          shader_details.shader_type = reshade::api::pipeline_stage::vertex_shader;
+          break;
+        case D3D11_SHVER_PIXEL_SHADER:
+          shader_details.shader_type = reshade::api::pipeline_stage::pixel_shader;
+          break;
+        case D3D11_SHVER_COMPUTE_SHADER:
+          shader_details.shader_type = reshade::api::pipeline_stage::compute_shader;
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (stage) {
+        case reshade::api::pipeline_stage::vertex_shader:
+        case reshade::api::pipeline_stage::pixel_shader:
+        case reshade::api::pipeline_stage::compute_shader:
+          shader_details.shader_type = stage;
+        default:
+          break;
+      }
+    }
+  }
 }
 
 void OnPushDescriptors(
@@ -517,118 +595,15 @@ void OnPushDescriptors(
   }
 }
 
-void OnBindDescriptorTables(
-    reshade::api::command_list* cmd_list,
-    reshade::api::shader_stage stages,
-    reshade::api::pipeline_layout layout,
-    uint32_t first,
-    uint32_t count,
-    const reshade::api::descriptor_table* tables) {
-  if (!is_snapshotting) return;
-  auto& data = cmd_list->get_private_data<CommandListData>();
-  auto& details = data.GetCurrentDrawDetails();
-
-  auto* device = cmd_list->get_device();
-  auto& device_data = device->get_private_data<DeviceData>();
-
-  auto& layout_data = device->get_private_data<renodx::utils::pipeline_layout::DeviceData>();
-  const std::shared_lock layout_lock(layout_data.mutex);
-
-  auto& descriptor_data = device->get_private_data<renodx::utils::descriptor::DeviceData>();
-
-  for (uint32_t i = 0; i < count; ++i) {
-    auto layout_index = first + i;
-
-    auto layout_data_pair = layout_data.pipeline_layout_data.find(layout.handle);
-    if (layout_data_pair == layout_data.pipeline_layout_data.end()) continue;
-
-    const auto& info = layout_data_pair->second;
-    if (layout_index > info.params.size()) continue;
-    const auto& param = info.params.at(layout_index);
-
-    for (uint32_t k = 0; k < param.descriptor_table.count; ++k) {
-      const auto& range = param.descriptor_table.ranges[k];
-
-      // Skip unbounded ranges
-      if (range.count == UINT32_MAX) continue;
-
-      switch (range.type) {
-        case reshade::api::descriptor_type::shader_resource_view:
-        case reshade::api::descriptor_type::sampler_with_resource_view:
-        case reshade::api::descriptor_type::buffer_shader_resource_view:
-        case reshade::api::descriptor_type::unordered_access_view:
-          break;
-        default:
-          continue;
-      }
-
-      uint32_t base_offset = 0;
-      reshade::api::descriptor_heap heap = {0};
-      device->get_descriptor_heap_offset(tables[i], range.binding, 0, &heap, &base_offset);
-
-      const std::shared_lock descriptor_lock(descriptor_data.mutex);
-
-      for (uint32_t j = 0; j < range.count; ++j) {
-        auto heap_pair = descriptor_data.heaps.find(heap.handle);
-        if (heap_pair == descriptor_data.heaps.end()) continue;
-        const auto& heap_data = heap_pair->second;
-        auto offset = base_offset + j;
-        if (offset >= heap_data.size()) continue;
-        const auto& [descriptor_type, descriptor_data] = heap_data[offset];
-        reshade::api::resource_view resource_view = {0};
-        bool is_uav = false;
-        switch (descriptor_type) {
-          case reshade::api::descriptor_type::sampler_with_resource_view:
-            resource_view = std::get<reshade::api::sampler_with_resource_view>(descriptor_data).view;
-            break;
-          case reshade::api::descriptor_type::buffer_unordered_access_view:
-          case reshade::api::descriptor_type::texture_unordered_access_view:
-            is_uav = true;
-            // fallthrough
-          case reshade::api::descriptor_type::buffer_shader_resource_view:
-          case reshade::api::descriptor_type::texture_shader_resource_view:
-            resource_view = std::get<reshade::api::resource_view>(descriptor_data);
-            break;
-          case reshade::api::descriptor_type::constant_buffer:
-          case reshade::api::descriptor_type::shader_storage_buffer:
-          case reshade::api::descriptor_type::acceleration_structure:
-            break;
-          default:
-            break;
-        }
-
-        auto slot = std::pair<uint32_t, uint32_t>(range.dx_register_index + j, range.dx_register_space);
-
-        const std::unique_lock lock(device_data.mutex);
-        if (is_uav) {
-          if (resource_view.handle == 0u) {
-            details.uav_binds.erase(slot);
-          } else {
-            auto detail_item = (DeviceData::GetResourceViewDetails(resource_view, device));
-            details.uav_binds[slot] = detail_item;
-          }
-        } else {
-          if (resource_view.handle == 0u) {
-            details.srv_binds.erase(slot);
-          } else {
-            auto detail_item = (DeviceData::GetResourceViewDetails(resource_view, device));
-
-            details.srv_binds[slot] = detail_item;
-          }
-        }
-      }
-    }
-  }
-}
-
 bool OnDraw(reshade::api::command_list* cmd_list, DrawDetails::DrawMethods draw_method) {
   bool bypass_draw = false;
 
   auto* device = cmd_list->get_device();
   auto& device_data = device->get_private_data<DeviceData>();
 
+  auto& state = renodx::utils::shader::GetCurrentState(cmd_list);
+
   {
-    auto& state = renodx::utils::shader::GetCurrentState(cmd_list);
     std::shared_lock lock(device_data.mutex);
     for (auto& [stage, hash] : state.current_shaders_hashes) {
       if (auto pair = device_data.shader_details.find(hash);
@@ -646,15 +621,135 @@ bool OnDraw(reshade::api::command_list* cmd_list, DrawDetails::DrawMethods draw_
     auto& command_list_data = cmd_list->get_private_data<CommandListData>();
     auto& draw_details = command_list_data.GetCurrentDrawDetails();
     draw_details.draw_method = draw_method;
-    draw_details.render_targets.clear();
 
     std::unique_lock lock(device_data.mutex);
-    uint32_t rtv_index = 0u;
-    for (auto render_target : renodx::utils::swapchain::GetRenderTargets(cmd_list)) {
-      if (render_target.handle != 0u) {
-        draw_details.render_targets[rtv_index] = DeviceData::GetResourceViewDetails(render_target, device);
+
+    if (state.pipeline_layout.handle != 0u) {
+      auto& layout_data = device->get_private_data<renodx::utils::pipeline_layout::DeviceData>();
+      const std::shared_lock layout_lock(layout_data.mutex);
+      // Check bound descriptor tables
+      auto layout_data_pair = layout_data.pipeline_layout_data.find(state.pipeline_layout.handle);
+      assert(layout_data_pair != layout_data.pipeline_layout_data.end());
+      //  continue;
+
+      const auto& info = layout_data_pair->second;
+      auto param_count = info.params.size();
+      auto& descriptor_data = device->get_private_data<renodx::utils::descriptor::DeviceData>();
+      for (auto param_index = 0; param_index < param_count; ++param_index) {
+        const auto& param = info.params.at(param_index);
+
+        uint32_t descriptor_table_count;
+        const reshade::api::descriptor_range* descriptor_table_ranges;
+        switch (param.type) {
+          case reshade::api::pipeline_layout_param_type::descriptor_table:
+            descriptor_table_count = param.descriptor_table.count;
+            descriptor_table_ranges = param.descriptor_table.ranges;
+            break;
+          case reshade::api::pipeline_layout_param_type::descriptor_table_with_static_samplers:
+            descriptor_table_count = param.descriptor_table_with_static_samplers.count;
+            descriptor_table_ranges = param.descriptor_table_with_static_samplers.ranges;
+            break;
+
+          case reshade::api::pipeline_layout_param_type::push_constants:
+          case reshade::api::pipeline_layout_param_type::push_descriptors:
+          case reshade::api::pipeline_layout_param_type::push_descriptors_with_ranges:
+          case reshade::api::pipeline_layout_param_type::push_descriptors_with_static_samplers:
+            continue;
+        }
+
+        const auto& table = info.tables[param_index];
+
+        for (uint32_t j = 0; j < descriptor_table_count; ++j) {
+          const auto& range = descriptor_table_ranges[j];
+
+          // Skip unbounded ranges
+          if (range.count == UINT32_MAX) continue;
+
+          switch (range.type) {
+            case reshade::api::descriptor_type::shader_resource_view:
+            case reshade::api::descriptor_type::sampler_with_resource_view:
+            case reshade::api::descriptor_type::buffer_shader_resource_view:
+            case reshade::api::descriptor_type::unordered_access_view:
+              break;
+            default:
+              continue;
+          }
+
+          if (draw_method == DrawDetails::DrawMethods::DISPATCH
+              && !renodx::utils::bitwise::HasFlag(range.visibility, reshade::api::shader_stage::compute)) {
+            continue;
+          }
+
+          uint32_t base_offset = 0;
+          reshade::api::descriptor_heap heap = {0};
+          device->get_descriptor_heap_offset(table, range.binding, 0, &heap, &base_offset);
+          const std::shared_lock descriptor_lock(descriptor_data.mutex);
+
+          for (uint32_t k = 0; k < range.count; ++k) {
+            auto heap_pair = descriptor_data.heaps.find(heap.handle);
+            assert(heap_pair != descriptor_data.heaps.end());
+            const auto& heap_data = heap_pair->second;
+            auto offset = base_offset + k;
+            if (offset >= heap_data.size()) {
+              // Invalid location (may be oversized bind)
+              continue;
+            }
+            const auto& [descriptor_type, descriptor_data] = heap_data[offset];
+            reshade::api::resource_view resource_view = {0};
+            bool is_uav = false;
+            switch (descriptor_type) {
+              case reshade::api::descriptor_type::sampler_with_resource_view:
+                resource_view = std::get<reshade::api::sampler_with_resource_view>(descriptor_data).view;
+                break;
+              case reshade::api::descriptor_type::buffer_unordered_access_view:
+              case reshade::api::descriptor_type::texture_unordered_access_view:
+                is_uav = true;
+                // fallthrough
+              case reshade::api::descriptor_type::buffer_shader_resource_view:
+              case reshade::api::descriptor_type::texture_shader_resource_view:
+                resource_view = std::get<reshade::api::resource_view>(descriptor_data);
+                break;
+              case reshade::api::descriptor_type::constant_buffer:
+              case reshade::api::descriptor_type::shader_storage_buffer:
+              case reshade::api::descriptor_type::acceleration_structure:
+                break;
+              default:
+                break;
+            }
+
+            auto slot = std::pair<uint32_t, uint32_t>(range.dx_register_index + k, range.dx_register_space);
+
+            if (is_uav) {
+              if (resource_view.handle == 0u) {
+                draw_details.uav_binds.erase(slot);
+              } else {
+                auto detail_item = (DeviceData::GetResourceViewDetails(resource_view, device));
+                draw_details.uav_binds[slot] = detail_item;
+              }
+            } else {
+              if (resource_view.handle == 0u) {
+                draw_details.srv_binds.erase(slot);
+              } else {
+                auto detail_item = (DeviceData::GetResourceViewDetails(resource_view, device));
+
+                draw_details.srv_binds[slot] = detail_item;
+              }
+            }
+          }
+        }
       }
-      ++rtv_index;
+    }
+
+    draw_details.render_targets.clear();
+
+    if (draw_method != DrawDetails::DrawMethods::DISPATCH) {
+      uint32_t rtv_index = 0u;
+      for (auto render_target : renodx::utils::swapchain::GetRenderTargets(cmd_list)) {
+        if (render_target.handle != 0u) {
+          draw_details.render_targets[rtv_index] = DeviceData::GetResourceViewDetails(render_target, device);
+        }
+        ++rtv_index;
+      }
     }
 
     device_data.command_list_data.push_back(command_list_data);
@@ -883,11 +978,26 @@ void RenderCapturePane(reshade::api::device* device, DeviceData& data) {
           }
 
           for (const auto& shader_hash : pipeline_bind.shader_hashes) {
+            auto& shader_details = data.GetShaderDetails(shader_hash);
+            switch (shader_details.shader_type) {
+              case reshade::api::pipeline_stage::vertex_shader:
+                if (!snapshot_pane_show_vertex_shaders) continue;
+                break;
+              case reshade::api::pipeline_stage::pixel_shader:
+                if (!snapshot_pane_show_pixel_shaders) continue;
+                break;
+              case reshade::api::pipeline_stage::compute_shader:
+                if (!snapshot_pane_show_compute_shaders) continue;
+                break;
+              default:
+                break;
+            }
+            // Start drawing shader row
             ++row_index;  // Count rows regardless of tree node state
             if (draw_node_open) {
-              auto& shader_details = data.GetShaderDetails(shader_hash);
-
               ImGui::TableNextRow();
+              ImGui::PushID(row_index);
+
               ImGui::TableNextColumn();
 
               SettingSelection search = {.shader_hash = shader_hash};
@@ -897,27 +1007,6 @@ void RenderCapturePane(reshade::api::device* device, DeviceData& data) {
                                   | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen
                                   | selection.GetTreeNodeFlags();
 
-              ImGui::PushID(row_index);
-              if (shader_hash != 0u && !shader_details.program_version.has_value()) {
-                if (shader_details.shader_data.empty()) {
-                  try {
-                    auto shader_data = pipeline_details.GetShaderData(shader_hash);
-                    if (!shader_data.has_value()) {
-                      throw std::exception("Failed to get shader data");
-                    }
-                    shader_details.shader_data = shader_data.value();
-                  } catch (const std::exception& e) {
-                    reshade::log::message(reshade::log::level::error, e.what());
-                  }
-                }
-                if (renodx::utils::device::IsDirectX(device)) {
-                  try {
-                    shader_details.program_version = renodx::utils::shader::compiler::directx::DecodeShaderVersion(shader_details.shader_data);
-                  } catch (const std::exception& e) {
-                    reshade::log::message(reshade::log::level::error, e.what());
-                  }
-                }
-              }
               // Fallback to subobject
               if (shader_details.program_version.has_value()) {
                 ImGui::TreeNodeEx("", bullet_flags, "%s_%d_%d",
@@ -926,10 +1015,9 @@ void RenderCapturePane(reshade::api::device* device, DeviceData& data) {
                                   shader_details.program_version->GetMinor());
               } else {
                 std::stringstream s;
-                s << pipeline_bind.pipeline_stage;
+                s << shader_details.shader_type;
                 ImGui::TreeNodeEx("", bullet_flags, "%s", s.str().c_str());
               }
-              ImGui::PopID();
               if (ImGui::IsItemClicked()) {
                 MakeSelectionCurrent(selection);
                 ImGui::SetItemDefaultFocus();
@@ -950,6 +1038,7 @@ void RenderCapturePane(reshade::api::device* device, DeviceData& data) {
 
               ImGui::TableNextColumn();  // Index
               ImGui::Text("%03d", draw_index);
+              ImGui::PopID();
             }
           }
         }
@@ -1222,19 +1311,32 @@ void RenderCapturePane(reshade::api::device* device, DeviceData& data) {
   }  // BeginTable
 }
 
+enum ShaderPaneColumns {
+  SHADER_PANE_COLUMN_HASH,
+  SHADER_PANE_COLUMN_TYPE,
+  SHADER_PANE_COLUMN_ALIAS,
+  SHADER_PANE_COLUMN_SOURCE,
+  SHADER_PANE_COLUMN_OPTIONS,
+  SHADER_PANE_COLUMN_SNAPSHOT,
+  //
+  SHADER_PANE_COLUMN_COUNT
+};
+
 void RenderShadersPane(reshade::api::device* device, DeviceData& data) {
   static ImGuiTreeNodeFlags tree_node_flags = ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_SpanFullWidth;
+
   if (ImGui::BeginTable(
           "##ShadersPaneTable",
-          5,
+          SHADER_PANE_COLUMN_COUNT,
           ImGuiTableFlags_BordersInner | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY
               | ImGuiTableFlags_Sortable | ImGuiTableFlags_SortMulti | ImGuiTableFlags_Hideable,
           ImVec2(0, 0))) {
-    ImGui::TableSetupColumn("Hash", ImGuiTableColumnFlags_NoHide);
-    ImGui::TableSetupColumn("Alias", ImGuiTableColumnFlags_NoHide);
+    ImGui::TableSetupColumn("Hash", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_None | ImGuiTableColumnFlags_WidthStretch, 16.0f);
+    ImGui::TableSetupColumn("Alias", ImGuiTableColumnFlags_None | ImGuiTableColumnFlags_WidthStretch, 16.0f);
     ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_NoHide);
     ImGui::TableSetupColumn("Options", ImGuiTableColumnFlags_NoHide);
-    ImGui::TableSetupColumn("Snapshot", ImGuiTableColumnFlags_NoHide);
+    ImGui::TableSetupColumn("Snapshot", ImGuiTableColumnFlags_None | ImGuiTableColumnFlags_WidthStretch, 16.0f);
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableHeadersRow();
 
@@ -1245,13 +1347,26 @@ void RenderShadersPane(reshade::api::device* device, DeviceData& data) {
 
     auto draw_row = [&](ShaderDetails& shader_details, int snapshot_index = -1) {
       if (drawn_hashes.contains(shader_details.shader_hash)) return;
+      switch (shader_details.shader_type) {
+        case reshade::api::pipeline_stage::vertex_shader:
+          if (!shaders_pane_show_vertex_shaders) return;
+          break;
+        case reshade::api::pipeline_stage::pixel_shader:
+          if (!shaders_pane_show_pixel_shaders) return;
+          break;
+        case reshade::api::pipeline_stage::compute_shader:
+          if (!shaders_pane_show_compute_shaders) return;
+          break;
+        default:
+          break;
+      }
       SettingSelection search = {.shader_hash = shader_details.shader_hash};
       auto& selection = GetSelection(search);
 
       // Undocumented ImGui Combo height
       const auto combo_height = ImGui::GetTextLineHeightWithSpacing();
       ImGui::TableNextRow(ImGuiTableRowFlags_None, combo_height);
-      if (ImGui::TableSetColumnIndex(0)) {  // Hash
+      if (ImGui::TableSetColumnIndex(SHADER_PANE_COLUMN_HASH)) {
         ImGui::PushID(cell_index_id++);
 
         // ImGui full size (0,0) applies to text not row
@@ -1272,14 +1387,29 @@ void RenderShadersPane(reshade::api::device* device, DeviceData& data) {
         ImGui::PopID();
       }
 
-      if (ImGui::TableSetColumnIndex(1)) {  // Alias
+      if (ImGui::TableSetColumnIndex(SHADER_PANE_COLUMN_ALIAS)) {
         ImGui::PushID(cell_index_id++);
         ImGui::AlignTextToFramePadding();
         RenderFileAlias(shader_details.disk_shader);
         ImGui::PopID();
       }
 
-      if (ImGui::TableSetColumnIndex(2)) {  // Source
+      if (ImGui::TableSetColumnIndex(SHADER_PANE_COLUMN_TYPE)) {
+        ImGui::PushID(cell_index_id++);
+        if (shader_details.program_version.has_value()) {
+          ImGui::Text("%s_%d_%d",
+                      shader_details.program_version->GetKindAbbr(),
+                      shader_details.program_version->GetMajor(),
+                      shader_details.program_version->GetMinor());
+        } else {
+          std::stringstream s;
+          s << shader_details.shader_type;
+          ImGui::TextUnformatted(s.str().c_str());
+        }
+        ImGui::PopID();
+      }
+
+      if (ImGui::TableSetColumnIndex(SHADER_PANE_COLUMN_SOURCE)) {  // Source
         ImGui::PushID(cell_index_id++);
         ImGui::SetNextItemWidth(ImGui::GetColumnWidth(2));
         if (shader_details.shader_source == ShaderDetails::ShaderSource::ORIGINAL_SHADER
@@ -1318,7 +1448,7 @@ void RenderShadersPane(reshade::api::device* device, DeviceData& data) {
         ImGui::PopID();
       }
 
-      if (ImGui::TableSetColumnIndex(3)) {  // Options
+      if (ImGui::TableSetColumnIndex(SHADER_PANE_COLUMN_OPTIONS)) {  // Options
         ImGui::PushID(cell_index_id++);
 
         auto color_vec4 = ImGui::GetStyleColorVec4(ImGuiCol_Button);
@@ -1358,7 +1488,7 @@ void RenderShadersPane(reshade::api::device* device, DeviceData& data) {
         ImGui::PopID();
       }
 
-      if (ImGui::TableSetColumnIndex(4)) {  // Snapshot
+      if (ImGui::TableSetColumnIndex(SHADER_PANE_COLUMN_SNAPSHOT)) {  // Snapshot
         ImGui::PushID(cell_index_id++);
         if (snapshot_index == -1) {
           ImGui::TextUnformatted("");
@@ -1374,6 +1504,7 @@ void RenderShadersPane(reshade::api::device* device, DeviceData& data) {
       for (auto& draw_details : command_list_data.draw_details) {
         for (const auto& pipeline_bind : draw_details.pipeline_binds) {
           for (const auto& shader_hash : pipeline_bind.shader_hashes) {
+            if (shader_hash == 0u) continue;
             auto& shader_details = data.GetShaderDetails(shader_hash);
             draw_row(shader_details, current_snapshot_index);
           }
@@ -1453,7 +1584,7 @@ void RenderShaderDefinesPane(reshade::api::device* device, DeviceData& data) {
     ImGui::TableNextColumn();
     ImGui::PushID(cell_index_id++);
     ImGui::SetNextItemWidth(-FLT_MIN);
-    char temp_key[128];
+    char temp_key[128] = "";
     ImGui::InputText("", temp_key, 128, ImGuiInputTextFlags_CharsNoBlank);
     ImGui::PopID();
 
@@ -1476,18 +1607,51 @@ void RenderShaderDefinesPane(reshade::api::device* device, DeviceData& data) {
   }  // ShaderDefinesTable
 }
 
+template <typename T = bool>
+void DrawSettingBoolCheckbox(reshade::api::effect_runtime* runtime, const char* label, const char* key, T* value) {
+  bool temp = *value;
+  ImGui::PushID(key);
+  if (ImGui::Checkbox(label, &temp)) {
+    *value = temp;
+    reshade::set_config_value(runtime, "renodx-dev", key, temp);
+  }
+  ImGui::PopID();
+}
+
 void RenderSettingsPane(reshade::api::device* device, DeviceData& data) {
-  char temp[256] = "";
-  renodx::utils::shader::compiler::watcher::GetLivePath().copy(temp, 256);
-  if (ImGui::InputText("Live Path", temp, 256)) {
-    std::string temp_string = temp;
-    auto pos = temp_string.find_last_not_of("\t\n\v\f\r ");
-    if (pos != std::string_view::npos) {
-      temp_string = {temp_string.data(), temp_string.data() + pos + 1};
+  {
+    ImGui::SeparatorText("Snapshot");
+
+    DrawSettingBoolCheckbox(data.runtime, "Show Vertex Shaders", "SnapshotPaneShowVertexShaders", &snapshot_pane_show_vertex_shaders);
+    DrawSettingBoolCheckbox(data.runtime, "Show Pixel Shaders", "SnapshotPaneShowPixelShaders", &snapshot_pane_show_pixel_shaders);
+    DrawSettingBoolCheckbox(data.runtime, "Show Compute Shaders", "SnapshotPaneShowComputeShaders", &snapshot_pane_show_compute_shaders);
+    DrawSettingBoolCheckbox(data.runtime, "Show Blends", "SnapshotPaneShowBlends", &snapshot_pane_show_blends);
+  }
+
+  {
+    ImGui::SeparatorText("Shaders");
+    char temp[256] = "";
+    renodx::utils::shader::compiler::watcher::GetLivePath().copy(temp, 256);
+
+    if (ImGui::InputText("Live Path", temp, 256)) {
+      std::string temp_string = temp;
+      auto pos = temp_string.find_last_not_of("\t\n\v\f\r ");
+      if (pos != std::string_view::npos) {
+        temp_string = {temp_string.data(), temp_string.data() + pos + 1};
+      }
+
+      renodx::utils::shader::compiler::watcher::SetLivePath(temp_string);
+      reshade::set_config_value(data.runtime, "renodx-dev", "LivePath", temp_string.c_str());
     }
 
-    renodx::utils::shader::compiler::watcher::SetLivePath(temp_string);
-    reshade::set_config_value(data.runtime, "renodx-dev", "LivePath", temp_string.c_str());
+    DrawSettingBoolCheckbox(data.runtime, "Show Vertex Shaders", "ShadersPaneShowVertexShaders", &shaders_pane_show_vertex_shaders);
+    DrawSettingBoolCheckbox(data.runtime, "Show Pixel Shaders", "ShadersPaneShowPixelShaders", &shaders_pane_show_pixel_shaders);
+    DrawSettingBoolCheckbox(data.runtime, "Show Compute Shaders", "ShadersPaneShowComputeShaders", &shaders_pane_show_compute_shaders);
+  }
+
+  {
+    ImGui::SeparatorText("Trace");
+    DrawSettingBoolCheckbox(data.runtime, "Trace Pipeline Creation", "TracePipelineCreation", &renodx::utils::trace::trace_pipeline_creation);
   }
 }
 
@@ -1736,16 +1900,11 @@ void RenderResourceViewView(reshade::api::device* device, DeviceData& data, Sett
   }
 }
 
-// @see https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
-void OnRegisterOverlay(reshade::api::effect_runtime* runtime) {
-  auto* device = runtime->get_device();
-  auto& data = device->get_private_data<DeviceData>();
-  std::unique_lock lock(data.mutex);  // Probably not needed
-  if (data.runtime == nullptr) {
-    data.runtime = runtime;
+void InitializeUserSettings(reshade::api::effect_runtime* runtime) {
+  {
     char temp[256] = "";
     size_t size = 256;
-    if (reshade::get_config_value(data.runtime, "renodx-dev", "LivePath", temp, &size)) {
+    if (reshade::get_config_value(runtime, "renodx-dev", "LivePath", temp, &size)) {
       std::string temp_string = std::string(temp);
       auto pos = temp_string.find_last_not_of("\t\n\v\f\r ");
       if (pos != std::string_view::npos) {
@@ -1753,6 +1912,33 @@ void OnRegisterOverlay(reshade::api::effect_runtime* runtime) {
       }
       renodx::utils::shader::compiler::watcher::SetLivePath(temp_string);
     }
+  }
+
+  for (const auto& [key, value] : std::vector<std::pair<const char*, std::atomic_bool*>>({
+           {"TracePipelineCreation", &renodx::utils::trace::trace_pipeline_creation},
+           {"SnapshotPaneShowVertexShaders", &snapshot_pane_show_vertex_shaders},
+           {"SnapshotPaneShowPixelShaders", &snapshot_pane_show_pixel_shaders},
+           {"SnapshotPaneShowComputeShaders", &snapshot_pane_show_compute_shaders},
+           {"SnapshotPaneShowBlends", &snapshot_pane_show_blends},
+           {"ShadersPaneShowVertexShaders", &shaders_pane_show_vertex_shaders},
+           {"ShadersPaneShowPixelShaders", &shaders_pane_show_pixel_shaders},
+           {"ShadersPaneShowComputeShaders", &shaders_pane_show_compute_shaders},
+       })) {
+    bool temp = *value;
+    if (reshade::get_config_value(runtime, "renodx-dev", key, temp)) {
+      *value = temp;
+    }
+  }
+}
+
+// @see https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
+void OnRegisterOverlay(reshade::api::effect_runtime* runtime) {
+  auto* device = runtime->get_device();
+  auto& data = device->get_private_data<DeviceData>();
+  std::unique_lock lock(data.mutex);  // Probably not needed
+  if (data.runtime == nullptr) {
+    data.runtime = runtime;
+    InitializeUserSettings(runtime);
   }
   static auto setting_window_size = 0;
   static auto setting_side_sheet_width = 0;
@@ -1888,7 +2074,6 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       reshade::register_event<reshade::addon_event::init_pipeline>(OnInitPipelineTrackAddons);
       reshade::register_event<reshade::addon_event::bind_pipeline>(OnBindPipeline);
       reshade::register_event<reshade::addon_event::push_descriptors>(OnPushDescriptors);
-      reshade::register_event<reshade::addon_event::bind_descriptor_tables>(OnBindDescriptorTables);
       reshade::register_event<reshade::addon_event::draw>(OnDraw);
       reshade::register_event<reshade::addon_event::draw_indexed>(OnDrawIndexed);
       reshade::register_event<reshade::addon_event::draw_or_dispatch_indirect>(OnDrawOrDispatchIndirect);
