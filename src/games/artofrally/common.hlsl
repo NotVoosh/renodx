@@ -29,9 +29,7 @@ float3 FinalizeOutput(float3 color) {
   	}
       if(injectedData.toneMapType == 0.f){
         color = renodx::color::bt709::clamp::BT709(color);
-      } else {
-        color = renodx::color::bt709::clamp::AP1(color);
-	  }
+      }
   	return color;
 }
 

@@ -24,18 +24,18 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0xBE750C14),  // LUT3DBaker (neutral)
   CustomShaderEntry(0x6EA48EC8),  // LUT3DBaker (neutral)
 
-  CustomShaderEntry(0x6BE60185),  // uberpost (FXAA/SMAA)
+  CustomShaderEntry(0x6BE60185),  // uberpost (bloom + grain)
   CustomShaderEntry(0x728A5929),  // uberpost (title menu)
-  CustomShaderEntry(0x6D14F22A),  // uberpost (no AA/TAA)
-  CustomShaderEntry(0x18DC6A24),  // uberpost FG (no AA/TAA)
-  CustomShaderEntry(0xC63B24BB),  // uberpost FG 2 (FXAA/SMAA)
-  CustomShaderEntry(0x7E2A04D8),  // uberpost bloom (no AA/TAA)
-  CustomShaderEntry(0x957EC72A),  // uberpost bloom 2 (FXAA/SMAA)
-  CustomShaderEntry(0x272EB112),  // uberpost potato (no AA/TAA)
-  CustomShaderEntry(0xDB814E6C),  // uberpost potato (FXAA/SMAA)
+  CustomShaderEntry(0x6D14F22A),  // uberpost 2 (bloom + grain + dither)
+  CustomShaderEntry(0x18DC6A24),  // uberpost 3 (grain + dither)
+  CustomShaderEntry(0xC63B24BB),  // uberpost 4 (grain)
+  CustomShaderEntry(0x7E2A04D8),  // uberpost 5 (bloom + dither)
+  CustomShaderEntry(0x957EC72A),  // uberpost 6 (bloom FXAA/SMAA)
+  CustomShaderEntry(0x272EB112),  // uberpost 7 (dither)
+  CustomShaderEntry(0xDB814E6C),  // uberpost 8
 
   CustomShaderEntry(0xCC8B6ACF),  // post final (FXAA)
-  CustomShaderEntry(0x366EE13E),  // post final (title menu/SMAA)
+  CustomShaderEntry(0x366EE13E),  // post final (SMAA/title menu)
 
   CustomShaderEntry(0x2B868B21),  // UI default
   CustomShaderEntry(0xD0559BEE),  // UI default 2
@@ -105,7 +105,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xFFB469,
