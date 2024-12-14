@@ -38,9 +38,8 @@ void main(
   r0.w = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r0.www;
   r0.xyzw = t3.Sample(s3_s, r0.xyz).xyzw;
-
+      if(injectedData.fxNoise > 0.f){
     r0.rgb = renodx::color::srgb::EncodeSafe(r0.rgb);
-    
   r1.xy = v1.xy * cb0[30].xy + cb0[30].zw;
   r1.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
   r0.w = r1.w * 2 + -1;
@@ -50,10 +49,10 @@ void main(
   r1.x = sqrt(r1.x);
   r1.x = 1 + -r1.x;
   r0.w = r1.x * r0.w;
-  
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
     r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
+    }
     o0.rgb = r0.rgb;
   return;
 }

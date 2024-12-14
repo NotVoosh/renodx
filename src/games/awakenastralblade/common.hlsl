@@ -105,7 +105,6 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig){
       color = renodx::color::bt709::from::dtucs::uvY(perceptual_new.yzx);
     }
   }
-    color = renodx::color::bt709::clamp::AP1(color);
     return color;
 }
 
@@ -149,7 +148,6 @@ float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig){
       color = renodx::color::bt709::from::dtucs::uvY(perceptual_new.yzx);
     }
   }
-    color = renodx::color::bt709::clamp::AP1(color);
     return color;
 }
 
@@ -197,6 +195,7 @@ float3 applyUserTonemap(float3 untonemapped){
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}
+      outputColor = renodx::color::bt709::clamp::BT2020(outputColor);
 
 	return outputColor;
 }

@@ -37,11 +37,12 @@ void main(
   r2.xyzw = t1.Sample(s1_s, w1.xy).xyzw;
   r0.yzw = r2.xyz * r1.xxx;
   o0.w = r2.w;
-
+      if(injectedData.fxNoise > 0.f){
     r0.gba = renodx::color::srgb::EncodeSafe(r0.gba);
-  r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
-    r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
-    r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
-    o0.rgb = r0.rgb;
+  r0.gba = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
+    r0.gba = renodx::color::srgb::DecodeSafe(r0.gba);
+    r0.gba = renodx::color::bt709::clamp::AP1(r0.gba);
+    }
+    o0.rgb = r0.gba;
   return;
 }
