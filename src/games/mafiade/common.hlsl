@@ -129,8 +129,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.saturation = injectedData.colorGradeSaturation;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 0.95f;
-			config.reno_drt_contrast = 1.3f;
+			config.reno_drt_contrast = 1.15f;
 			config.reno_drt_saturation = 1.15f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
 			config.reno_drt_flare = 0.0025 * injectedData.colorGradeFlare;
@@ -152,8 +151,8 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
-			config.highlights *= 0.9f;
-			config.contrast *= 1.3f;
+			config.highlights *= 0.95f;
+			config.contrast *= 1.15f;
 			config.saturation *= 1.2f;
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			outputColor = applyReinhardPlus(outputColor, config);
@@ -182,8 +181,7 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			config.contrast = injectedData.colorGradeContrast;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 0.95f;
-			config.reno_drt_contrast = 1.3f;
+			config.reno_drt_contrast = 1.15f;
 			config.reno_drt_flare = 0.0025 * injectedData.colorGradeFlare;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 	
@@ -196,8 +194,8 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			16.f);
 
 		if (injectedData.toneMapType == 4.f){				// Reinhard+
-			config.highlights *= 0.9f;
-			config.contrast *= 1.3f;
+			config.highlights *= 0.95f;
+			config.contrast *= 1.15f;
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			outputColor = applyReinhardPlus(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
