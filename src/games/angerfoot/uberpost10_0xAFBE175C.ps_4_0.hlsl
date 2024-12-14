@@ -170,9 +170,6 @@ void main(
     r1.x = r0.w;
   }
   o0.xyzw = r1.yzwx;
-      if(injectedData.fxFilmGrain > 0.f){
-    o0.rgb = applyFilmGrain(o0.rgb, v1);
-      }
     o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

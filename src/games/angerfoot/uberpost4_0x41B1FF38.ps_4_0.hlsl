@@ -38,7 +38,10 @@ void main(
   r0.w = 0.5 * cb0[36].x;
   r0.xyz = r0.xyz * cb0[36].xxx + r0.www;
   r0.xyzw = t3.Sample(s3_s, r0.xyz).xyzw;
-
+      if(injectedData.fxFilmGrain > 0.f){
+    r0.rgb = applyFilmGrain(r0.rgb, w1);
+    }  
+    if(injectedData.fxNoise > 0.f){
     r0.rgb = renodx::color::srgb::EncodeSafe(r0.rgb);
 
   r1.xy = v1.xy * cb0[30].xy + cb0[30].zw;
@@ -52,6 +55,9 @@ void main(
   r0.w = r1.x * r0.w;
 
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
-    o0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
+    }
+    o0.rgb = r0.rgb;
   return;
 }

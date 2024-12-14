@@ -22,6 +22,12 @@ void main(
   uint4 bitmask, uiDest;
   float4 fDest;
 
+  r1.xyzw = t1.Sample(s1_s, w1.xy).xyzw;
+  o0.w = r1.w;
+      if(injectedData.fxFilmGrain > 0.f){
+    r1.rgb = applyFilmGrain(r1.rgb, w1);
+    }  
+    if(injectedData.fxNoise > 0.f){
   r0.xy = v1.xy * cb0[28].xy + cb0[28].zw;
   r0.x = t0.Sample(s0_s, r0.xy).w;
   r0.x = r0.x * 2 + -1;
@@ -31,11 +37,12 @@ void main(
   r0.y = sqrt(r0.y);
   r0.y = 1 + -r0.y;
   r0.x = r0.x * r0.y;
-  r1.xyzw = t1.Sample(s1_s, w1.xy).xyzw;
-  o0.w = r1.w;
 
     r0.gba = renodx::color::srgb::EncodeSafe(r1.rgb);
   r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
-    o0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r1.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
+    }
+    o0.rgb = r1.rgb;
   return;
 }

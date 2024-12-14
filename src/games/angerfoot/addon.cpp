@@ -21,6 +21,8 @@
 namespace {
 
 renodx::mods::shader::CustomShaders custom_shaders = {
+    CustomShaderEntry(0x8A6BCB4C),  // videos
+
     CustomShaderEntry(0x6EA48EC8),  // LUT3DBaker
 
     CustomShaderEntry(0x2706BB7A),  // uberpost (title menu)
@@ -45,6 +47,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x366EE13E),  // smaa (dither)
 
     CustomShaderEntry(0x459D4153),  // colour correction
+    CustomShaderEntry(0xBA4C6020),  // crosshair
 
     CustomShaderEntry(0x20133A8B),  // Final
 };
@@ -113,7 +116,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xE50067,
