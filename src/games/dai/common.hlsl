@@ -104,7 +104,7 @@ float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig, bool sd
     return color;
 }
 
-float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float midGray){
+float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState lutSampler, float3 LUTless, float midGray, bool cutscene = false){
 		
 		float3 outputColor = untonemapped.rgb;
 		float3 hueCorrectionColor = LUTless;
@@ -122,9 +122,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
 			config.reno_drt_contrast = 1.2f;
-			config.reno_drt_saturation = 1.3f;
+			config.reno_drt_saturation = 1.2f;
 			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.05 * injectedData.colorGradeFlare;
+			config.reno_drt_flare = cutscene ? 0.f : 0.05 * injectedData.colorGradeFlare;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
@@ -146,9 +146,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 			if (injectedData.toneMapType == 4.f){		// Reinhard+
-			config.shadows *= 0.6f;
+			config.shadows *= cutscene ? 1.f : 0.6f;
 			config.contrast *= 1.2f;
-			config.saturation *= 1.35f;
+			config.saturation *= 1.25f;
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			outputColor = applyReinhardPlus(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
