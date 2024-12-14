@@ -126,9 +126,9 @@ float3 applyUserTonemap(float3 untonemapped){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
-			config.highlights *= 1.1f;
-			config.shadows *= 1.05f;
-			config.contrast *= 1.4f;
+			config.highlights *= 1.05f;
+			config.shadows *= 1.1f;
+			config.contrast *= 1.35f;
 			config.saturation *= 1.25f;
 			outputColor = applyReinhardPlus(outputColor, config);
 			} else {
