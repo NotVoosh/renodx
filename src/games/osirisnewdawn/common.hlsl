@@ -39,7 +39,6 @@ float3 FinalizeOutput(float3 color) {
   	  if(injectedData.toneMapGammaCorrection == 1.f) {
 	color = renodx::color::correct::GammaSafe(color);
   	}
-        color = renodx::color::bt709::clamp::AP1(color);
   	return color;
 }
 
