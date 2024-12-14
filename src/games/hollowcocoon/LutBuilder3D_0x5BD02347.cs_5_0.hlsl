@@ -233,7 +233,7 @@ cbuffer cb0 : register(b0){
     r0.xyz = r0.xyz * cb0[0].yyy;
       r1.rgb = lutShaper(r0.rgb, true);
   }
-  r0.rgb = applyUserTonemap(r1.rgb, false);
+  r0.rgb = applyUserTonemapMenu(r1.rgb);
   r0.w = 1;
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzw

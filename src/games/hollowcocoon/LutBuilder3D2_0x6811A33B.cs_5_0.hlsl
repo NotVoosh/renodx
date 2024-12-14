@@ -408,7 +408,7 @@ cbuffer cb0 : register(b0){
     r1.r = dot(float3(3.2409699,-1.5373832,-0.498610765), r0.rgb);
     r1.g = dot(float3(-0.969243646,1.8759675,0.0415550582), r0.rgb);
     r1.b = dot(float3(0.0556300804,-0.203976959,1.05697155), r0.rgb);
-    r0.rgb = applyUserTonemap(r1.rgb, true);
+    r0.rgb = applyUserTonemap(r1.rgb);
   }
 
   r0.w = 1;

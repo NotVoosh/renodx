@@ -51,7 +51,7 @@ void main(
     r0.rgb = applyFilmGrain(r0.rgb, v1);
   }
   o0.w = r0.w;
-
+    if(injectedData.fxNoise > 0.f){
     r0.rgb = renodx::color::srgb::EncodeSafe(r0.rgb);
   r2.xy = cb0[2].xy * r1.yz;
   r1.xy = cb1[43].xy * r1.yz;
@@ -67,6 +67,7 @@ void main(
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;    // dithering
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
     r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
+    }
   r1.z = 0;
   r1.xyzw = t2.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;

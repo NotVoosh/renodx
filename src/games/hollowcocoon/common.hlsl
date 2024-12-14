@@ -88,7 +88,7 @@ float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig){
     return color;
 }
 
-float3 applyUserTonemap(float3 untonemapped, bool ACES){
+float3 applyUserTonemap(float3 untonemapped){
 		
 		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(untonemapped);
@@ -104,8 +104,8 @@ float3 applyUserTonemap(float3 untonemapped, bool ACES){
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.mid_gray_value = ACES ? midGray : 0.18f;
-			config.mid_gray_nits = ACES ? midGray * 100 : 18.f;
+			config.mid_gray_value = midGray;
+			config.mid_gray_nits = midGray * 100;
 			config.reno_drt_highlights = 1.2f;
 			config.reno_drt_shadows = 1.2f;
 			config.reno_drt_contrast = 1.3f;
@@ -115,7 +115,7 @@ float3 applyUserTonemap(float3 untonemapped, bool ACES){
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 
-				if(injectedData.toneMapType >= 3.f && ACES == 1){
+				if(injectedData.toneMapType >= 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
@@ -123,6 +123,36 @@ float3 applyUserTonemap(float3 untonemapped, bool ACES){
 			config.shadows *= 1.05f;
 			config.contrast *= 1.4f;
 			config.saturation *= 1.25f;
+			outputColor = applyReinhardPlus(outputColor, config);
+			} else {
+			outputColor = renodx::tonemap::config::Apply(outputColor, config);
+			}
+
+	return outputColor;
+}
+
+float3 applyUserTonemapMenu(float3 untonemapped){
+		
+		float3 outputColor = untonemapped;
+		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
+
+			config.type = injectedData.toneMapType;
+			config.peak_nits = injectedData.toneMapPeakNits;
+			config.game_nits = injectedData.toneMapGameNits;
+			config.gamma_correction = injectedData.toneMapGammaCorrection;
+			config.exposure = injectedData.colorGradeExposure;
+			config.highlights = injectedData.colorGradeHighlights;
+			config.shadows = injectedData.colorGradeShadows;
+			config.contrast = injectedData.colorGradeContrast;
+			config.saturation = injectedData.colorGradeSaturation;
+			config.reno_drt_saturation = 1.05f;
+			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
+			config.reno_drt_flare = 0.001 * injectedData.colorGradeFlare;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
+			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
+
+				if (injectedData.toneMapType == 4.f){		// Reinhard+
+			config.saturation *= 1.1f;
 			outputColor = applyReinhardPlus(outputColor, config);
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);

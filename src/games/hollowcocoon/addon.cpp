@@ -34,7 +34,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0xF507A307),  // HDRPfinal 2
     CustomShaderEntry(0x4C2AF525),  // HDRPfinal 3
 
-    CustomSwapchainShader(0x20133A8B),  // Final
+    CustomShaderEntry(0x20133A8B),  // Final
 };
 
 ShaderInjectData shader_injection;
@@ -101,7 +101,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapHueCorrection",
         .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 75.f,
+        .default_value = 100.f,
         .label = "Hue Correction",
         .section = "Tone Mapping",
         .tint = 0xF8CB7C,

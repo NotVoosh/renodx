@@ -46,7 +46,7 @@ void main(
     r1.rgb = applyFilmGrain(r1.rgb, v1);
   }
   o0.w = r1.w;
-
+    if(injectedData.fxNoise > 0.f){
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
   r2.xy = cb0[2].xy * r0.xy;
   r0.xy = cb1[43].xy * r0.xy;
@@ -62,6 +62,7 @@ void main(
   r1.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r1.xyz;
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.rgb);
     r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
+    }
   r0.z = 0;
   r0.xyzw = t2.SampleLevel(s0_s, r0.xyz, 0).xyzw;
   o0.xyz = r0.www * r1.xyz + r0.xyz;
