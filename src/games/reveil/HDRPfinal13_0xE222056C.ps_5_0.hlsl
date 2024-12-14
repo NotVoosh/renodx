@@ -165,7 +165,7 @@ void main(
   r1.xyz = r1.xxx ? r2.xyz : r3.yzw;
   r4.xyz = r0.www ? r1.xyz : r0.xyz;
   o0.w = r4.w;
-
+    if(injectedData.fxNoise > 0.f){
     r0.rgb = renodx::color::srgb::EncodeSafe(r4.rgb);
   r1.xy = cb0[2].xy * r6.xy;
   r2.xy = cb1[48].xy * r6.xy;
@@ -181,6 +181,7 @@ void main(
   r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
     r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
+    }
   r2.z = 0;
   r1.xyzw = t1.SampleLevel(s0_s, r2.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;

@@ -28,6 +28,9 @@ float3 FinalizeOutput(float3 color) {
   	  if(injectedData.toneMapGammaCorrection == 1.f) {
 	color = renodx::color::correct::GammaSafe(color);
   	}
+      if(injectedData.toneMapType == 0.f){
+    color = renodx::color::bt709::clamp::BT709(color);
+    } 
   	color *= injectedData.toneMapUINits;
   	color /= 80.f;
   	return color;

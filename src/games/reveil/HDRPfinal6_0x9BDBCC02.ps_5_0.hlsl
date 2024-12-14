@@ -42,11 +42,12 @@ void main(
   r2.zw = float2(0,0);
   r2.xyzw = t0.Load(r2.xyzw).xyzw;
   o0.w = r2.w;
-
+    if(injectedData.fxNoise > 0.f){
     r0.gba = renodx::color::srgb::EncodeSafe(r2.rgb);
   r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
     r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
+    }
   r1.z = 0;
   r1.xyzw = t1.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
