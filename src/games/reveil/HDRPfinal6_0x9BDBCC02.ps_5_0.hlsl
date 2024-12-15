@@ -47,6 +47,8 @@ void main(
   r0.xyz = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
     r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
+    } else {
+    r0.rgb = r2.rgb;
     }
   r1.z = 0;
   r1.xyzw = t1.SampleLevel(s0_s, r1.xyz, 0).xyzw;
