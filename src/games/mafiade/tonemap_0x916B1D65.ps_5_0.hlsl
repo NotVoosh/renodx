@@ -390,7 +390,7 @@ void main(
     r0.xyz = t8.Sample(s0_s, r2.xy).xyz;
         if(injectedData.fxFilmGrainType == 0){  
     r1.xyz = r0.xyz * cb0[0].yyy * injectedData.fxFilmGrain + r1.xyz;
-    } else if(injectedData.is_swapchain_write == true) {
+    } else {
     r1.rgb = applyFilmGrain(r1.rgb, v1.yz);
     }
   }
@@ -416,9 +416,8 @@ void main(
       r2.rgb = renodx::math::SqrtSafe(r1.rgb);
     r3.xyz = cb0[8].www + r2.xyz;
     r3.xyz = min(cb0[8].zzz, r3.xyz);
-    r0.xyz = r0.xyz * r3.xyz * injectedData.fxNoise + r2.xyz;
+    r0.xyz = renodx::color::bt709::clamp::AP1(r0.xyz * r3.xyz) * injectedData.fxNoise + r2.xyz;
       r1.rgb = renodx::math::PowSafe(r0.rgb, 2.f);
-      r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
     }
 
     // This shader writes on swapchain most of the time.

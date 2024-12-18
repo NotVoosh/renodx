@@ -38,6 +38,9 @@ void main(
   r1.xyz = r1.xxx * r1.yzw + r2.xyz;
   r0.yzw = -r1.xyz + r0.yzw;
   r2.xyz = r0.xxx * r0.yzw + r1.xyz;
+
+    r2.rgb = renodx::color::bt709::from::AP1(r2.rgb);   // writing on swapchain here, back to bt709
+
   r0.x = cmp(0 < cb0[2].z);
   if (r0.x != 0) {
     r0.xy = cb0[2].xy + v0.xy;
@@ -46,19 +49,13 @@ void main(
     r0.zw = float2(0,0);
     r0.xyz = t2.Load(r0.xyz).xyz;
     r0.xyz = r0.xyz * float3(2,2,2) + float3(-1,-1,-1);
-    r1.xyz = max(float3(0,0,0), r2.xyz);
-    r1.xyz = sqrt(r1.xyz);
+      r1.rgb = renodx::math::SqrtSafe(r2.rgb);
     r3.xyz = cb0[2].www + r1.xyz;
     r3.xyz = min(cb0[2].zzz, r3.xyz);
-    r0.xyz = r0.xyz * r3.xyz + r1.xyz;
-    r2.xyz = r0.xyz * r0.xyz;
+    r0.xyz = renodx::color::bt709::clamp::AP1(r0.xyz * r3.xyz) * injectedData.fxNoise + r1.xyz;
+      r2.rgb = renodx::math::PowSafe(r0.rgb, 2.f);
   }
-      r2.rgb = renodx::color::bt709::from::AP1(r2.rgb);   // writing on swapchain here, back to bt709
-        if(injectedData.fxFilmGrainType == 1.f){
-      r2.rgb = applyFilmGrain(r2.rgb, v1.xy);
-      }
       r2.rgb = PostToneMapScale(r2.rgb);
-
   o0.xyzw = r2.xyzw;
   return;
 }

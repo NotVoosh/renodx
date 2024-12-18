@@ -36,11 +36,8 @@ void main(
       r2.rgb = renodx::math::SqrtSafe(r0.rgb);
     r3.xyz = cb0[0].www + r2.xyz;
     r3.xyz = min(cb0[0].zzz, r3.xyz);
-
-    r1.xyz = r1.xyz * r3.xyz * injectedData.fxNoise + r2.xyz;
-
+    r1.xyz = renodx::color::bt709::clamp::AP1(r1.xyz * r3.xyz) * injectedData.fxNoise + r2.xyz;
       r0.rgb = renodx::math::PowSafe(r1.rgb, 2.f);
-      r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
   }
   o0.xyzw = r0.xyzw;
   return;
