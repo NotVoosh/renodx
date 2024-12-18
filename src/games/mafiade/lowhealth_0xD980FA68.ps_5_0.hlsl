@@ -69,6 +69,9 @@ void main(
   r0.w = 1;
   r0.xyzw = -r2.xyzw + r0.xyzw;
   r0.xyzw = r1.xxxx * r0.xyzw + r2.xyzw;
+
+      r0.rgb = renodx::color::bt709::from::AP1(r0.rgb);   // writing on swapchain here, back to bt709
+
   r1.x = cmp(0 < cb0[0].z);
   if (r1.x != 0) {
     r1.xy = cb0[0].xy + v0.xy;
@@ -77,14 +80,12 @@ void main(
     r1.zw = float2(0,0);
     r1.xyz = t2.Load(r1.xyz).xyz;
     r1.xyz = r1.xyz * float3(2,2,2) + float3(-1,-1,-1);
-    //r2.xyz = max(float3(0,0,0), r0.xyz);
-    //r2.xyz = sqrt(r2.xyz);
+      r2.rgb = renodx::math::SqrtSafe(r0.rgb);
     r3.xyz = cb0[0].www + r2.xyz;
     r3.xyz = min(cb0[0].zzz, r3.xyz);
-    r1.xyz = r1.xyz * r3.xyz + r2.xyz;
-    r0.xyz = r1.xyz * r1.xyz;
+    r1.xyz = renodx::color::bt709::clamp::AP1(r1.xyz * r3.xyz) * injectedData.fxNoise + r2.xyz;
+      r0.rgb = renodx::math::PowSafe(r1.rgb, 2.f);
   }
-      r0.rgb = renodx::color::bt709::from::AP1(r0.rgb);   // writing on swapchain here, back to bt709
       r0.rgb = PostToneMapScale(r0.rgb);
   o0.xyzw = r0.xyzw;
   return;
