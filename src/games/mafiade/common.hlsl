@@ -189,6 +189,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
 			config.contrast *= 1.11f;
 			config.saturation *= 1.13f;
+			config.hue_correction_strength = injectedData.toneMapHueCorrection;
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			outputColor = applyReinhardPlus(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
@@ -216,9 +217,12 @@ float3 applyUserTonemapNoir(float3 untonemapped, Texture3D lutTexture, SamplerSt
 			config.contrast = injectedData.colorGradeContrast;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_contrast = 1.15f;
-			config.reno_drt_flare = 0.0025 * injectedData.colorGradeFlare;
+			config.reno_drt_contrast = 1.11f;
+			config.reno_drt_dechroma = 0.f;
+			config.reno_drt_flare = 0.01 * pow(injectedData.colorGradeFlare, 3.32192809489);
+			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
+			config.reno_drt_per_channel = injectedData.toneMapPerChannel != 0;
 	
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
