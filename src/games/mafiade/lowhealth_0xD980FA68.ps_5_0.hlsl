@@ -70,7 +70,7 @@ void main(
   r0.xyzw = -r2.xyzw + r0.xyzw;
   r0.xyzw = r1.xxxx * r0.xyzw + r2.xyzw;
 
-      r0.rgb = renodx::color::bt709::from::AP1(r0.rgb);   // writing on swapchain here, back to bt709
+      r0.rgb = renodx::color::bt709::from::BT2020(r0.rgb);   // writing on swapchain here, back to bt709
 
   r1.x = cmp(0 < cb0[0].z);
   if (r1.x != 0) {

@@ -78,13 +78,13 @@ void main(
   r1.xyz = float3(0.25,0.25,0.25) * r1.xyz;
   r1.xyz = r2.xyz * float3(0.25,0.25,0.25) + r1.xyz;
   //r0.x = dot(r1.xyz, float3(0.298999995,0.587000012,0.114));
-    r0.x = renodx::color::y::from::AP1(r1.rgb);
+    r0.x = renodx::color::y::from::BT2020(r1.rgb);
   r0.z = cmp(r0.x < r0.z);
   r0.x = cmp(r0.y < r0.x);
   r0.x = (int)r0.x | (int)r0.z;
   r0.xyz = r0.xxx ? r3.xyz : r1.xyz;
 
-    r0.rgb = renodx::color::bt709::from::AP1(r0.rgb);   // writing on swapchain here, back to bt709
+    r0.rgb = renodx::color::bt709::from::BT2020(r0.rgb);   // writing on swapchain here, back to bt709
 
   r0.w = cmp(0 < cb0[1].z);
   if (r0.w != 0) {

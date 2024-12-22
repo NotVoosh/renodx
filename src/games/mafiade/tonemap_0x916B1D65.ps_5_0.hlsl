@@ -428,7 +428,7 @@ void main(
         if(injectedData.is_swapchain_write == true){
       r1.rgb = PostToneMapScale(r1.rgb);
       } else {
-      r1.rgb = renodx::color::ap1::from::BT709(r1.rgb);
+      r1.rgb = renodx::color::bt2020::from::BT709(r1.rgb);
       }
     
   o0.xyz = r1.xyz;
