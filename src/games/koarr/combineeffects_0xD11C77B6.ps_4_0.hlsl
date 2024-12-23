@@ -35,7 +35,7 @@ void main(
   r0.xyzw = g_bloomSampler_texture.Sample(g_bloomSampler_sampler_s, v1.xy).xyzw;
   r0.xyz = g_constants.bloomStrength * r0.xyz * injectedData.fxBloom;
   r1.xyzw = g_dofMotionBlurSampler_texture.Sample(g_dofMotionBlurSampler_sampler_s, v1.xy).xyzw;
-  r0.xyz = r1.xyz * r1.www + r0.xyz;
+  r0.xyz = r1.xyz * r1.www * 0 + r0.xyz;
   r0.w = 1 + -r1.w;
   r1.xyzw = g_colorSampler_texture.Sample(g_colorSampler_sampler_s, v1.xy).xyzw;
 
@@ -62,7 +62,7 @@ void main(
 		  o0.rgb = applyVignette(o0.rgb, v1, injectedData.fxVignette);
 			}
 				if (injectedData.fxFilmGrain > 0.f) {
-			o0.rgb = applyFilmGrain(o0.rgb, v1);
+			o0.rgb = applyFilmGrain(o0.rgb, v1, injectedData.fxFilmGrainType != 0.f);
 			}
 		o0.rgb = PostToneMapScale(o0.rgb);
   return;
