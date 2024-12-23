@@ -12,7 +12,7 @@ float3 applyFilmGrain(float3 outputColor, float2 screen, bool colored){
           injectedData.random_1,
           injectedData.random_2,
           injectedData.random_3),
-      injectedData.fxFilmGrain * 0.03f,
+      injectedData.fxFilmGrain * 0.01f,
       1.f);
       } else {
     grainedColor = renodx::effects::ApplyFilmGrain(
