@@ -39,9 +39,8 @@ void main(
   o0.w = r2.w;
       if(injectedData.fxNoise > 0.f){
     r0.gba = renodx::color::srgb::EncodeSafe(r0.gba);
-  r0.gba = r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.yzw;
+  r0.gba = renodx::color::bt709::clamp::AP1(r0.xxx * float3(0.00392156886,0.00392156886,0.00392156886)) * injectedData.fxNoise + r0.yzw;
     r0.gba = renodx::color::srgb::DecodeSafe(r0.gba);
-    r0.gba = renodx::color::bt709::clamp::AP1(r0.gba);
     }
     o0.rgb = r0.gba;
   return;
