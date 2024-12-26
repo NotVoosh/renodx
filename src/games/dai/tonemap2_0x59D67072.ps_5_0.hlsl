@@ -100,7 +100,7 @@ void main(
     o0.rgb = applyUserTonemap(untonemapped, colorGradingTexture, colorGradingTextureSampler_s, LUTless, midGray);
     o0.a = renodx::color::y::from::BT709(o0.rgb);
 		  if (injectedData.fxFilmGrain > 0.f) {
-		o0.rgb = applyFilmGrain(o0.rgb, screen);
+		o0.rgb = applyFilmGrain(o0.rgb, screen, injectedData.fxFilmGrainType != 0.f);
 		}
     o0.rgb = PostToneMapScale(o0.rgb);
   return;
