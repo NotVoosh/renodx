@@ -51,13 +51,14 @@ using CustomShaders = std::unordered_map<uint32_t, CustomShader>;
 
 // clang-format off
 #define BypassShaderEntry(__crc32__) { __crc32__, { .crc32 = __crc32__, .on_draw = &renodx::mods::shader::internal::OnBypassShaderDraw } }
-#define CustomShaderEntry(crc32) { crc32, { crc32, std::vector<uint8_t>(_##crc32, _##crc32 + sizeof(_##crc32)) } }
-#define CustomCountedShader(crc32, index) { crc32, { crc32, std::vector<uint8_t>(_##crc32, _##crc32 + sizeof(_##crc32)), ##index} }
-#define CustomSwapchainShader(crc32) { crc32, { crc32, std::vector<uint8_t>(_##crc32, _##crc32 + sizeof(_##crc32)), -1, &renodx::utils::swapchain::HasBackBufferRenderTarget } }
-#define CustomShaderEntryCallback(crc32, callback) { crc32, { crc32, std::vector<uint8_t>(_##crc32, _##crc32 + sizeof(_##crc32)), -1, callback} }
+#define CustomShaderEntry(crc32) { crc32, { crc32, __##crc32 } }
+#define CustomCountedShader(crc32, index) { crc32, { crc32, __##crc32, ##index} }
+#define CustomSwapchainShader(crc32) { crc32, { crc32, __##crc32, -1, &renodx::utils::swapchain::HasBackBufferRenderTarget } }
+#define CustomShaderEntryCallback(crc32, callback) { crc32, { crc32, __##crc32, -1, callback} }
 // clang-format on
 
 static thread_local std::vector<reshade::api::pipeline_layout_param*> created_params;
+static thread_local std::unordered_map<uint32_t, reshade::api::pipeline_layout_param*> rebuilt_params;
 
 static float* shader_injection = nullptr;
 static size_t shader_injection_size = 0;
@@ -126,6 +127,7 @@ static bool OnCreatePipelineLayout(
     reshade::api::pipeline_layout_param*& params) {
   uint32_t cbv_index = 0;
   uint32_t pc_count = 0;
+  uint32_t pdss_index = -1;
   if (param_count == -1) {
     std::stringstream s;
     s << "mods::shader::OnCreatePipelineLayout(";
@@ -172,6 +174,7 @@ static bool OnCreatePipelineLayout(
       }
 #if RESHADE_API_VERSION >= 13
     } else if (param.type == reshade::api::pipeline_layout_param_type::push_descriptors_with_static_samplers) {
+      if (pdss_index == -1) pdss_index = param_index;
       for (uint32_t range_index = 0; range_index < param.descriptor_table_with_static_samplers.count; ++range_index) {
         auto range = param.descriptor_table_with_static_samplers.ranges[range_index];
         if (range.static_samplers != nullptr) {
@@ -188,7 +191,7 @@ static bool OnCreatePipelineLayout(
     }
   }
 
-  if (data.expected_constant_buffer_index != -1 && cbv_index != data.expected_constant_buffer_index) {
+  if (data.expected_constant_buffer_index != -1 && cbv_index > data.expected_constant_buffer_index) {
     std::stringstream s;
     s << "mods::shader::OnCreatePipelineLayout(";
     s << "Pipeline layout index mismatch, actual: " << cbv_index;
@@ -196,6 +199,10 @@ static bool OnCreatePipelineLayout(
     s << ")";
     reshade::log::message(reshade::log::level::debug, s.str().c_str());
     return false;
+  }
+
+  if (data.expected_constant_buffer_index != -1) {
+    cbv_index = data.expected_constant_buffer_index;
   }
 
   if (pc_count != 0 && !allow_multiple_push_constants) {
@@ -216,13 +223,22 @@ static bool OnCreatePipelineLayout(
   created_params.push_back(new_params);
 
   // Copy up to size of old
-  memcpy(new_params, params, sizeof(reshade::api::pipeline_layout_param) * old_count);
+  uint32_t injection_index = old_count;
+  if (pdss_index == -1) {
+    memcpy(new_params, params, sizeof(reshade::api::pipeline_layout_param) * old_count);
+  } else {
+    // copy upto pdss index, leave slot for push constants, add pdss after
+    // avoids reshade adding pc constant buffers
+    memcpy(new_params, params, sizeof(reshade::api::pipeline_layout_param) * pdss_index);
+    injection_index = pdss_index;
+    memcpy(new_params + pdss_index + 1, params + pdss_index, sizeof(reshade::api::pipeline_layout_param) * (old_count - pdss_index));
+  }
 
   // Fill in extra param
   const uint32_t slots = shader_injection_size;
   const uint32_t max_count = 64u - (old_count + 1u) + 1u;
 
-  new_params[old_count] = reshade::api::pipeline_layout_param(
+  new_params[injection_index] = reshade::api::pipeline_layout_param(
       reshade::api::constant_range{
           .binding = 0,
           .dx_register_index = cbv_index,
@@ -246,7 +262,7 @@ static bool OnCreatePipelineLayout(
   std::stringstream s;
   s << "mods::shader::OnCreatePipelineLayout(";
   s << "will insert cbuffer " << cbv_index;
-  s << " at root_index " << old_count;
+  s << " at root_index " << injection_index;
   s << " with slot count " << slots;
   s << " creating new size of " << (old_count + 1u + slots);
   s << ", newParams: " << reinterpret_cast<void*>(new_params);
@@ -386,16 +402,15 @@ static void OnInitPipelineLayout(
         return;
       };
 
-      if (param_count > 0) {
-        if (params[param_count - 1].type == reshade::api::pipeline_layout_param_type::push_constants) {
-          injection_index = param_count - 1;
+      for (uint32_t param_index = 0; param_index < param_count; ++param_index) {
+        if (params[param_index].type == reshade::api::pipeline_layout_param_type::push_constants) {
+          injection_index = param_index;
         }
       }
 
-      for (reshade::api::pipeline_layout_param* injected_params : created_params) {
-        free(injected_params);
-      }
-      created_params.clear();
+      // Releasing params will break other addons that listen for init_pipeline_layout (eg: devkit)
+      rebuilt_params[layout.handle] = created_params.back();
+      created_params.pop_back();
 
       if (injection_index == -1) {
         std::stringstream s;
@@ -472,6 +487,15 @@ static void OnDestroyPipelineLayout(
   auto& data = device->get_private_data<DeviceData>();
   const std::unique_lock lock(data.mutex);
   changed |= data.modded_pipeline_root_indexes.erase(layout.handle);
+  if (auto pair = rebuilt_params.find(layout.handle);
+      pair != rebuilt_params.end()) {
+    changed = static_cast<uint32_t>(true);
+    auto& created_params = pair->second;
+    // Possible risk of access violation on next event listener
+    free(created_params);
+    rebuilt_params.erase(pair);
+  }
+
   if (changed == 0u) return;
 
   std::stringstream s;
@@ -595,7 +619,7 @@ static bool PushShaderInjections(
     } else {
       std::stringstream s;
       s << "mods::shader::PushShaderInjections(did not find modded pipeline root index";
-      s << ", pipeline: " << reinterpret_cast<void*>(shader_state->pipeline_layout.handle);
+      s << ", layout: " << reinterpret_cast<void*>(shader_state->pipeline_layout.handle);
       s << ")";
       reshade::log::message(reshade::log::level::warning, s.str().c_str());
       return false;
@@ -832,6 +856,8 @@ static void OnPresent(
     uint32_t dirty_rect_count,
     const reshade::api::rect* dirty_rects) {
   auto& data = swapchain->get_device()->get_private_data<DeviceData>();
+  if (std::addressof(data) == nullptr) return;
+
   if (using_counted_shaders) {
     const std::unique_lock lock(data.mutex);
     data.counted_shaders.clear();
@@ -938,6 +964,8 @@ static void Use(DWORD fdw_reason, CustomShaders new_custom_shaders, T* new_injec
 
       reshade::unregister_event<reshade::addon_event::init_device>(OnInitDevice);
       reshade::unregister_event<reshade::addon_event::destroy_device>(OnDestroyDevice);
+
+      reshade::unregister_event<reshade::addon_event::present>(OnPresent);
 
       reshade::unregister_event<reshade::addon_event::draw>(OnDraw);
       reshade::unregister_event<reshade::addon_event::dispatch>(OnDispatch);

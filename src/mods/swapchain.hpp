@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <initializer_list>
+#include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <sstream>
@@ -715,8 +716,8 @@ static void SetupSwapchainProxy(
 
 static void OnInitSwapchain(reshade::api::swapchain* swapchain) {
   auto* device = swapchain->get_device();
-  if (device == nullptr) return;
   auto& data = device->get_private_data<DeviceData>();
+  if (std::addressof(data) == nullptr) return;
   const std::unique_lock lock(data.mutex);
 
   reshade::log::message(reshade::log::level::debug, "mods::swapchain::OnInitSwapchain(reset resource upgrade)");
@@ -751,6 +752,7 @@ static void OnInitSwapchain(reshade::api::swapchain* swapchain) {
 static void OnDestroySwapchain(reshade::api::swapchain* swapchain) {
   auto* device = swapchain->get_device();
   auto& data = device->get_private_data<DeviceData>();
+  if (std::addressof(data) == nullptr) return;
 
   const size_t back_buffer_count = swapchain->get_back_buffer_count();
   for (uint32_t index = 0; index < back_buffer_count; ++index) {
@@ -942,6 +944,8 @@ static void OnInitResource(
     return;
   }
 
+  if (initial_data != nullptr) return;
+
   auto& private_data = device->get_private_data<DeviceData>();
   const std::unique_lock lock(private_data.mutex);
 
@@ -1097,6 +1101,7 @@ static void OnDestroyResource(reshade::api::device* device, reshade::api::resour
   }
 
   if (use_resource_cloning) {
+    data.resource_clone_enabled.erase(resource.handle);
     data.resource_clone_targets.erase(resource.handle);
     if (
         auto pair = data.resource_clones.find(resource.handle);
@@ -1527,7 +1532,7 @@ static bool ActivateCloneHotSwap(
 
   clone_resource = reshade::api::resource{cloned_resource_pair->second};
 
-  if (data.resource_clone_enabled.contains(clone_resource.handle)) {
+  if (data.resource_clone_enabled.contains(resource.handle)) {
     // Already activated
     return false;
   }
@@ -1545,7 +1550,7 @@ static bool ActivateCloneHotSwap(
 
 #endif
 
-  data.resource_clone_enabled.insert(clone_resource.handle);
+  data.resource_clone_enabled.insert(resource.handle);
   return true;
 }
 
@@ -2274,8 +2279,9 @@ static bool OnSetFullscreenState(reshade::api::swapchain* swapchain, bool fullsc
     renodx::utils::swapchain::ResizeBuffer(swapchain, target_format, target_color_space);
   }
   auto* device = swapchain->get_device();
-  if (device == nullptr) return false;
   auto& private_data = device->get_private_data<DeviceData>();
+  if (std::addressof(private_data) == nullptr) return false;
+
   const std::unique_lock lock(private_data.mutex);
   reshade::log::message(reshade::log::level::debug, "mods::swapchain::OnSetFullscreenState(reset resource upgrade)");
   private_data.resource_upgrade_finished = false;
@@ -2309,19 +2315,13 @@ static bool OnSetFullscreenState(reshade::api::swapchain* swapchain, bool fullsc
   return false;
 }
 
-static void OnPresent(
-    reshade::api::command_queue* queue,
-    reshade::api::swapchain* swapchain,
-    const reshade::api::rect* source_rect,
-    const reshade::api::rect* dest_rect,
-    uint32_t dirty_rect_count,
-    const reshade::api::rect* dirty_rects) {
+static void DrawSwapChainProxy(reshade::api::swapchain* swapchain, reshade::api::command_queue* queue) {
+  auto* cmd_list = queue->get_immediate_command_list();
   auto current_back_buffer = swapchain->get_current_back_buffer();
-
   auto* device = swapchain->get_device();
   auto& data = device->get_private_data<DeviceData>();
 
-  auto* cmd_list = queue->get_immediate_command_list();
+  if (std::addressof(data) == nullptr) return;
 
   // std::shared_lock data_lock(data.mutex);
 
@@ -2491,10 +2491,21 @@ static void OnPresent(
     device->destroy_resource_view(rtv);
     data.swap_chain_proxy_rtvs.erase(current_back_buffer.handle);
   }
+  queue->flush_immediate_command_list();
 
 #ifdef DEBUG_LEVEL_2
   reshade::log::message(reshade::log::level::debug, s.str().c_str());
 #endif
+}
+
+static void OnPresent(
+    reshade::api::command_queue* queue,
+    reshade::api::swapchain* swapchain,
+    const reshade::api::rect* source_rect,
+    const reshade::api::rect* dest_rect,
+    uint32_t dirty_rect_count,
+    const reshade::api::rect* dirty_rects) {
+  DrawSwapChainProxy(swapchain, queue);
 }
 
 static void SetUseHDR10(bool value = true) {
@@ -2583,12 +2594,39 @@ static void Use(DWORD fdw_reason, T* new_injections = nullptr) {
 
       reshade::unregister_event<reshade::addon_event::create_swapchain>(OnCreateSwapchain);
       reshade::unregister_event<reshade::addon_event::init_swapchain>(OnInitSwapchain);
+      reshade::unregister_event<reshade::addon_event::destroy_swapchain>(OnDestroySwapchain);
+
+      // reshade::register_event<reshade::addon_event::create_pipeline>(on_create_pipeline);
 
       reshade::unregister_event<reshade::addon_event::init_resource>(OnInitResource);
       reshade::unregister_event<reshade::addon_event::create_resource>(OnCreateResource);
+      reshade::unregister_event<reshade::addon_event::destroy_resource>(OnDestroyResource);
 
       reshade::unregister_event<reshade::addon_event::create_resource_view>(OnCreateResourceView);
       reshade::unregister_event<reshade::addon_event::init_resource_view>(OnInitResourceView);
+      reshade::unregister_event<reshade::addon_event::destroy_resource_view>(OnDestroyResourceView);
+
+      reshade::unregister_event<reshade::addon_event::copy_resource>(OnCopyResource);
+
+      reshade::unregister_event<reshade::addon_event::resolve_texture_region>(OnResolveTextureRegion);
+
+      reshade::unregister_event<reshade::addon_event::init_command_list>(OnInitCommandList);
+      reshade::unregister_event<reshade::addon_event::destroy_command_list>(OnDestroyCommandList);
+
+      reshade::unregister_event<reshade::addon_event::bind_render_targets_and_depth_stencil>(OnBindRenderTargetsAndDepthStencil);
+      reshade::unregister_event<reshade::addon_event::push_descriptors>(OnPushDescriptors);
+      reshade::unregister_event<reshade::addon_event::update_descriptor_tables>(OnUpdateDescriptorTables);
+      // reshade::register_event<reshade::addon_event::copy_descriptor_tables>(OnCopyDescriptorTables);
+      // reshade::register_event<reshade::addon_event::bind_descriptor_tables>(OnBindDescriptorTables);
+      reshade::unregister_event<reshade::addon_event::clear_render_target_view>(OnClearRenderTargetView);
+      reshade::unregister_event<reshade::addon_event::clear_unordered_access_view_uint>(OnClearUnorderedAccessViewUint);
+      reshade::unregister_event<reshade::addon_event::clear_unordered_access_view_float>(OnClearUnorderedAccessViewFloat);
+
+      reshade::unregister_event<reshade::addon_event::copy_texture_region>(OnCopyTextureRegion);
+      // reshade::register_event<reshade::addon_event::barrier>(OnBarrier);
+      reshade::unregister_event<reshade::addon_event::copy_buffer_to_texture>(OnCopyBufferToTexture);
+
+      reshade::unregister_event<reshade::addon_event::present>(OnPresent);
 
       reshade::unregister_event<reshade::addon_event::set_fullscreen_state>(OnSetFullscreenState);
 
