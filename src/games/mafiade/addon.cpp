@@ -25,11 +25,7 @@ ShaderInjectData shader_injection;
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntryCallback(0x916B1D65, [](reshade::api::command_list* cmd_list) {  // tonemap (+ post-processing)
     shader_injection.hasLoadedTitleMenu = 1.f;
-        if (renodx::utils::swapchain::HasBackBufferRenderTarget(cmd_list)) {
-    shader_injection.is_swapchain_write = true;
-    } else {
-    shader_injection.is_swapchain_write = false;
-    }
+        shader_injection.is_swapchain_write = renodx::utils::swapchain::HasBackBufferRenderTarget(cmd_list);
     return true;
     }),
 
@@ -446,14 +442,8 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       renodx::mods::swapchain::force_borderless = false;
       renodx::mods::swapchain::prevent_full_screen = false;
       renodx::mods::swapchain::use_resource_cloning = true;
-      renodx::mods::swapchain::swap_chain_proxy_vertex_shader = {
-          _swap_chain_proxy_vertex_shader,
-          _swap_chain_proxy_vertex_shader + sizeof(_swap_chain_proxy_vertex_shader),
-      };
-      renodx::mods::swapchain::swap_chain_proxy_pixel_shader = {
-          _swap_chain_proxy_pixel_shader,
-          _swap_chain_proxy_pixel_shader + sizeof(_swap_chain_proxy_pixel_shader),
-      };
+      renodx::mods::swapchain::swap_chain_proxy_vertex_shader = __swap_chain_proxy_vertex_shader;
+      renodx::mods::swapchain::swap_chain_proxy_pixel_shader = __swap_chain_proxy_pixel_shader;
 
       // videos
       renodx::mods::swapchain::swap_chain_upgrade_targets.push_back({
