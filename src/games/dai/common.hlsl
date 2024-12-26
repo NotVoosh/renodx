@@ -42,7 +42,7 @@ float3 FinalizeOutput(float3 color) {
   } else {
     color = renodx::color::srgb::DecodeSafe(color);
   }
-  //color = renodx::color::bt709::clamp::AP1(color);
+  color = renodx::color::bt709::clamp::AP1(color);
   color *= injectedData.toneMapUINits;
   color /= 80.f;
   return color;
@@ -223,8 +223,8 @@ float3 Apply(float3 inputColor, renodx::tonemap::Config tm_config, renodx::lut::
     float previous_lut_config_strength = lut_config.strength;
     lut_config.strength = 1.f;
     float3 color_lut = renodx::lut::Sample(lutTexture, lut_config, color_sdr);
-      if(tm_config.type == renodx::tonemap::config::type::VANILLA){
-    return lerp(inputColor, color_lut, previous_lut_config_strength);
+      if(tm_config.type == 0.f){
+    return max(0, lerp(inputColor, color_lut, previous_lut_config_strength));
     } else if (perChannel == true){
     return UpgradeToneMapPerChannel(color_hdr, color_sdr, color_lut, previous_lut_config_strength);
     } else {
@@ -271,7 +271,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			32.f);
 
 				if(injectedData.toneMapType == 0.f){
-			outputColor = saturate(hueCorrectionColor);
+			outputColor = hueCorrectionColor;
 			}
 				if (injectedData.toneMapGammaCorrection == 0.f) {
 			outputColor = renodx::color::correct::GammaSafe(outputColor, true);
@@ -292,6 +292,6 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 		} else {
 			outputColor = Apply(outputColor, config, lut_config, lutTexture, injectedData.upgradePerChannel != 0);
 		}
-	
+      outputColor = renodx::color::bt709::clamp::BT2020(outputColor);
 	return outputColor;
 }
