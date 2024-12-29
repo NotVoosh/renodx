@@ -1,7 +1,6 @@
 #include "./common.hlsl"
 
 Texture2D<float4> t0 : register(t0);
-
 SamplerState s0_s : register(s0);
 
 cbuffer cb1 : register(b1){
@@ -58,13 +57,9 @@ void main(
   r0.x = r0.x * 1.70357752 + -r0.y;
   r1.y = -r1.z * 0.194207832 + r0.x;
   r1.w = 1;
-    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
+    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);  // sharpened color before lerp
   r0.xyzw = r1.xyzw + -r2.xyzw;
   o0.xyzw = cb0[2].xxxx * r0.xyzw * injectedData.fxLumaSharpen + r2.xyzw;
-    //o0.rgb = renodx::color::bt709::clamp::AP1(o0.rgb);
-      if(injectedData.fxFilmGrainType == 1.f){
-    o0.rgb = applyFilmGrain(o0.rgb, v0);
-    }
 		o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

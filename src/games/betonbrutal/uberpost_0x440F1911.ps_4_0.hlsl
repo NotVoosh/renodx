@@ -158,7 +158,7 @@ void main(
   r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
   r2.xyz = r0.xyz * r0.www + r1.yzw;
     } else {
-    r2.rgb = r1.gba;
+    r2.rgb = applyFilmGrain(r1.gba, v1);
     }
   
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
