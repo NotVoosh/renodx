@@ -76,19 +76,31 @@ float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig){
 	color = renodx::color::bt709::from::AP1(color);
 	}
 
-	  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f) {
+  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f || RhConfig.reno_drt_blowout != 0.f) {
     float3 perceptual_new;
 
-      if (RhConfig.reno_drt_hue_correction_method == 0u) {
-        perceptual_new = renodx::color::oklab::from::BT709(color);
-      } else if (RhConfig.reno_drt_hue_correction_method == 1u) {
-        perceptual_new = renodx::color::ictcp::from::BT709(color);
-      } else if (RhConfig.reno_drt_hue_correction_method == 2u) {
-        perceptual_new = renodx::color::dtucs::uvY::from::BT709(color).zxy;
-      }
+    if (RhConfig.reno_drt_hue_correction_method == 0u) {
+      perceptual_new = renodx::color::oklab::from::BT709(color);
+    } else if (RhConfig.reno_drt_hue_correction_method == 1u) {
+      perceptual_new = renodx::color::ictcp::from::BT709(color);
+    } else if (RhConfig.reno_drt_hue_correction_method == 2u) {
+      perceptual_new = renodx::color::dtucs::uvY::from::BT709(color).zxy;
+    }
 
     if (RhConfig.reno_drt_dechroma != 0.f) {
       perceptual_new.yz *= lerp(1.f, 0.f, saturate(pow(y / (10000.f / 100.f), (1.f - RhConfig.reno_drt_dechroma))));
+    }
+
+    if (RhConfig.reno_drt_blowout != 0.f) {
+      float percent_max = saturate(y * 100.f / 10000.f);
+      // positive = 1 to 0, negative = 1 to 2
+      float blowout_strength = 100.f;
+      float blowout_change = pow(1.f - percent_max, blowout_strength * abs(RhConfig.reno_drt_blowout));
+      if (RhConfig.reno_drt_blowout < 0) {
+        blowout_change = (2.f - blowout_change);
+      }
+
+      perceptual_new.yz *= blowout_change;
     }
 
     perceptual_new.yz *= RhConfig.saturation;

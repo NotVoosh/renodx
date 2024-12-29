@@ -104,7 +104,7 @@ float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig, bool sd
     color = renodx::color::bt709::from::AP1(color);
   }
 
-  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f) {
+  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f || RhConfig.reno_drt_blowout != 0.f) {
     float3 perceptual_new;
 
     if (RhConfig.reno_drt_hue_correction_method == 0u) {
