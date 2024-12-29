@@ -413,6 +413,19 @@ void OnPresetOff() {
 }
 
 auto start = std::chrono::steady_clock::now();
+static std::mt19937 random_generator(std::chrono::system_clock::now().time_since_epoch().count());
+static float random_range = (random_generator.max() - random_generator.min());
+bool fired_on_init_swapchain = false;
+
+void OnInitSwapchain(reshade::api::swapchain* swapchain) {
+  if (fired_on_init_swapchain) return;
+  fired_on_init_swapchain = true;
+  auto peak = renodx::utils::swapchain::GetPeakNits(swapchain);
+  if (peak.has_value()) {
+    settings[1]->default_value = peak.value();
+    settings[1]->can_reset = true;
+  }
+}
 
 void OnPresent(
     reshade::api::command_queue* queue,
@@ -423,6 +436,9 @@ void OnPresent(
     const reshade::api::rect* dirty_rects) {
   auto end = std::chrono::steady_clock::now();
   shader_injection.elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+  shader_injection.random_1 = (float)(random_generator() + random_generator.min()) / random_range;
+  shader_injection.random_2 = (float)(random_generator() + random_generator.min()) / random_range;
+  shader_injection.random_3 = (float)(random_generator() + random_generator.min()) / random_range;
 }
 
 }  // namespace
@@ -466,6 +482,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           .ignore_size = true,
       });
 
+      reshade::register_event<reshade::addon_event::init_swapchain>(OnInitSwapchain);
       reshade::register_event<reshade::addon_event::present>(OnPresent);
 
       break;
@@ -475,9 +492,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   }
 
   renodx::utils::settings::Use(fdw_reason, &settings, &OnPresetOff);
-
   renodx::mods::swapchain::Use(fdw_reason);
-
   renodx::mods::shader::Use(fdw_reason, custom_shaders, &shader_injection);
 
   return TRUE;
