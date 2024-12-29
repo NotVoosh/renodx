@@ -92,6 +92,11 @@ void main(
     r1.xyz = r0.www * r1.xyz + cb0[141].xyz;
     r0.xyz = r1.xyz * r0.xyz;
   }
+
+      if(injectedData.fxVignette > 0.f){
+    r0.rgb = applyVignette(r0.rgb, v1, injectedData.fxVignette);
+    }
+
   r0.xyz = cb0[132].www * r0.xyz;
 
       float3 untonemapped;
@@ -295,7 +300,7 @@ void main(
     o0.rgb = applyUserTonemap(untonemapped, t2, s0_s, cb0[132].rgb);
     }
       if(injectedData.fxFilmGrain > 0.f){
-    o0.rgb = applyFilmGrain(o0.rgb, v1);
+    o0.rgb = applyFilmGrain(o0.rgb, v1, injectedData.fxFilmGrainType != 0);
     }
     o0.rgb = PostToneMapScale(o0.rgb);
   return;
