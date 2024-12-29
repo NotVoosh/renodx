@@ -387,9 +387,8 @@ void main(
   r0.x = r0.y * r0.x;
 
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
-    r1.rgb = r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886) * injectedData.fxNoise + r1.rgb;
+    r1.rgb = renodx::color::bt709::clamp::AP1(r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886)) * injectedData.fxNoise + r1.rgb;
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.rgb);
-    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
     }
     r1.rgb = PostToneMapScale(r1.rgb);
     o0.rgb = r1.rgb;

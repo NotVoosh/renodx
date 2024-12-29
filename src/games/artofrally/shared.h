@@ -15,6 +15,8 @@ struct ShaderInjectData {
   float toneMapGammaCorrection;
   float toneMapHueCorrection;
   float toneMapHueProcessor;
+  float toneMapColorSpace;
+  float toneMapPerChannel;
   float colorGradeExposure;
   float colorGradeHighlights;
   float colorGradeShadows;
@@ -27,7 +29,10 @@ struct ShaderInjectData {
   float fxBloom;
   float fxVignette;
   float fxFilmGrain;
+  float fxFilmGrainType;
   float fxNoise;
+
+  float elapsedTime;
 };
 
 #ifndef __cplusplus

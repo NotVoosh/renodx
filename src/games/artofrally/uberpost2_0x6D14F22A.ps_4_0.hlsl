@@ -108,6 +108,7 @@ void main(
     r0.x = -1 + r0.w;
     r2.w = r1.x * r0.x + 1;
   }
+    if(injectedData.fxFilmGrainType == 0.f){
   r0.xy = w1.xy * cb0[41].xy + cb0[41].zw;
   r0.xyzw = t7.Sample(s7_s, r0.xy).xyzw;
     r0.a = renodx::color::y::from::BT709(r1.gba);
@@ -118,6 +119,9 @@ void main(
   r0.xyz = cb0[40].www * r0.xyz * injectedData.fxFilmGrain;
 
   r2.xyz = r0.xyz * r0.www + r1.yzw;
+    } else {
+    r2.rgb = applyFilmGrain(r1.gba, w1);
+    }
   r0.xyzw = cb0[36].zzzz * r2.xyzw;
   
     r0.rgb = lutShaper(r0.rgb);
@@ -138,9 +142,8 @@ void main(
   r0.x = r0.y * r0.x;
 
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
-    r1.rgb = r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886) * injectedData.fxNoise + r1.rgb;
+    r1.rgb = renodx::color::bt709::clamp::AP1(r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886)) * injectedData.fxNoise + r1.rgb;
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.rgb);
-    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
     }
 		r1.rgb = PostToneMapScale(r1.rgb);
     o0.rgb = r1.rgb;
