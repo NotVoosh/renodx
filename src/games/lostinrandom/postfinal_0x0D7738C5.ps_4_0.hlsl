@@ -79,7 +79,7 @@ void main(
   r3.xyz = float3(0.25,0.25,0.25) * r3.xyz;
   r3.xyz = r2.yzw * float3(0.25,0.25,0.25) + r3.xyz;
   r2.yzw = float3(0.5,0.5,0.5) * r2.yzw;
-  r0.z = dot(r3.xyz, float3(0.212672904,0.715152204,0.0721750036));
+    r0.z = renodx::color::y::from::BT709(r3.rgb);
   r3.w = min(r0.w, r0.y);
   r0.y = max(r0.w, r0.y);
   r0.y = max(r0.y, r2.x);
@@ -95,7 +95,7 @@ void main(
   r0.x = (int)r0.x | (int)r0.y;
   o0.xyz = r0.xxx ? r2.yzw : r3.xyz;
         if(injectedData.fxFilmGrain > 0.f){
-      o0.rgb = applyFilmGrain(o0.rgb, v1);
+      o0.rgb = applyFilmGrain(o0.rgb, v1, injectedData.fxFilmGrainType != 0.f);
       }
       o0.rgb = PostToneMapScale(o0.rgb);
   o0.w = 1;
