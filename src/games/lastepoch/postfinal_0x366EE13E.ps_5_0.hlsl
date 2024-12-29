@@ -25,7 +25,7 @@ void main(
   r1.xyzw = t1.Sample(s1_s, w1.xy).xyzw;
   o0.w = r1.w;
       if(injectedData.fxFilmGrain > 0.f){
-    r1.rgb = applyFilmGrain(r1.rgb, w1.xy);
+    r1.rgb = applyFilmGrain(r1.rgb, w1.xy, injectedData.fxFilmGrainType != 0.f);
     }
     if(injectedData.fxNoise > 0.f){
   r0.xy = v1.xy * cb0[28].xy + cb0[28].zw;
@@ -39,9 +39,8 @@ void main(
   r0.x = r0.x * r0.y;
 
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
-    r1.rgb = r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886) * injectedData.fxNoise + r1.rgb;
+    r1.rgb = renodx::color::bt709::clamp::AP1(r0.rrr * float3(0.00392156886, 0.00392156886, 0.00392156886)) * injectedData.fxNoise + r1.rgb;
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.rgb);
-    r1.rgb = renodx::color::bt709::clamp::AP1(r1.rgb);
     }
 		r1.rgb = PostToneMapScale(r1.rgb);
     o0.xyz = r1.xyz;
