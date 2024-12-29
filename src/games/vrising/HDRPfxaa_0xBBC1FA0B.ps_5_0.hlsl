@@ -118,9 +118,9 @@ void main(
   //r0.yzw = cb0[8].yyy * r0.yzw;
   //o0.xyz = exp2(r0.yzw);
       if(injectedData.fxFilmGrain > 0.f){
-		o0.rgb = applyFilmGrain(r1.rgb, v1.xy);
+		r0.gba = applyFilmGrain(r0.gba, v1.xy, injectedData.fxFilmGrainType != 0.f);
     }
-		o0.rgb = PostToneMapScale(o0.rgb);
+		o0.rgb = PostToneMapScale(r0.gba);
   r0.y = cmp(cb0[8].x == 1.000000);
   o0.w = r0.y ? r0.x : 1;
   return;
