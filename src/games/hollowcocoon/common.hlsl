@@ -53,12 +53,29 @@ float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig){
 		if(RhConfig.gamma_correction == 1.f){
 	RhPeak = renodx::color::correct::Gamma(RhPeak, true);
 	}
-	
+	float y;
+		if(RhConfig.reno_drt_working_color_space == 0u){
+	color = max(0, color);
+		y = renodx::color::y::from::BT709(color * RhConfig.exposure);
+
+	} else if(RhConfig.reno_drt_working_color_space == 1u){
+	color = renodx::color::bt2020::from::BT709(color);
+		y = renodx::color::y::from::BT2020(abs(color * RhConfig.exposure));
+
+	} else if(RhConfig.reno_drt_working_color_space == 2u){
 	color = renodx::color::ap1::from::BT709(color);
-		float y = renodx::color::y::from::AP1(color * RhConfig.exposure);
+		y = renodx::color::y::from::AP1(color * RhConfig.exposure);
+	}
+
 	color = renodx::color::grade::UserColorGrading(color, RhConfig.exposure, RhConfig.highlights, RhConfig.shadows, RhConfig.contrast);
 	color = renodx::tonemap::ReinhardScalable(color, RhPeak, 0.f, 0.18f, RhConfig.mid_gray_value);
+
+		if(RhConfig.reno_drt_working_color_space == 1u){
+	color = renodx::color::bt709::from::BT2020(color);
+	} else if(RhConfig.reno_drt_working_color_space == 2u){
 	color = renodx::color::bt709::from::AP1(color);
+	}
+
 	  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f) {
     float3 perceptual_new;
 
@@ -93,6 +110,7 @@ float3 applyUserTonemap(float3 untonemapped){
 		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = renodx::tonemap::ACESFittedAP1(untonemapped);
 		float midGray = renodx::color::y::from::BT709(renodx::tonemap::ACESFittedAP1(float3(0.18f,0.18f,0.18f)));
+
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
 			config.type = injectedData.toneMapType;
@@ -106,22 +124,23 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.saturation = injectedData.colorGradeSaturation;
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
-			config.reno_drt_highlights = 1.2f;
-			config.reno_drt_shadows = 1.2f;
-			config.reno_drt_contrast = 1.3f;
-			config.reno_drt_saturation = 1.2f;
-			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.005 * injectedData.colorGradeFlare;
-			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
+			config.reno_drt_contrast = 1.f;
+			config.reno_drt_saturation = 1.f;
+			config.reno_drt_dechroma = 0.f;
+			config.reno_drt_flare = 0.05f * pow(injectedData.colorGradeFlare, 4.32192809489);
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
+			config.reno_drt_working_color_space = (uint)injectedData.toneMapColorSpace;
+			config.reno_drt_per_channel = injectedData.toneMapPerChannel != 0;
+			config.reno_drt_blowout = injectedData.colorGradeBlowout;
 
 				if(injectedData.toneMapType >= 3.f){
 			outputColor = renodx::color::correct::Hue(outputColor, hueCorrectionColor, injectedData.toneMapHueCorrection, (uint)injectedData.toneMapHueProcessor);
 			}
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
-			config.highlights *= 1.05f;
-			config.shadows *= 1.1f;
-			config.contrast *= 1.35f;
+			config.highlights *= 0.9f;
+			config.shadows *= 0.9f;
+			config.contrast *= 1.3f;
 			config.saturation *= 1.25f;
 			outputColor = applyReinhardPlus(outputColor, config);
 			} else {
@@ -134,6 +153,7 @@ float3 applyUserTonemap(float3 untonemapped){
 float3 applyUserTonemapMenu(float3 untonemapped){
 		
 		float3 outputColor = untonemapped;
+
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
 			config.type = injectedData.toneMapType;
@@ -146,10 +166,13 @@ float3 applyUserTonemapMenu(float3 untonemapped){
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
 			config.reno_drt_saturation = 1.05f;
-			config.reno_drt_dechroma = injectedData.colorGradeBlowout;
-			config.reno_drt_flare = 0.001 * injectedData.colorGradeFlare;
-			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
+			config.reno_drt_dechroma = 0.f;
+			config.reno_drt_flare = 0.001f * pow(injectedData.colorGradeFlare, 3.32192809489);
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
+			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
+			config.reno_drt_working_color_space = (uint)injectedData.toneMapColorSpace;
+			config.reno_drt_per_channel = injectedData.toneMapPerChannel != 0;
+			config.reno_drt_blowout = injectedData.colorGradeBlowout;
 
 				if (injectedData.toneMapType == 4.f){		// Reinhard+
 			config.saturation *= 1.1f;

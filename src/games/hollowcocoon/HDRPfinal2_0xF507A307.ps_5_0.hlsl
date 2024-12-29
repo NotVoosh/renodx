@@ -192,9 +192,8 @@ void main(
   r1.x = sqrt(r1.x);
   r1.x = 1 + -r1.x;
   r0.w = r1.x * r0.w;
-  r0.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r0.xyz;
+  r0.xyz = renodx::color::bt709::clamp::AP1(r0.www * float3(0.00392156886,0.00392156886,0.00392156886)) * injectedData.fxNoise + r0.xyz;
     r0.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
-    r0.rgb = renodx::color::bt709::clamp::AP1(r0.rgb);
     }
   r2.z = 0;
   r1.xyzw = t2.SampleLevel(s0_s, r2.xyz, 0).xyzw;
