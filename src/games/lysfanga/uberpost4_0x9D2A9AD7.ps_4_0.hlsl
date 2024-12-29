@@ -256,7 +256,7 @@ void main(
     o0.rgb = sampleLUT(preLUT, t1, s0_s, cb0[128].rgb);
     }
       if(injectedData.fxFilmGrain > 0.f){
-    o0.rgb = applyFilmGrain(o0.rgb, v1);
+    o0.rgb = applyFilmGrain(o0.rgb, v1, injectedData.fxFilmGrainType != 0.f);
     }
       if(injectedData.fxBlooom == 0.f){
     o0.rgb = PostToneMapScale(o0.rgb);
