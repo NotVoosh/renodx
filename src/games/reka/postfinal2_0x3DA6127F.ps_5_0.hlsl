@@ -45,7 +45,7 @@ void main(
   r1.xyzw = t1.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
       if(injectedData.fxFilmGrain > 0.f){
-    o0.rgb = applyFilmGrain(o0.rgb, v1);
+    o0.rgb = applyFilmGrain(o0.rgb, v1, injectedData.fxFilmGrainType != 0.f);
     }
     o0.rgb = PostToneMapScale(o0.rgb);
   return;

@@ -234,7 +234,7 @@ cbuffer cb0 : register(b0){
     
       r1.rgb = lutShaper(r1.rgb, true);
   }
-    if(injectedData.toneMapType == 0.f){
+    float3 untonemapped = r1.rgb;
 // CustomTonemap
   r0.xyz = max(float3(0,0,0), r1.xyz);
   r1.xyz = cb0[18].xxx * r0.xyz;                    // 0.25, 0, 0, 0.24999750
@@ -281,9 +281,59 @@ cbuffer cb0 : register(b0){
   r0.x = r0.w ? r0.x : 0;
   r3.z = r0.x * r1.w + r1.y;
   r0.xyz = max(float3(0,0,0), r3.xyz);
-  } else {
-    r0.rgb = applyUserTonemap(r1.rgb);
-  }
+
+    float3 vanilla = r0.rgb;
+    r1.rgb = float3(0.18,0.18,0.18);
+
+  r0.xyz = max(float3(0,0,0), r1.xyz);
+  r1.xyz = cb0[18].xxx * r0.xyz;                    // 0.25, 0, 0, 0.24999750
+  r2.xyzw = cmp(r1.xxyy < cb0[18].yzyz);
+  r3.xyzw = r2.yyyy ? cb0[21].xyzw : cb0[23].xyzw;  // -0, 0, 0, 0 ::: 5, 1.01946783, -1, -0.50973392
+  r4.xyzw = r2.yyww ? cb0[22].xyxy : cb0[24].xyxy;  // 1.38629436, 1, 0, 0 ::: -29.60446548, 18.99981880, 0, 0
+  r3.xyzw = r2.xxxx ? cb0[19].xyzw : r3.xyzw;       // 0, 0, 1, 0.50973392
+  r4.xyzw = r2.xxzz ? cb0[20].xyxy : r4.xyzw;       // -nan, 0, 0, 0
+  r0.x = r0.x * cb0[18].x + -r3.x;
+  r0.x = r0.x * r3.z;
+  r0.w = cmp(0 < r0.x);
+  r0.x = log2(r0.x);
+  r0.x = r4.y * r0.x;
+  r0.x = r0.x * 0.693147182 + r4.x;
+  r0.x = 1.44269502 * r0.x;
+  r0.x = exp2(r0.x);
+  r0.x = r0.w ? r0.x : 0;
+  r3.x = r0.x * r3.w + r3.y;
+  r5.xyzw = r2.wwww ? cb0[21].xyzw : cb0[23].xyzw;
+  r2.xyzw = r2.zzzz ? cb0[19].xyzw : r5.xyzw;
+  r0.x = r0.y * cb0[18].x + -r2.x;
+  r0.x = r0.x * r2.z;
+  r0.y = cmp(0 < r0.x);
+  r0.x = log2(r0.x);
+  r0.x = r4.w * r0.x;
+  r0.x = r0.x * 0.693147182 + r4.z;
+  r0.x = 1.44269502 * r0.x;
+  r0.x = exp2(r0.x);
+  r0.x = r0.y ? r0.x : 0;
+  r3.y = r0.x * r2.w + r2.y;
+  r0.xy = cmp(r1.zz < cb0[18].yz);
+  r1.xyzw = r0.yyyy ? cb0[21].xyzw : cb0[23].xyzw;
+  r0.yw = r0.yy ? cb0[22].xy : cb0[24].xy;
+  r1.xyzw = r0.xxxx ? cb0[19].xyzw : r1.xyzw;
+  r0.xy = r0.xx ? cb0[20].xy : r0.yw;
+  r0.z = r0.z * cb0[18].x + -r1.x;
+  r0.z = r0.z * r1.z;
+  r0.w = cmp(0 < r0.z);
+  r0.z = log2(r0.z);
+  r0.y = r0.y * r0.z;
+  r0.x = r0.y * 0.693147182 + r0.x;
+  r0.x = 1.44269502 * r0.x;
+  r0.x = exp2(r0.x);
+  r0.x = r0.w ? r0.x : 0;
+  r3.z = r0.x * r1.w + r1.y;
+  r0.xyz = max(float3(0,0,0), r3.xyz);
+    float midGray = renodx::color::y::from::BT709(r0.rgb);
+
+    r0.rgb = applyUserTonemap(untonemapped, vanilla, midGray);
+
   r0.w = 1;
 // No code for instruction (needs manual fix):
 //store_uav_typed u0.xyzw, vThreadID.xyzz, r0.xyzw
