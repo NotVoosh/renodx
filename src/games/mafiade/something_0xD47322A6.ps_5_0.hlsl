@@ -35,11 +35,11 @@ void main(
   //r1.y = dot(r3.xyz, float3(0.298999995,0.587000012,0.114));
   //r0.x = dot(r0.xyz, float3(0.298999995,0.587000012,0.114));
   //r0.y = dot(r4.xyz, float3(0.298999995,0.587000012,0.114));
-    r0.w = renodx::color::y::from::AP1(r1.rgb);
-    r1.x = renodx::color::y::from::AP1(r2.rgb);
-    r1.y = renodx::color::y::from::AP1(r3.rgb);
-    r0.x = renodx::color::y::from::AP1(r0.rgb);
-    r0.y = renodx::color::y::from::AP1(r4.rgb);
+    r0.w = renodx::color::y::from::BT709(r1.rgb);
+    r1.x = renodx::color::y::from::BT709(r2.rgb);
+    r1.y = renodx::color::y::from::BT709(r3.rgb);
+    r0.x = renodx::color::y::from::BT709(r0.rgb);
+    r0.y = renodx::color::y::from::BT709(r4.rgb);
 
   r0.z = min(r1.x, r0.w);
   r1.z = min(r1.y, r0.x);
@@ -78,13 +78,11 @@ void main(
   r1.xyz = float3(0.25,0.25,0.25) * r1.xyz;
   r1.xyz = r2.xyz * float3(0.25,0.25,0.25) + r1.xyz;
   //r0.x = dot(r1.xyz, float3(0.298999995,0.587000012,0.114));
-    r0.x = renodx::color::y::from::BT2020(r1.rgb);
+    r0.x = renodx::color::y::from::BT709(r1.rgb);
   r0.z = cmp(r0.x < r0.z);
   r0.x = cmp(r0.y < r0.x);
   r0.x = (int)r0.x | (int)r0.z;
   r0.xyz = r0.xxx ? r3.xyz : r1.xyz;
-
-    r0.rgb = renodx::color::bt709::from::BT2020(r0.rgb);   // writing on swapchain here, back to bt709
 
   r0.w = cmp(0 < cb0[1].z);
   if (r0.w != 0) {
@@ -94,13 +92,10 @@ void main(
     r1.zw = float2(0,0);
     r1.xyz = t1.Load(r1.xyz).xyz;
     r1.xyz = r1.xyz * float3(2,2,2) + float3(-1,-1,-1);
-    //r2.xyz = max(float3(0,0,0), r0.xyz);
-    //r2.xyz = sqrt(r2.xyz);
       r2.rgb = renodx::math::SqrtSafe(r0.rgb);
     r3.xyz = cb0[1].www + r2.xyz;
     r3.xyz = min(cb0[1].zzz, r3.xyz);
     r1.xyz = renodx::color::bt709::clamp::AP1(r1.xyz * r3.xyz) * injectedData.fxNoise + r2.xyz;
-    //r0.xyz = r1.xyz * r1.xyz;
       r0.rgb = renodx::math::PowSafe(r1.rgb, 2.f);
   }
       r0.rgb = PostToneMapScale(r0.rgb);

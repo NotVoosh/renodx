@@ -87,19 +87,16 @@ void main(
   r3.xyzw = cmp(float4(0,0,0,0) < cb0[6].xyzw);
   if (r3.x != 0) {
     r2.xyz = r1.xyz * cb1[2].xyz + cb1[1].xyz;
-    r1.xyz = max(float3(0,0,0), r2.xyz);
+    //r1.xyz = max(float3(0,0,0), r2.xyz);
+      r1.rgb = r2.rgb;
   }
     
         float3 untonemapped;
-        float3 preLUT;
         float linearWhite;
   if (r2.w != 0) {
     switch (r0.x) {
       case 0 :
       r2.xyz = r1.xyz * r0.yyy;                                 // exposure
-            
-            //untonemapped = r4.rgb;
-            
       r2.xyz = log2(r2.xyz);
       //r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
       r2.xyz = exp2(r2.xyz);
@@ -107,46 +104,28 @@ void main(
       break;
       case 1 :
       r0.w = r0.y * r0.z;
-      // r0.w = W (r0.y is something about exposure)
           linearWhite = r0.w;
       r1.w = cb1[5].y / cb1[5].z;                               // 0.01     0.3
-      // r1.w = E / F
       r2.x = cb1[4].z * cb1[4].y;                               // 0.1      0.3
-      // r2.x = C * B
       r2.y = cb1[4].x * r0.w + r2.x;                            // 0.22
-      // r2.y = A * W + C * B
       r2.zw = cb1[5].xx * cb1[5].yz;                            // 0.2      0.01    0.3
-      // r2.z = D * E
-      // r2.w = D * F
       r2.y = r0.w * r2.y + r2.z;
-      // r2.y = W * (A * W + C * B) + D * E
       r3.x = cb1[4].x * r0.w + cb1[4].y;                        // 0.22      0.3
-      // r3.x = A * W + B
       r0.w = r0.w * r3.x + r2.w;
-      // r0.w = W * (A * W + B) + D * F
       r0.w = r2.y / r0.w;
-      // r0.w = (W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)
       r0.w = r0.w + -r1.w;
-      // r0.w = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F
       r0.w = 1 / r0.w;
       r4.xyz = r1.xyz * r0.yyy;                                 // exposure
             
             untonemapped = r4.rgb;
-            
+
       r5.xyz = cb1[4].xxx * r4.xyz + r2.xxx;                    // 0.22
-      // r5 = A * x + C * B
       r2.xyz = r4.xyz * r5.xyz + r2.zzz;
-      // r2 = x * (A * x + C * B) + D * E
       r5.xyz = cb1[4].xxx * r4.xyz + cb1[4].yyy;                // 0.22         0.3
-      // r5 = A * x + B
       r4.xyz = r4.xyz * r5.xyz + r2.www;
-      // r4 = x * (A * x + B) + D * F
       r2.xyz = r2.xyz / r4.xyz;
-      // r2 = (x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)
       r2.xyz = r2.xyz + -r1.www;
-      // r2 = ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F
       r2.xyz = saturate(r2.xyz * r0.www);
-      // r2 = (((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F) / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F)
       r2.xyz = log2(r2.xyz);
       //r2.xyz = cb0[2].xxx * r2.xyz;                             // 1 (game brightness)
       r2.xyz = exp2(r2.xyz);
@@ -154,18 +133,12 @@ void main(
       break;
       case -1 :
       r2.xyz = r1.xyz * r0.yyy;                                 // exposure
-            
-            //untonemapped = r4.rgb;
-            
       r2.xyz = log2(r2.xyz);
       //r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
       r1.xyz = exp2(r2.xyz);
       break;
       case -2 :
       r2.xyz = r1.xyz * r0.yyy;                                 // exposure
-            
-            //untonemapped = r4.rgb;
-            
       r2.xyz = max(float3(0,0,0), r2.xyz);
       r2.xyz = log2(r2.xyz);
       //r2.xyz = cb0[2].xxx * r2.xyz;                             // game brightness
@@ -173,9 +146,6 @@ void main(
       break;
       case -3 :
       r2.xyz = r1.xyz * r0.yyy;                                 // exposure
-            
-            //untonemapped = r4.rgb;
-            
       r4.xyz = r2.xyz * float3(2708.71411,2708.71411,2708.71411) + float3(6801.15234,6801.15234,6801.15234);
       r4.xyz = r2.xyz * r4.xyz + float3(1079.54736,1079.54736,1079.54736);
       r4.xyz = r2.xyz * r4.xyz + float3(1.16146493,1.16146493,1.16146493);
@@ -191,10 +161,7 @@ void main(
       r1.xyz = exp2(r2.xyz);
       break;
       case -4 :
-      r2.xyz = r1.xyz * r0.yyy;                                 // exposure
-            
-            //untonemapped = r4.rgb;
-            
+      r2.xyz = r1.xyz * r0.yyy;                                 // exposure            
       r4.xyz = float3(0.600000024,0.600000024,0.600000024) * r2.xyz;
       r5.xyz = r2.xyz * float3(1625.22852,1625.22852,1625.22852) + float3(6801.15234,6801.15234,6801.15234);
       r5.xyz = r4.xyz * r5.xyz + float3(1079.54736,1079.54736,1079.54736);
@@ -334,25 +301,19 @@ void main(
       }
       // seemingly not used?
       r0.xyz = r2.xyz * r1.xyz;
-            preLUT = r0.rgb;
       r4.xyz = max(float3(9.99999975e-06,9.99999975e-06,9.99999975e-06), r0.xyz);
       r4.xyz = log2(r4.xyz);
       r4.xyz = float3(0.454545468,0.454545468,0.454545468) * r4.xyz;
       r4.xyz = exp2(r4.xyz);
       r4.xyz = r4.xyz * float3(0.9375,0.9375,0.9375) + float3(0.03125,0.03125,0.03125);
-      r4.xyz = t9.Sample(s2_s, r4.xyz).xyz;                                                                      // LUT
+      r4.xyz = t9.Sample(s2_s, r4.xyz).xyz;
       r0.w = saturate(cb1[6].y);
       r4.xyz = -r1.xyz * r2.xyz + r4.xyz;
       r0.xyz = r0.www * r4.xyz + r0.xyz;
-          if (cb1[6].y == 1.f) {
-        r1.rgb = applyUserTonemapNoir(untonemapped, t9, s2_s, linearWhite);
-        } else {
-        r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
-        }
+        r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite, cb1[6].y == 1.f);
       r1.xyz = r0.xyz / r2.xyz;
     } else {
       // color grading LUT
-            preLUT = r1.rgb;
       r0.xyz = max(float3(9.99999975e-06,9.99999975e-06,9.99999975e-06), r1.xyz);
       r0.xyz = log2(r0.xyz);
       r0.xyz = float3(0.454545468,0.454545468,0.454545468) * r0.xyz;
@@ -361,13 +322,8 @@ void main(
       r0.xyz = t9.Sample(s2_s, r0.xyz).xyz;                                                                       // LUT
       r0.w = saturate(cb1[6].y);
       r0.xyz = r0.xyz + -r1.xyz;
-      //r1.xyz = saturate(r0.www * r0.xyz + r1.xyz);
-        r1.xyz = r0.www * r0.xyz + r1.xyz;
-          if (cb1[6].y == 1.f) {
-        r1.rgb = applyUserTonemapNoir(untonemapped, t9, s2_s, linearWhite);
-        } else {
-        r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite);
-        }
+      r1.xyz = saturate(r0.www * r0.xyz + r1.xyz);
+        r1.rgb = applyUserTonemap(untonemapped, t9, s2_s, linearWhite, cb1[6].y == 1.f);
     }
   }
     
@@ -422,13 +378,10 @@ void main(
 
     // This shader writes on swapchain most of the time.
     // Intermediate fp11 resources spawn temporarily during cutscenes (Depth of Field/Blur effects)
-    // Using AP1 to preserve WCG when this happens
-    // Inverse conversion is done in latest DoF shader (samples everything, writes on swapchain)
-    // + same with "low health" effect
+    // Keeping unscaled Linear in this case
+    // Scaling and gamma is done in latest shader always (samples everything, writes on swapchain)
         if(injectedData.is_swapchain_write == true){
       r1.rgb = PostToneMapScale(r1.rgb);
-      } else {
-      r1.rgb = renodx::color::bt2020::from::BT709(r1.rgb);
       }
     
   o0.xyz = r1.xyz;

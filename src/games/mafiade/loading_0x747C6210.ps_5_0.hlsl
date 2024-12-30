@@ -23,7 +23,6 @@ void main(
 
   r0.xyzw = t0.Sample(s0_s, v2.xy).xyzw;
   r0.xyzw = v1.xyzw * r0.xyzw;
-
 // sensor noise
   r1.x = cmp(0 < cb0[0].z);
   if (r1.x != 0) {

@@ -9,8 +9,6 @@ void main(
     out float4 output : SV_Target0)
 {
     float4 color = sourceTexture.Sample(sourceSampler_s, texcoord.xy);
-    
     color.rgb = FinalizeOutput(color.rgb);
-    
   output.rgba = color;
 }
