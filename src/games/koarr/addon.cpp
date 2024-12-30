@@ -53,7 +53,6 @@ renodx::utils::settings::Settings settings = {
         .key = "toneMapPeakNits",
         .binding = &shader_injection.toneMapPeakNits,
         .default_value = 1000.f,
-        .can_reset = false,
         .label = "Peak Brightness",
         .section = "Tone Mapping",
         .tooltip = "Sets the value of peak white in nits",
@@ -107,15 +106,40 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "toneMapHueProcessor",
+        .binding = &shader_injection.toneMapHueProcessor,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
+        .can_reset = false,
+        .label = "Hue Processor",
+        .section = "Tone Mapping",
+        .labels = {"OKLab", "ICtCp", "darktable UCS"},
+        .tint = 0xAC7C38,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "diceShoulderStart",
         .binding = &shader_injection.diceShoulderStart,
-        .default_value = 0.33f,
+        .default_value = 0.25f,
         .label = "DICE Shoulder Start",
         .section = "Tone Mapping",
         .tint = 0xAC7C38,
         .max = 0.99f,
         .format = "%.2f",
         .is_enabled = []() { return shader_injection.toneMapType == 4.f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "upgradePerChannel",
+        .binding = &shader_injection.upgradePerChannel,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 0.f,
+        .can_reset = false,
+        .label = "Upgrade LUT Per Channel",
+        .section = "Tone Mapping",
+        .tooltip = "Upgrades SDR color grading LUT per-channel instead of by luminance",
+        .labels = {"Off", "On"},
+        .tint = 0xAC7C38,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeExposure",
@@ -182,10 +206,9 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
         .binding = &shader_injection.colorGradeFlare,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Flare",
         .section = "Color Grading",
-        .tooltip = "Embrace the darkness... (Gently.)",
         .tint = 0x38F6FC,
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType == 3.f; },
@@ -261,11 +284,13 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x38F6FC,
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
+          renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 1.f);
+          renodx::utils::settings::UpdateSetting("upgradePerChannel", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
-          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeShadows", 60.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 62.f);
-          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 66.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 70.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 80.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 80.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
@@ -280,13 +305,16 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Can be used with any Tone Mapper",
         .tint = 0x38F6FC,
         .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 0.f);
+          renodx::utils::settings::UpdateSetting("diceShoulderStart", 0.33f);
+          renodx::utils::settings::UpdateSetting("upgradePerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 65.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 65.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 75.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 25.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 55.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
@@ -299,29 +327,19 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Reverts to default Color Grading.",
         .tint = 0x0D1D34,
         .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 1.f);
+          renodx::utils::settings::UpdateSetting("diceShoulderStart", 0.25f);
+          renodx::utils::settings::UpdateSetting("upgradePerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeFlare", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
         },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "forceHueProcessor",
-        .binding = &shader_injection.forceHueProcessor,
-        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 0.f,
-        .label = "Force Hue Processor",
-        .section = "Processor",
-        .tooltip = "Default: Frostbite = dartable UCS"
-                   "\nRenoDRT = ICtCp | DICE = OkLab",
-        .labels = {"Default", "OKLab", "ICtCp", "darktable UCS"},
-        .tint = 0xFB7352,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,

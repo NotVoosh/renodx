@@ -14,7 +14,9 @@ struct ShaderInjectData {
   float toneMapUINits;
   float toneMapGammaCorrection;
   float toneMapHueCorrection;
+  float toneMapHueProcessor;
   float diceShoulderStart;
+  float upgradePerChannel;
   float colorGradeExposure;
   float colorGradeHighlights;
   float colorGradeShadows;
@@ -28,7 +30,7 @@ struct ShaderInjectData {
   float fxVignette;
   float fxFilmGrain;
   float fxFilmGrainType;
-  float forceHueProcessor;
+  
   float elapsedTime;
   float random_1;
   float random_2;
