@@ -77,7 +77,7 @@ float3 RenoDRTSmoothClamp(float3 untonemapped) {
   renodrtSC_config.hue_correction_method = renodx::tonemap::renodrt::config::hue_correction_method::OKLAB;
   renodrtSC_config.tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
   renodrtSC_config.hue_correction_type = renodx::tonemap::renodrt::config::hue_correction_type::INPUT;
-  renodrtSC_config.working_color_space = 2u;
+  renodrtSC_config.working_color_space = 0u;
   renodrtSC_config.per_channel = false;
   float3 renoDRTColor = renodx::tonemap::renodrt::BT709(untonemapped, renodrtSC_config);
   return renoDRTColor;
@@ -92,7 +92,7 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig){
 	color = renodx::color::grade::UserColorGrading(color, FbConfig.exposure, FbConfig.highlights, FbConfig.shadows, FbConfig.contrast);
 	color = renodx::tonemap::frostbite::BT709(color, FbPeak);
   
-	  if (FbConfig.reno_drt_dechroma != 0.f || FbConfig.saturation != 1.f || FbConfig.hue_correction_strength != 0.f) {
+	  if (FbConfig.saturation != 1.f || FbConfig.hue_correction_strength != 0.f || FbConfig.reno_drt_blowout != 0.f) {
     float3 perceptual_new;
 
       if (FbConfig.reno_drt_hue_correction_method == 0u) {
@@ -125,10 +125,6 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig){
       perceptual_new.yz *= renodx::math::DivideSafe(chrominance_pre_adjust, chrominance_post_adjust, 1.f);
     }
 
-    if (FbConfig.reno_drt_dechroma != 0.f) {
-      perceptual_new.yz *= lerp(1.f, 0.f, saturate(pow(y / (10000.f / 100.f), (1.f - FbConfig.reno_drt_dechroma))));
-    }
-
     if (FbConfig.reno_drt_blowout != 0.f) {
       float percent_max = saturate(y * 100.f / 10000.f);
       // positive = 1 to 0, negative = 1 to 2
@@ -156,8 +152,8 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig){
 }
 
 float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig){
-	DICESettings DICEconfig = DefaultDICESettings();
-	DICEconfig.Type = 3;
+  DICESettings DICEconfig = DefaultDICESettings();
+  DICEconfig.Type = 2 + (uint)injectedData.toneMapPerChannel;
 	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
 	float DicePaperWhite = DiceConfig.game_nits / 80.f;
 	float DicePeak = DiceConfig.peak_nits / 80.f;
@@ -170,7 +166,7 @@ float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig){
 	color = renodx::color::grade::UserColorGrading(color, DiceConfig.exposure, DiceConfig.highlights, DiceConfig.shadows, DiceConfig.contrast);
 	color = DICETonemap(color * DicePaperWhite, DicePeak, DICEconfig) / DicePaperWhite;
 
-	  if (DiceConfig.reno_drt_dechroma != 0.f || DiceConfig.saturation != 1.f || DiceConfig.hue_correction_strength != 0.f) {
+        if (DiceConfig.saturation != 1.f || DiceConfig.hue_correction_strength != 0.f || DiceConfig.reno_drt_blowout != 0.f) {
     float3 perceptual_new;
 
       if (DiceConfig.reno_drt_hue_correction_method == 0u) {
@@ -203,10 +199,6 @@ float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig){
       perceptual_new.yz *= renodx::math::DivideSafe(chrominance_pre_adjust, chrominance_post_adjust, 1.f);
     }
 
-    if (DiceConfig.reno_drt_dechroma != 0.f) {
-      perceptual_new.yz *= lerp(1.f, 0.f, saturate(pow(y / (10000.f / 100.f), (1.f - DiceConfig.reno_drt_dechroma))));
-    }
-
     if (DiceConfig.reno_drt_blowout != 0.f) {
       float percent_max = saturate(y * 100.f / 10000.f);
       // positive = 1 to 0, negative = 1 to 2
@@ -237,12 +229,7 @@ float3 applyUserTonemap(float3 untonemapped){
 		
 		float3 outputColor = untonemapped;
 		float3 hueCorrectionColor = RenoDRTSmoothClamp(outputColor);
-		int hueProcessor;
-			if(injectedData.forceHueProcessor == 0.f){
-		hueProcessor = abs((int)injectedData.toneMapType - 4);
-		} else {
-		hueProcessor = (int)injectedData.forceHueProcessor - 1;
-		}
+    bool perChannel = injectedData.toneMapPerChannel != 0.f && injectedData.toneMapType >= 3.f;
 		
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
@@ -255,18 +242,18 @@ float3 applyUserTonemap(float3 untonemapped){
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.mid_gray_value = 0.19f;
 			config.mid_gray_nits = 19.f;
 			config.reno_drt_contrast = 1.04f;
 			config.reno_drt_saturation = 1.05f;
-			config.reno_drt_dechroma = 0.f;
-			config.reno_drt_flare = 0.001 * pow(injectedData.colorGradeFlare, 4.32192809489);
+			config.reno_drt_dechroma = 0.5f;
+			config.reno_drt_flare = 0.01 * pow(injectedData.colorGradeFlare, 5.32192809489);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			config.hue_correction_strength = perChannel ? 0.f : injectedData.toneMapHueCorrection;
 			config.hue_correction_color = hueCorrectionColor;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
-			config.reno_drt_hue_correction_method = hueProcessor;
+			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 			config.reno_drt_blowout = injectedData.colorGradeBlowout;
+      config.reno_drt_per_channel = perChannel;
 
 				if(injectedData.toneMapType == 0.f){
 			outputColor = saturate(outputColor);

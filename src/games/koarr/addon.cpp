@@ -104,7 +104,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
         .tint = 0xAC7C38,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
+        .is_visible = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapPerChannel",

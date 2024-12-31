@@ -171,8 +171,8 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig, bool sdr =
 }
 
 float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig, bool sdr = false){
-	DICESettings DICEconfig = DefaultDICESettings();
-	DICEconfig.Type = 2 + (uint)DiceConfig.reno_drt_per_channel;
+  DICESettings DICEconfig = DefaultDICESettings();
+  DICEconfig.Type = 2 + (uint)injectedData.toneMapPerChannel;
 	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
 	float DicePaperWhite = DiceConfig.game_nits / 80.f;
 	float DicePeak = sdr ? DicePaperWhite : DiceConfig.peak_nits / 80.f;
