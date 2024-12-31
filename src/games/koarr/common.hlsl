@@ -52,7 +52,6 @@ float3 PostToneMapScale(float3 color) {
     color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
     color = renodx::color::srgb::EncodeSafe(color);
   }
-    color = max(-0.53f, color);
   return color;
 }
 
@@ -173,7 +172,7 @@ float3 applyFrostbite(float3 color, renodx::tonemap::Config FbConfig, bool sdr =
 
 float3 applyDICE(float3 color, renodx::tonemap::Config DiceConfig, bool sdr = false){
 	DICESettings DICEconfig = DefaultDICESettings();
-	DICEconfig.Type = 3;
+	DICEconfig.Type = 2 + (uint)DiceConfig.reno_drt_per_channel;
 	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
 	float DicePaperWhite = DiceConfig.game_nits / 80.f;
 	float DicePeak = sdr ? DicePaperWhite : DiceConfig.peak_nits / 80.f;
@@ -335,7 +334,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 		outputColor = saturate(outputColor);
 			}
 		float3 hueCorrectionColor = RenoDRTSmoothClamp(outputColor);
-    
+    bool perChannel = injectedData.toneMapPerChannel != 0.f && injectedData.toneMapType >= 3.f;
 		  renodx::tonemap::Config config = renodx::tonemap::config::Create();
 
 			config.type = injectedData.toneMapType;
@@ -351,13 +350,14 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 			config.reno_drt_contrast = 1.04f;
 			config.reno_drt_saturation = 1.05f;
 			config.reno_drt_dechroma = 0.5f;
-			config.reno_drt_flare = 0.0001 * pow(injectedData.colorGradeFlare, 15.32192809489);
+			config.reno_drt_flare = 0.01 * pow(injectedData.colorGradeFlare, 5.32192809489);
 			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection;
+			config.hue_correction_strength = perChannel ? 0.f : injectedData.toneMapHueCorrection;
 			config.hue_correction_color = hueCorrectionColor;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 			config.reno_drt_blowout = injectedData.colorGradeBlowout;
+      config.reno_drt_per_channel = perChannel;
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -373,9 +373,7 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 				float3 sdrColor = applyFrostbite(outputColor, config, true);
 			  float3 hdrColor = applyFrostbite(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = injectedData.upgradePerChannel != 0 ?
-      UpgradeToneMapPerChannel(hdrColor, sdrColor, lutColor, previous_lut_config_strength) :
-      UpgradeToneMap(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
+			outputColor = UpgradeToneMap(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
 
 			} else if (injectedData.toneMapType == 4.f){		// DICE
         float previous_lut_config_strength = lut_config.strength;
@@ -383,14 +381,13 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 				float3 sdrColor = applyDICE(outputColor, config, true);
 			  float3 hdrColor = applyDICE(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = injectedData.upgradePerChannel != 0 ?
+			outputColor = perChannel && (injectedData.upgradePerChannel != 0.f) ?
       UpgradeToneMapPerChannel(hdrColor, sdrColor, lutColor, previous_lut_config_strength) :
       UpgradeToneMap(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
 
 			} else {
-			outputColor = Apply(outputColor, config, lut_config, lutTexture, injectedData.upgradePerChannel != 0.f);
+			outputColor = Apply(outputColor, config, lut_config, lutTexture, perChannel && (injectedData.upgradePerChannel != 0.f));
 			}
-      outputColor = renodx::color::bt709::clamp::BT2020(outputColor);
 
 	return outputColor;
 }
