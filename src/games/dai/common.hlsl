@@ -86,7 +86,7 @@ float3 applyReinhardPlus(float3 color, renodx::tonemap::Config RhConfig, bool sd
 	color = renodx::color::grade::UserColorGrading(color, RhConfig.exposure, RhConfig.highlights, RhConfig.shadows, RhConfig.contrast);
 	color = renodx::tonemap::ReinhardScalable(color, RhPeak, 0.f, 0.18f, RhConfig.mid_gray_value);
 	color = sdr ? color : renodx::color::bt709::from::BT2020(color);
-	  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f || RhConfig.hue_correction_strength != 0.f) {
+	  if (RhConfig.reno_drt_dechroma != 0.f || RhConfig.saturation != 1.f || RhConfig.hue_correction_strength != 0.f || RhConfig.reno_drt_blowout != 0.f) {
     float3 perceptual_new;
 
       if (RhConfig.reno_drt_hue_correction_method == 0u) {
@@ -252,14 +252,20 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 			config.reno_drt_contrast = 1.2f;
 			config.reno_drt_saturation = 1.f;
 			config.reno_drt_dechroma = 0.f;
-			config.reno_drt_flare = cutscene ? 0.f : 0.05 * pow(injectedData.colorGradeFlare, 4.32192809489);;
-			config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
-			config.hue_correction_strength = injectedData.toneMapHueCorrection * (1.f - injectedData.toneMapPerChannel);
+			config.reno_drt_flare = cutscene ? 0.f : 0.05 * pow(injectedData.colorGradeFlare, 5.32192809489);;
+			config.hue_correction_type = injectedData.toneMapPerChannel != 0.f
+      ? renodx::tonemap::config::hue_correction_type::INPUT
+      : renodx::tonemap::config::hue_correction_type::CUSTOM;
+			config.hue_correction_strength = injectedData.toneMapPerChannel != 0.f
+      ? (1.f - injectedData.toneMapHueCorrection)
+      : injectedData.toneMapHueCorrection;
 			config.hue_correction_color = hueCorrectionColor;
 			config.reno_drt_tone_map_method = renodx::tonemap::renodrt::config::tone_map_method::DANIELE;
 			config.reno_drt_hue_correction_method = (uint)injectedData.toneMapHueProcessor;
 			config.reno_drt_per_channel = injectedData.toneMapPerChannel != 0;
 			config.reno_drt_blowout = injectedData.colorGradeBlowout;
+
+        bool perChannelCombo = config.type == 3.f && config.reno_drt_per_channel == true || config.type == 2.f; 
 
 			renodx::lut::Config lut_config = renodx::lut::config::Create(
 			lutSampler,
@@ -285,11 +291,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture3D lutTexture, SamplerState 
 				float3 sdrColor = applyReinhardPlus(outputColor, config, true);
 			  float3 hdrColor = applyReinhardPlus(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = injectedData.upgradePerChannel != 0 ?
-      UpgradeToneMapPerChannel(hdrColor, sdrColor, lutColor, previous_lut_config_strength) :
-      UpgradeToneMap(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
+			outputColor = UpgradeToneMap(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
 		} else {
-			outputColor = Apply(outputColor, config, lut_config, lutTexture, injectedData.upgradePerChannel != 0);
+			outputColor = Apply(outputColor, config, lut_config, lutTexture, perChannelCombo && injectedData.upgradePerChannel != 0.f);
 		}
       outputColor = renodx::color::bt709::clamp::BT2020(outputColor);
 	return outputColor;
