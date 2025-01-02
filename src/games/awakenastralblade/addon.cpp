@@ -112,6 +112,17 @@ renodx::utils::settings::Settings settings = {
         .is_visible = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "toneMapHueCorrection",
+        .binding = &shader_injection.toneMapHueCorrection,
+        .default_value = 100.f,
+        .label = "Hue Correction",
+        .section = "Tone Mapping",
+        .tint = 0x927A13,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+        .is_visible = []() { return shader_injection.toneMapType >= 2.f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "toneMapPerChannel",
         .binding = &shader_injection.toneMapPerChannel,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
@@ -122,17 +133,6 @@ renodx::utils::settings::Settings settings = {
         .labels = {"Off", "On"},
         .tint = 0x927A13,
         .is_visible = []() { return shader_injection.toneMapType >= 3.f; },
-    },
-    new renodx::utils::settings::Setting{
-        .key = "toneMapHueCorrection",
-        .binding = &shader_injection.toneMapHueCorrection,
-        .default_value = 100.f,
-        .label = "Hue Correction",
-        .section = "Tone Mapping",
-        .tint = 0x927A13,
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.01f; },
-        .is_visible = []() { return shader_injection.toneMapType >= 3.f && shader_injection.toneMapPerChannel == 0.f || shader_injection.toneMapType == 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "diceShoulderStart",
@@ -204,8 +204,8 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .tint = 0x432A26,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
         .parse = [](float value) { return value * 0.02f - 1.f; },
+        .is_visible = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeFlare",
@@ -215,8 +215,8 @@ renodx::utils::settings::Settings settings = {
         .section = "Color Grading",
         .tint = 0x432A26,
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.toneMapType == 3.f; },
         .parse = [](float value) { return value * 0.02f; },
+        .is_visible = []() { return shader_injection.toneMapType == 3.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "colorGradeLUTStrength",
@@ -239,7 +239,6 @@ renodx::utils::settings::Settings settings = {
         .tooltip = "Selects whether to use the vanilla sampling or PQ for the game's internal rendering LUT.",
         .labels = {"Arri C1000", "PQ"},
         .tint = 0x432A26,
-        .is_visible = []() { return shader_injection.colorGradeLUTStrength != 0.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "fxBloom",
@@ -291,41 +290,85 @@ renodx::utils::settings::Settings settings = {
         .section = "Effects",
         .labels = {"Black & White", "Colored"},
         .tint = 0x02A9C9,
+        .is_visible = []() { return shader_injection.fxFilmGrain != 0.f; },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
-        .label = "Vibrant Filmic",
+        .label = "Vibrant Filmic",  // Frostbite
         .section = "Color Grading Templates",
         .group = "templates",
-        .tooltip = "Powered by RenoDRT",
+        .tint = 0x02A9C9,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapType", 2.f);
+          renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 2.f);
+          renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 35.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 40.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);
+        },
+        .is_visible = []() { return shader_injection.toneMapType == 2.f; },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Vibrant Filmic",  // RenoDRT
+        .section = "Color Grading Templates",
+        .group = "templates",
         .tint = 0x432A26,
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapType", 3.f);
           renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 1.f);
+          renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 100.f);
           renodx::utils::settings::UpdateSetting("toneMapPerChannel", 1.f);
+          renodx::utils::settings::UpdateSetting("upgradePerChannel", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 40.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 80.f);
-          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);
         },
+        .is_visible = []() { return shader_injection.toneMapType == 3.f; },
+    },
+    new renodx::utils::settings::Setting{
+        .value_type = renodx::utils::settings::SettingValueType::BUTTON,
+        .label = "Vibrant Filmic",  // DICE
+        .section = "Color Grading Templates",
+        .group = "templates",
+        .tint = 0x927A13,
+        .on_change = []() {
+          renodx::utils::settings::UpdateSetting("toneMapType", 4.f);
+          renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 0.f);
+          renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 100.f);
+          renodx::utils::settings::UpdateSetting("toneMapPerChannel", 1.f);
+          renodx::utils::settings::UpdateSetting("diceShoulderStart", 0.5f);
+          renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
+          renodx::utils::settings::UpdateSetting("colorGradeHighlights", 45.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 40.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 65.f);
+          renodx::utils::settings::UpdateSetting("colorGradeSaturation", 70.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 60.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+          renodx::utils::settings::UpdateSetting("colorGradeLUTScaling", 100.f);
+        },
+        .is_visible = []() { return shader_injection.toneMapType == 4.f; },
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::BUTTON,
         .label = "Enhanced Vanilla",
         .section = "Color Grading Templates",
         .group = "templates",
-        .tooltip = "Can be used with any Tone Mapper",
         .tint = 0x432A26,
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 1.f);
-          renodx::utils::settings::UpdateSetting("toneMapPerChannel", 0.f);
-          renodx::utils::settings::UpdateSetting("upgradePerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 100.f);
+          renodx::utils::settings::UpdateSetting("toneMapPerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("diceShoulderStart", 0.33f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
@@ -346,9 +389,8 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x02A9C9,
         .on_change = []() {
           renodx::utils::settings::UpdateSetting("toneMapHueProcessor", 1.f);
-          renodx::utils::settings::UpdateSetting("toneMapPerChannel", 0.f);
-          renodx::utils::settings::UpdateSetting("upgradePerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("toneMapHueCorrection", 100.f);
+          renodx::utils::settings::UpdateSetting("toneMapPerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("diceShoulderStart", 0.25f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
@@ -425,8 +467,6 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
   renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
-  renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
-  renodx::utils::settings::UpdateSetting("colorGradeFlare", 0.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
