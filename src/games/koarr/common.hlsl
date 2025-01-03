@@ -383,7 +383,9 @@ float3 applyUserTonemap(float3 untonemapped, Texture2D lutTexture, SamplerState 
 				float3 sdrColor = applyFrostbite(outputColor, config, true);
 			  float3 hdrColor = applyFrostbite(outputColor, config);
 				float3 lutColor = renodx::lut::Sample(lutTexture, lut_config, sdrColor);
-			outputColor = UpgradeToneMapPerChannel(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
+			outputColor = injectedData.upgradePerChannel != 0.f ?
+      UpgradeToneMapPerChannel(hdrColor, sdrColor, lutColor, previous_lut_config_strength) :
+      UpgradeToneMap(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
 
 			} else if (injectedData.toneMapType == 4.f){		// DICE
         float previous_lut_config_strength = lut_config.strength;

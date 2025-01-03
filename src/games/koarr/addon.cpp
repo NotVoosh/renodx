@@ -33,7 +33,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
 
     CustomShaderEntry(0xD11C77B6),  // combineeffects (color grading, dof, bloom)
     CustomShaderEntry(0x70CEAF26),  // combineeffects 2 (color grading)
-    CustomShaderEntry(0x8159D8EB),  // FXAA
+    //CustomShaderEntry(0x8159D8EB),  // FXAA
 };
 
 renodx::utils::settings::Settings settings = {
@@ -137,7 +137,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Tone Mapping",
         .labels = {"Per Luminance", "Per Channel"},
         .tint = 0xAC7C38,
-        .is_visible = []() { return shader_injection.toneMapType >= 3.f && shader_injection.toneMapPerChannel == 1.f; },
+        .is_visible = []() { return shader_injection.toneMapType == 2.f || shader_injection.toneMapType >= 3.f && shader_injection.toneMapPerChannel == 1.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "diceShoulderStart",
