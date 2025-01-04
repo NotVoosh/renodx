@@ -27,10 +27,14 @@ float3 applyFilmGrain(float3 outputColor, float2 screen, bool colored){
 
 //-----SCALING-----//
 float3 PostToneMapScale(float3 color) {
-      if(injectedData.toneMapGammaCorrection == 1.f){
-    color = renodx::color::correct::GammaSafe(color);
+      if(injectedData.toneMapGammaCorrection == 2.f){
+    color = renodx::color::correct::GammaSafe(color, false, 2.4f);
     color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
-    color = renodx::color::correct::GammaSafe(color, true);
+    color = renodx::color::correct::GammaSafe(color, true, 2.4f);
+    } else if(injectedData.toneMapGammaCorrection == 1.f){
+    color = renodx::color::correct::GammaSafe(color, false, 2.2f);
+    color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
+    color = renodx::color::correct::GammaSafe(color, true, 2.2f);
     } else {
     color *= injectedData.toneMapGameNits / injectedData.toneMapUINits;
     }
@@ -38,13 +42,17 @@ float3 PostToneMapScale(float3 color) {
 }
 
 float3 FinalizeOutput(float3 color) {
-  	  if(injectedData.toneMapGammaCorrection == 1.f) {
-	color = renodx::color::correct::GammaSafe(color);
-  	}
+  	  if(injectedData.toneMapGammaCorrection == 2.f){
+	  color = renodx::color::correct::GammaSafe(color, false, 2.4f);
+  	} else if(injectedData.toneMapGammaCorrection == 1.f){
+    color = renodx::color::correct::GammaSafe(color, false, 2.2f);
+    }
+    color *= injectedData.toneMapUINits;
       if(injectedData.toneMapType == 0.f){
     color = renodx::color::bt709::clamp::BT709(color);
+    } else {
+    color = renodx::color::bt709::clamp::BT2020(color);
     }
-  	color *= injectedData.toneMapUINits;
   	color /= 80.f;
   	return color;
 }
@@ -86,8 +94,8 @@ float3 RenoDRTSmoothClamp(float3 untonemapped) {
 float3 applyFrostbite(float3 input, renodx::tonemap::Config FbConfig) {
   float3 color = input;
 	float FbPeak = FbConfig.peak_nits / FbConfig.game_nits;
-		if(FbConfig.gamma_correction == 1.f){
-	FbPeak = renodx::color::correct::Gamma(FbPeak, true);
+		if(FbConfig.gamma_correction != 0.f){
+	FbPeak = renodx::color::correct::Gamma(FbPeak, FbConfig.gamma_correction > 0.f, abs(FbConfig.gamma_correction) == 1.f ? 2.2f : 2.4f);
 	}
 		float y = renodx::color::y::from::BT709(color * FbConfig.exposure);
 	color = renodx::color::grade::UserColorGrading(color, FbConfig.exposure, FbConfig.highlights, FbConfig.shadows, FbConfig.contrast);
@@ -159,9 +167,9 @@ float3 applyDICE(float3 input, renodx::tonemap::Config DiceConfig) {
 	DICEconfig.ShoulderStart = injectedData.diceShoulderStart;
 	float DicePaperWhite = DiceConfig.game_nits / 80.f;
 	float DicePeak = DiceConfig.peak_nits / 80.f;
-		if(DiceConfig.gamma_correction == 1.f){
-	DicePaperWhite = renodx::color::correct::Gamma(DicePaperWhite, true);
-	DicePeak = renodx::color::correct::Gamma(DicePeak, true);
+		if(DiceConfig.gamma_correction != 0.f){
+	DicePaperWhite = renodx::color::correct::Gamma(DicePaperWhite, DiceConfig.gamma_correction > 0.f, abs(DiceConfig.gamma_correction) == 1.f ? 2.2f : 2.4f);
+	DicePeak = renodx::color::correct::Gamma(DicePeak, DiceConfig.gamma_correction > 0.f, abs(DiceConfig.gamma_correction) == 1.f ? 2.2f : 2.4f);
 	}
 
 		float y = renodx::color::y::from::BT709(color * DiceConfig.exposure);
@@ -275,6 +283,5 @@ float3 applyUserTonemap(float3 untonemapped){
 			} else {
 			outputColor = renodx::tonemap::config::Apply(outputColor, config);
 			}
-      outputColor = renodx::color::bt709::clamp::BT2020(outputColor);
 	return outputColor;
 }

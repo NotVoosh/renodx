@@ -65,6 +65,7 @@ renodx::utils::settings::Settings settings = {
         .tint = 0x927A13,
         .min = 48.f,
         .max = 4000.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapGameNits",
@@ -91,12 +92,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "toneMapGammaCorrection",
         .binding = &shader_injection.toneMapGammaCorrection,
-        .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
-        .can_reset = false,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 1.f,
         .label = "Gamma Correction",
         .section = "Tone Mapping",
-        .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
+        .tooltip = "Emulates a display EOTF.",
+        .labels = {"Off", "2.2", "BT.1886"},
         .tint = 0x927A13,
     },
     new renodx::utils::settings::Setting{
@@ -104,7 +105,6 @@ renodx::utils::settings::Settings settings = {
         .binding = &shader_injection.toneMapHueProcessor,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
         .default_value = 1.f,
-        .can_reset = false,
         .label = "Hue Processor",
         .section = "Tone Mapping",
         .labels = {"OKLab", "ICtCp", "darktable UCS"},
@@ -232,8 +232,7 @@ renodx::utils::settings::Settings settings = {
         .key = "colorGradeLUTSampling",
         .binding = &shader_injection.colorGradeLUTSampling,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 1,
-        .can_reset = false,
+        .default_value = 1.f,
         .label = "Internal LUT Sampling",
         .section = "Color Grading",
         .tooltip = "Selects whether to use the vanilla sampling or PQ for the game's internal rendering LUT.",
@@ -284,7 +283,7 @@ renodx::utils::settings::Settings settings = {
         .key = "fxFilmGrainType",
         .binding = &shader_injection.fxFilmGrainType,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
-        .default_value = 0,
+        .default_value = 0.f,
         .can_reset = false,
         .label = "Film Grain Type",
         .section = "Effects",
@@ -330,7 +329,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 0.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 25.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 80.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);
         },
