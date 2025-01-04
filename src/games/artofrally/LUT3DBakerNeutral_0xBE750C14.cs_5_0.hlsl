@@ -127,20 +127,7 @@ cbuffer cb0 : register(b0){
       r0.rgb = max(0, r0.rgb);
 		
         r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
-		if(injectedData.toneMapType == 0.f){
-	// Neutral Tonemap
-	  r1.rgb = r0.rgb * float3(1.31338608, 1.31338608, 1.31338608);
-	  r2.rgb = r0.rgb * float3(0.262677222, 0.262677222, 0.262677222) + float3(0.0695999935, 0.0695999935, 0.0695999935);
-	  r2.rgb = r1.rgb * r2.rgb + float3(0.005440, 0.005440, 0.005440);
-	  r0.rgb = r0.rgb * float3(0.262677222, 0.262677222, 0.262677222) + float3(0.29, 0.29, 0.29);
-	  r0.rgb = r1.rgb * r0.rgb + float3(0.0816000104, 0.0816000104, 0.0816000104);
-	  r0.rgb = r2.rgb / r0.rgb;
-	  r0.rgb = r0.rgb + float3(-0.0666666627, -0.0666666627, -0.0666666627);
-	  r0.rgb = r0.rgb * float3(1.31338608, 1.31338608, 1.31338608);
-	  r0.rgb = max(0, r0.rgb);
-		} else {
       r0.rgb = applyUserTonemapNeutral(r0.rgb);
-    }
 	  r0.a = 1;  
   u0[vThreadID.xyz] = r0.rgba;
   }
