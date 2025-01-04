@@ -164,6 +164,7 @@ void main(
 		config.shadows *= 0.8f;
 		config.contrast *= 1.3f;
 		config.saturation *= 1.4f;
+    config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
     config.hue_correction_strength = injectedData.toneMapHueCorrection;
     r2.gba = applyReinhardPlus(outputColor, config);
       }
@@ -173,6 +174,7 @@ void main(
 		config.shadows *= 0.8f;
 		config.contrast *= 1.3f;
 		config.saturation *= 1.4f;
+    config.hue_correction_type = renodx::tonemap::config::hue_correction_type::CUSTOM;
     config.hue_correction_strength = injectedData.toneMapHueCorrection;
     hdrColor = applyReinhardPlus(outputColor, config);
     sdrColor = applyReinhardPlus(outputColor, config, true);
@@ -256,7 +258,6 @@ void main(
     r2.gba = UpgradeToneMap(hdrColor, sdrColor, lutOutput, previous_lut_config_strength);
     }
   }
-    r2.gba = renodx::color::bt709::clamp::BT2020(r2.gba);
     linearColor = r2.gba;
     r2.gba = renodx::color::gamma::EncodeSafe(r2.gba);
     
@@ -377,7 +378,7 @@ void main(
   r0.z = r0.z + -r0.x;
   r0.x = r0.y * r0.z + r0.x;
     r0.b = injectedData.toneMapType != 0.f ? renodx::color::y::from::BT709(r2.rgb)
-                                             : dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
+                                           : dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
   r0.z = cb1[5].z * r0.y;
   r0.y = cb1[5].z * r0.y + -0.200000003;
   r0.y = saturate(-5 * r0.y);
@@ -387,7 +388,7 @@ void main(
   r0.y = r0.y * r0.y;
   r0.y = r0.y * r0.y;
   r0.x = r0.y * -r0.x + r0.x;
-  o0.xyz = renodx::color::bt709::clamp::AP1(r0.xxx * cb1[5].xxx) * injectedData.fxFilmGrain + r2.xyz;
+  o0.xyz = r0.xxx * cb1[5].xxx * injectedData.fxFilmGrain + r2.xyz;
     o0.rgb = renodx::color::gamma::DecodeSafe(o0.rgb);
   } else {
     o0.rgb = applyFilmGrain(renodx::color::gamma::DecodeSafe(r2.rgb), v1);

@@ -55,6 +55,7 @@ renodx::utils::settings::Settings settings = {
         .tint = 0xAE8B60,
         .min = 48.f,
         .max = 4000.f,
+        .is_enabled = []() { return shader_injection.toneMapType >= 2.f; },
     },
     new renodx::utils::settings::Setting{
         .key = "toneMapGameNits",
@@ -418,7 +419,7 @@ renodx::utils::settings::Settings settings = {
     },
     new renodx::utils::settings::Setting{
         .value_type = renodx::utils::settings::SettingValueType::TEXT,
-        .label = "Version: BETA/UNTESTED " + std::string(renodx::utils::date::ISO_DATE),
+        .label = "Version: " + std::string(renodx::utils::date::ISO_DATE),
         .section = "About",
         .tooltip = std::string(__DATE__),
     },
