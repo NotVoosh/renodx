@@ -33,10 +33,10 @@ cbuffer cb0 : register(b0){
       
     // unity_to_ACES(r0.rgb)
     r1.r = dot(float3(0.439701, 0.382978, 0.177335), r0.rgb);
-    r1.g = dot(float3(0.0897922963, 0.813423, 0.0967615992), r0.rgb);
+    r1.g = dot(float3(0.0897923, 0.813423, 0.0967616), r0.rgb);
     r1.b = dot(float3(0.017544, 0.111544, 0.870704), r0.rgb);
 
-      float3 preCG = mul(renodx::color::AP0_TO_AP1_MAT, r1.rgb);
+      float3 preCG = r1.rgb;
     
   // ACEScc (log) space
     // ACES_to_ACEScc(r1.rgb)
@@ -69,15 +69,18 @@ cbuffer cb0 : register(b0){
     r0.g = r0.g ? r1.b : 65504;
     r3.b = r0.r ? r2.b : r0.g;
 
-      r0.rgb = mul(renodx::color::AP0_TO_AP1_MAT, r3.rgb);
+      // ACES_to_ACEScg
+      r0.r = dot(float3(1.4514393161, -0.2365107469, -0.2149285693), r3.rgb);
+      r0.g = dot(float3(-0.0765537734, 1.1762296998, -0.0996759264), r3.rgb);
+      r0.b = dot(float3(0.0083161484, -0.0060324498, 0.9977163014), r3.rgb);
     // (start) LinearGrade
       // WhiteBalance(r0.rgb, cb0[1].rgb)
-      r1.r = dot(float3(0.390405, 0.549941, 0.00892631989), r0.rgb);
-      r1.g = dot(float3(0.0708416030, 0.963172, 0.00135775004), r0.rgb);
-      r1.b = dot(float3(0.0231081992, 0.128021, 0.936245), r0.rgb);
+      r1.r = dot(float3(0.390405, 0.549941, 0.00892632), r0.rgb);
+      r1.g = dot(float3(0.0708416, 0.963172, 0.00135775), r0.rgb);
+      r1.b = dot(float3(0.0231082, 0.128021, 0.936245), r0.rgb);
       r0.rgb = r1.rgb * cb0[1].rgb;
       r1.r = dot(float3(2.858470, -1.628790, -0.024891), r0.rgb);
-      r1.g = dot(float3(-0.210182, 1.158200, 0.000324280991), r0.rgb);
+      r1.g = dot(float3(-0.210182, 1.158200, 0.000324281), r0.rgb);
       r1.b = dot(float3(-0.041812, -0.118169, 1.068670), r0.rgb);
       // ColorFilter
       r0.rgb = r1.rgb * cb0[2].rgb;
@@ -126,7 +129,7 @@ cbuffer cb0 : register(b0){
       r1.g = saturate(r1.g);
       r0.a = dot(r1.gg, r0.aa);
       // Lum Vs Sat
-      r3.r = dot(r0.rgb, float3(0.212672904, 0.715152204, 0.072175));
+      r3.r = dot(r0.rgb, float3(0.2126729, 0.7151522, 0.0721750));
       r3.ga = float2(0.25,0.25);
       r0.r = t0.SampleLevel(s0_s, r3.rg, 0).a;
       r0.r = saturate(r0.r);
@@ -152,34 +155,17 @@ cbuffer cb0 : register(b0){
       // Saturation(r0.gba, cb0[3].g * r0.r)
       r1.gba = r0.gba * r1.rrr;
       r0.r = dot(cb0[3].gg, r0.rr);
-      r1.g = dot(r1.gba, float3(0.212672904, 0.715152204, 0.072175));
+      r1.g = dot(r1.gba, float3(0.2126729, 0.7151522, 0.0721750));
       r0.gba = r1.rrr * r0.gba + -r1.ggg;
       r0.rgb = r0.rrr * r0.gba + r1.ggg;
       // (end) LinearGrade
-
-        r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
-    if(injectedData.toneMapType == 0.f){
-      r3.rgb = mul(renodx::color::AP1_TO_AP0_MAT, r0.rgb);
-
-      r3.rgb = renodx::tonemap::aces::RRT(r3.rgb);
-      float a = 278.5085;
-      float b = 10.7772;
-      float c = 293.6045;
-      float d = 88.7122;
-      float e = 80.6889;
-      r3.rgb = (r3.rgb * (a * r3.rgb + b)) / (r3.rgb * (c * r3.rgb + d) + e);
-      r3.rgb = renodx::tonemap::aces::DarkToDim(r3.rgb);
-      half3 AP1_RGB2Y = half3(0.272229, 0.674082, 0.0536895);
-      r3.rgb = lerp(dot(r3.rgb, AP1_RGB2Y).rrr, r3.rgb, 0.93);
-      r3.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r3.rgb);
-      r3.rgb = mul(renodx::color::D60_TO_D65_MAT, r3.rgb);
-      r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r3.rgb);
-    r0.rgb = max(0, r3.rgb);
-    } else {
-      r0.rgb = mul(renodx::color::AP1_TO_XYZ_MAT, r0.rgb);
-      r3.rgb = mul(renodx::color::XYZ_TO_BT709_MAT, r0.rgb);
+      // ACEScg_to_ACES
+      r3.r = dot(float3(0.6954522414, 0.1406786965, 0.1638690622), r0.rgb);
+      r3.g = dot(float3(0.0447945634, 0.8596711185, 0.0955343182), r0.rgb);
+      r3.b = dot(float3(-0.0055258826, 0.0040252103, 1.0015006723), r0.rgb);
+        r0.rgb = lerp(preCG, r3.rgb, injectedData.colorGradeLUTStrength);
+      r3.rgb = mul(ACES_to_SRGB_MAT, r0.rgb);
       r0.rgb = applyUserTonemap(r3.rgb);
-    }    
   r0.a = 1;
   u0[vThreadID.xyz] = r0.rgba;
   }
