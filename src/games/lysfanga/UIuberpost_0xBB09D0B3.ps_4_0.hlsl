@@ -4,7 +4,6 @@ Texture2D<float4> t3 : register(t3);
 Texture2D<float4> t2 : register(t2);
 Texture2D<float4> t1 : register(t1);
 Texture2D<float4> t0 : register(t0);
-
 SamplerState s0_s : register(s0);
 
 cbuffer cb0 : register(b0){

@@ -32,7 +32,6 @@ void main(
   r0.x = max(r1.y, r0.x);
   r0.x = r0.x / r1.x;
   r0.xyz = r0.yzw * r0.xxx;
-  //o0.xyz = max(float3(0,0,0), r0.xyz);
     o0.rgb = r0.rgb;
   o0.w = 1;
   return;
