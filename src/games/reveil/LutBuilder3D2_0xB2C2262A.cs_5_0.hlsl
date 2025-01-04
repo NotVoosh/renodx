@@ -244,17 +244,6 @@ cbuffer cb0 : register(b0){
     r2.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r0.xyz);
   }
   r0.xyz = r2.xyz;
-  /*r1.xyz = r0.xyz * float3(5.55555582,5.55555582,5.55555582) + float3(0.0479959995,0.0479959995,0.0479959995);
-  r1.xyz = log2(r1.xyz);
-  r1.xyz = r1.xyz * float3(0.0734997839,0.0734997839,0.0734997839) + float3(0.386036009,0.386036009,0.386036009);
-  r1.xyz = min(float3(1,1,1), r1.xyz);
-  r1.xyz = cb0[1].yyy * r1.xyz;
-  r0.w = 0.5 * cb0[1].x;
-  r1.xyz = r1.xyz * cb0[1].xxx + r0.www;
-  r1.xyz = t0.SampleLevel(s0_s, r1.xyz, 0).xyz;
-  r1.xyz = r1.xyz + -r0.xyz;
-  r0.xyz = cb0[1].zzz * r1.xyz + r0.xyz;
-  r0.xyz = max(float3(0,0,0), r0.xyz);*/
       float3 lutInput = renodx::color::arri::logc::c1000::Encode(r0.rgb, false);
       float3 lutColor = min(1.f, renodx::lut::Sample(t0, s0_s, lutInput, 32.f));
     r0.rgb = renodx::tonemap::UpgradeToneMap(r0.rgb, saturate(r0.rgb), lutColor, cb0[1].z);

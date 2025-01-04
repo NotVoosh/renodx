@@ -59,7 +59,7 @@ void main(
   r1.w = sqrt(r1.w);
   r1.w = 1 + -r1.w;
   r0.w = r1.w * r0.w;
-  r1.xyz = renodx::color::bt709::clamp::AP1(r0.www * float3(0.00392156886,0.00392156886,0.00392156886)) * injectedData.fxNoise + r1.xyz;
+  r1.xyz = r0.www * float3(0.00392156886,0.00392156886,0.00392156886) * injectedData.fxNoise + r1.xyz;
     r1.rgb = renodx::color::srgb::DecodeSafe(r1.rgb);
     }
   r0.z = 0;
