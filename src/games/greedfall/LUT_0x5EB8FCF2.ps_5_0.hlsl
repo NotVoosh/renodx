@@ -133,10 +133,10 @@ void main(
 			config.mid_gray_value = midGray;
 			config.mid_gray_nits = midGray * 100;
       config.reno_drt_highlights = 1.f;
-      config.reno_drt_shadows = 1.f;
-      config.reno_drt_contrast = 1.f;
+      config.reno_drt_shadows = 1.1f;
+      config.reno_drt_contrast = 1.1f;
 			config.reno_drt_dechroma = injectedData.colorGradeDechroma;
-			config.reno_drt_flare = 0.1f * pow(injectedData.colorGradeFlare, 4.32192809489);
+			config.reno_drt_flare = 0.075f * pow(injectedData.colorGradeFlare, 4.32192809489);
 			config.hue_correction_type = injectedData.toneMapPerChannel != 0.f
       ? renodx::tonemap::config::hue_correction_type::INPUT
       : renodx::tonemap::config::hue_correction_type::CUSTOM;
@@ -365,7 +365,7 @@ void main(
   r0.xz = r0.xx * r0.zw + r1.xy;
   r0.z = r0.z + -r0.x;
   r0.x = r0.y * r0.z + r0.x;
-    r0.b = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
+  r0.b = dot(r2.xyz, float3(0.298999995,0.587000012,0.114));
   r0.z = cb1[5].z * r0.y;
   r0.y = cb1[5].z * r0.y + -0.200000003;
   r0.y = saturate(-5 * r0.y);
