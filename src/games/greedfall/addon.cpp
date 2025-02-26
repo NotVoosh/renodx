@@ -24,6 +24,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
   CustomShaderEntry(0x99BBA5F9),  // videos
   CustomShaderEntry(0x94CFA97C),  // worldmap
   CustomShaderEntry(0x2594436A),  // tonemap
+  CustomShaderEntry(0x56C52C31),  // tonemap (VS)
   CustomShaderEntry(0x5EB8FCF2),  // LUT
   CustomShaderEntry(0x457E22C2),  // Final
 };
@@ -274,6 +275,29 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "fxAutoExposureMax",
+        .binding = &shader_injection.fxAutoExposureMax,
+        .default_value = 100.f,
+        .label = "Auto Exposure Max",
+        .section = "Effects",
+        .tooltip = "Reduce light adaptation in darker environment.",
+        .tint = 0x895434,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "fxAutoExposureMin",
+        .binding = &shader_injection.fxAutoExposureMin,
+        .default_value = 0.f,
+        .label = "Auto Exposure Min",
+        .section = "Effects",
+        .tooltip = "Reduce light adaptation in lighter environment.",
+        .tint = 0x895434,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+        .is_visible = []() { return current_settings_mode >= 2; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxVignette",
         .binding = &shader_injection.fxVignette,
         .default_value = 50.f,
@@ -387,11 +411,11 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSetting("toneMapPerChannel", 0.f);
           renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
           renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeContrast", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeShadows", 45.f);
+          renodx::utils::settings::UpdateSetting("colorGradeContrast", 70.f);
           renodx::utils::settings::UpdateSetting("colorGradeSaturation", 80.f);
-          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 50.f);
-          renodx::utils::settings::UpdateSetting("colorGradeDechroma", 80.f);
+          renodx::utils::settings::UpdateSetting("colorGradeBlowout", 35.f);
+          renodx::utils::settings::UpdateSetting("colorGradeDechroma", 65.f);
           renodx::utils::settings::UpdateSetting("colorGradeFlare", 25.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
           renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 1.f);
@@ -441,6 +465,8 @@ void OnPresetOff() {
   renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
   renodx::utils::settings::UpdateSetting("colorGradeLUTSampling", 0.f);
   renodx::utils::settings::UpdateSetting("fxBloom", 50.f);
+  renodx::utils::settings::UpdateSetting("fxAutoExposureMax", 100.f);
+  renodx::utils::settings::UpdateSetting("fxAutoExposureMin", 0.f);
   renodx::utils::settings::UpdateSetting("fxVignette", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrain", 50.f);
   renodx::utils::settings::UpdateSetting("fxFilmGrainType", 0.f);
@@ -479,8 +505,6 @@ extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for
 
 // NOLINTEND(readability-identifier-naming)
 
-const float screen_width = GetSystemMetrics(SM_CXSCREEN);
-const float screen_height = GetSystemMetrics(SM_CYSCREEN);
 BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   switch (fdw_reason) {
     case DLL_PROCESS_ATTACH:
