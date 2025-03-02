@@ -322,7 +322,7 @@ float3 applyUserTonemapSteep(float3 untonemapped, Texture3D lutTexture, SamplerS
     outputColor = injectedData.upgradePerChannel != 0.f ? UpgradeToneMapPerChannel(hdrColor, sdrColor, lutColor, previous_lut_config_strength)
                                                         : UpgradeToneMapByLuminance(hdrColor, sdrColor, lutColor, previous_lut_config_strength);
   } else {
-    outputColor = Apply(outputColor, config, lut_config, lutTexture, injectedData.upgradePerChannel != 0.f);
+    outputColor = Apply(outputColor, config, lut_config, lutTexture, injectedData.upgradePerChannel == 0.f);
   }
   return outputColor;
 }

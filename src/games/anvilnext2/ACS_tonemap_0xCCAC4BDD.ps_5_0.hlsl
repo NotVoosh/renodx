@@ -53,7 +53,8 @@ void main(
   r0.xyz = r0.xyz * r0.www;
   r0.w = t1.Sample(s1_s, float2(0,0)).x;
   r1.xyzw = t2.Sample(s2_s, v1.xy).xyzw * injectedData.fxBloom;
-  r0.xyz = r0.xyz * lerp(1.f, r0.www, injectedData.fxAutoExposure) + r1.xyz;
+  //r0.xyz = r0.xyz * lerp(1.f, r0.www, injectedData.fxAutoExposure) + r1.xyz;
+  r0.xyz = r0.xyz * r0.www + r1.xyz;
   r0.w = r1.w * cb5[11].x + 1;
   r0.xyz = r0.xyz / r0.www;
   r1.xy = cmp(float2(0,0) != cb5[1].xy);
@@ -96,6 +97,7 @@ void main(
     float3 hdrColor;
     float3 sdrColor;
     float3 lutInput;
+    float midGray = renodx::color::y::from::BT709(float3(0.10956, 0.10956, 0.10956));
   	renodx::tonemap::Config config = renodx::tonemap::config::Create();
 			config.type = injectedData.toneMapType;
 			config.peak_nits = injectedData.toneMapPeakNits;
@@ -106,8 +108,8 @@ void main(
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.mid_gray_value = 0.10965f;
-			config.mid_gray_nits = 10.965f;
+			config.mid_gray_value = midGray;
+			config.mid_gray_nits = midGray * 100;
       config.reno_drt_highlights = 1.f;
       config.reno_drt_shadows = 1.f;
       config.reno_drt_contrast = 1.f;

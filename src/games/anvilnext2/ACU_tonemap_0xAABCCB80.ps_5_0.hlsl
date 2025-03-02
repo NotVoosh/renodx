@@ -80,6 +80,7 @@ void main(
     float3 hdrColor;
     float3 sdrColor;
     float3 lutInput;
+    float midGray = renodx::color::y::from::BT709(float3(0.10956, 0.10956, 0.10956));
     renodx::tonemap::Config config = renodx::tonemap::config::Create();
     if (!(cb5[1].y == 0.f || (cb5[1].z == 2.f && cb5[1].w == 1.f))) {
 			config.type = injectedData.toneMapType;
@@ -91,8 +92,8 @@ void main(
 			config.shadows = injectedData.colorGradeShadows;
 			config.contrast = injectedData.colorGradeContrast;
 			config.saturation = injectedData.colorGradeSaturation;
-			config.mid_gray_value = 0.10965f;
-			config.mid_gray_nits = 10.965f;
+			config.mid_gray_value = midGray;
+			config.mid_gray_nits = midGray * 100;
       config.reno_drt_highlights = 1.f;
       config.reno_drt_shadows = 1.f;
       config.reno_drt_contrast = 1.f;

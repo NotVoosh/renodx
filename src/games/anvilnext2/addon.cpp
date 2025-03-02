@@ -61,7 +61,7 @@ ShaderInjectData shader_injection;
         },                                     \
   }
 
-int game; // 0 = Unity, 1 = Syndicate, 2 = Steep
+int game; // 1 = Syndicate, 2 = Steep, 3 = Unity
 renodx::mods::shader::CustomShaders custom_shaders = {
     // AC (common)
     UpgradeRTVReplaceShader(0x7ED35FB9),  // videos
@@ -72,6 +72,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     UpgradeRTVReplaceShader(0xAABCCB80),  // tonemap
     CustomShaderEntryCallback(0x6C45C1A8, [](reshade::api::command_list* cmd_list) {  // UI
     shader_injection.hasLoadedTitleMenu = true;
+    game = 3;
     return true;
     }),
     // Syndicate
@@ -91,6 +92,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     game = 2;
     return true;
     }),
+    CustomShaderEntry(0x4BFBC8E8),  // hit effect (vignette)
 };
 
 float current_settings_mode = 0;
@@ -306,7 +308,7 @@ renodx::utils::settings::Settings settings = {
         .max = 100.f,
         .is_enabled = []() { return shader_injection.toneMapType != 1.f; },
         .parse = [](float value) { return value * 0.01f; },
-        .is_visible = []() { return current_settings_mode >= 1; },
+        .is_visible = []() { return current_settings_mode >= 1 && game != 2; },
     },
     new renodx::utils::settings::Setting{
       .key = "colorGradeLUTScaling",
@@ -575,6 +577,8 @@ void OnInitSwapchain(reshade::api::swapchain* swapchain, bool resize) {
   }
 }
 
+bool game_check = false;
+
 void OnPresent(
     reshade::api::command_queue* queue,
     reshade::api::swapchain* swapchain,
@@ -584,6 +588,14 @@ void OnPresent(
     const reshade::api::rect* dirty_rects) {
   auto end = std::chrono::steady_clock::now();
   shader_injection.elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+  if(game_check) return;
+  if(game != 0) {
+    game_check = true;
+  if(game == 2){
+    settings[21]->labels = {"Per Channel", "Luminance"};
+    settings[21]->tooltip = "";
+  }
+}
 }
 
 }  // namespace
@@ -591,7 +603,7 @@ void OnPresent(
 // NOLINTBEGIN(readability-identifier-naming)
 
 extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
-extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Assassin's Creed: Unity, Syndicate & Steep";
+extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX for Anvil Next 2 games";
 
 // NOLINTEND(readability-identifier-naming)
 

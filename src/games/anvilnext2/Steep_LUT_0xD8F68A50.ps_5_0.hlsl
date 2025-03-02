@@ -152,16 +152,11 @@ void main(
     r1.xyz = float3(78.84375,78.84375,78.84375) * r1.xyz;
     r0.xyz = exp2(r1.xyz);
   } else {
-    float3 preLUT = renodx::color::srgb::DecodeSafe(r0.rgb);
-    r1.xyz = r0.xyz * cb5[0].xyz + cb5[1].xyz;
-    r1.xyz = t1.Sample(s12_s, r1.xyz).xyz;
+    float3 lutInput = renodx::color::srgb::DecodeSafe(r0.rgb);
+    r1.rgb = applyUserTonemapSteep(lutInput, t1, s12_s);
     r1.w = cmp(cb1[136].w < 0);
-    r2.xyz = max(float3(9.99999975e-06,9.99999975e-06,9.99999975e-06), r1.xyz);
-    r2.xyz = log2(r2.xyz);
-    r2.xyz = float3(0.495867789,0.495867789,0.495867789) * r2.xyz;
-    r2.xyz = exp2(r2.xyz);
-    //r0.xyz = r1.www ? r2.xyz : r1.xyz;
-    r0.xyz = r1.www ? r2.xyz : applyUserTonemapSteep(preLUT, t1, s12_s);
+    r2.rgb = renodx::math::SignPow(r1.rgb, 0.495867789f);
+    r0.xyz = r1.www ? r2.xyz : r1.xyz;
     r0.rgb = PostToneMapScale(r0.rgb);
   }
   o0.xyzw = r0.xyzw;
