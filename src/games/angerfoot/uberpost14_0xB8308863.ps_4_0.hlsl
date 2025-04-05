@@ -62,7 +62,7 @@ void main(
   r0.xy = cb0[26].xx * r0.xy;
   r0.xyzw = t3.Sample(s3_s, r0.xy).xyzw;
   r0.xyzw = r2.xyzw + r0.xyzw;
-  r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+  r0.xyzw = cb0[34].yyyy * r0.xyzw * CUSTOM_BLOOM;
   r2.xy = v1.xy * cb0[33].xy + cb0[33].zw;
   r2.xyzw = t4.Sample(s4_s, r2.xy).xyzw;
   r3.xyzw = float4(0.0625, 0.0625, 0.0625, 0.0625) * r0.xyzw;
@@ -120,10 +120,10 @@ void main(
   r0.xyz = r0.xyz * cb0[36].xxx + r1.xxx;
   r1.xyzw = t5.Sample(s5_s, r0.xyz).xyzw;
   o0.w = r0.w;
-  if (injectedData.fxFilmGrain > 0.f) {
-    r1.rgb = applyFilmGrain(r1.rgb, w1, injectedData.fxFilmGrainType != 0.f);
+  if (CUSTOM_FILM_GRAIN_STRENGTH > 0.f) {
+    r1.rgb = applyFilmGrain(r1.rgb, w1);
   }
-  if (injectedData.fxNoise > 0.f) {
+  if (CUSTOM_NOISE > 0.f) {
     r0.xy = v1.xy * cb0[30].xy + cb0[30].zw;
     r2.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
     r0.x = r2.w * 2 + -1;
@@ -134,9 +134,9 @@ void main(
     r0.x = 1 + -r0.x;
     r0.x = r0.y * r0.x;
     r1.rgb = renodx::color::srgb::EncodeSafe(r1.rgb);
-    r0.xyz = r0.xxx * float3(0.00392156886, 0.00392156886, 0.00392156886) * injectedData.fxNoise + r1.xyz;
+    r0.xyz = r0.xxx * float3(0.00392156886, 0.00392156886, 0.00392156886) * CUSTOM_NOISE + r1.xyz;
     r1.rgb = renodx::color::srgb::DecodeSafe(r0.rgb);
   }
-  o0.rgb = PostToneMapScale(r1.rgb);
+  o0.rgb = renodx::draw::RenderIntermediatePass(r1.rgb);
   return;
 }

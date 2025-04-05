@@ -18,6 +18,6 @@ void main(
   o0.w = cb0[2].x * r0.w;
   o0.xyz = r0.xyz;
   o0 = saturate(o0);
-  o0.rgb = PostToneMapScale(o0.rgb);
+  o0.rgb = renodx::draw::RenderIntermediatePass(o0.rgb);
   return;
 }

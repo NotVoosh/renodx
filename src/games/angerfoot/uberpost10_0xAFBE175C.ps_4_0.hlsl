@@ -33,7 +33,7 @@ void main(
   r0.yz = v1.xy * float2(2, 2) + float2(-1, -1);
   r0.w = dot(r0.yz, r0.yz);
   r0.yz = r0.yz * r0.ww;
-  r0.yz = cb0[35].ww * r0.yz * injectedData.fxChroma;
+  r0.yz = cb0[35].ww * r0.yz * CUSTOM_CHROMATIC_ABERRATION;
   r1.xy = cb0[31].zw * -r0.yz;
   r1.xy = float2(0.5, 0.5) * r1.xy;
   r0.w = dot(r1.xy, r1.xy);
@@ -97,7 +97,7 @@ void main(
   r0.xy = cb0[26].xx * r0.xy;
   r0.xyzw = t2.Sample(s2_s, r0.xy).xyzw;
   r0.xyzw = r2.xyzw + r0.xyzw;
-  r0.xyzw = cb0[34].yyyy * r0.xyzw * injectedData.fxBloom;
+  r0.xyzw = cb0[34].yyyy * r0.xyzw * CUSTOM_BLOOM;
   r2.xy = v1.xy * cb0[33].xy + cb0[33].zw;
   r2.xyzw = t3.Sample(s3_s, r2.xy).xyzw;
   r3.xyzw = float4(0.0625, 0.0625, 0.0625, 0.0625) * r0.xyzw;
@@ -161,6 +161,6 @@ void main(
     r1.x = r0.w;
   }
   o0.xyzw = r1.yzwx;
-  o0.rgb = PostToneMapScale(o0.rgb);
+  o0.rgb = renodx::draw::RenderIntermediatePass(o0.rgb);
   return;
 }

@@ -27,7 +27,7 @@ void main(
   r0.yz = v1.xy * float2(2, 2) + float2(-1, -1);
   r0.w = dot(r0.yz, r0.yz);
   r0.yz = r0.yz * r0.ww;
-  r0.yz = cb0[35].ww * r0.yz * injectedData.fxChroma;
+  r0.yz = cb0[35].ww * r0.yz * CUSTOM_CHROMATIC_ABERRATION;
   r1.xy = cb0[31].zw * -r0.yz;
   r1.xy = float2(0.5, 0.5) * r1.xy;
   r0.w = dot(r1.xy, r1.xy);

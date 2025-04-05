@@ -16,7 +16,7 @@ void main(
   float4 fDest;
 
   r0.xyzw = t0.Sample(s0_s, v0.xy).xyzw;
-  o0.rgb = PostToneMapScale(r0.rgb);
+  o0.rgb = renodx::draw::RenderIntermediatePass(r0.rgb);
   o0.w = 1;
   return;
 }
