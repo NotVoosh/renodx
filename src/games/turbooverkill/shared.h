@@ -9,6 +9,7 @@
 // Should be 4x32
 struct ShaderInjectData {
   float toneMapType;
+  float toneMapTypeAlt;
   float toneMapPeakNits;
   float toneMapGameNits;
   float toneMapUINits;
@@ -18,6 +19,7 @@ struct ShaderInjectData {
   float toneMapHueCorrection;
   float toneMapColorSpace;
   float toneMapPerChannel;
+  float toneMapShoulderStart;
   float colorGradeExposure;
   float colorGradeHighlights;
   float colorGradeShadows;
@@ -25,6 +27,7 @@ struct ShaderInjectData {
   float colorGradeSaturation;
   float colorGradeBlowout;
   float colorGradeDechroma;
+  float colorGradeDechromaAlt;
   float colorGradeFlare;
   float colorGradeClip;
   float colorGradeLUTStrength;
