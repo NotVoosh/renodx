@@ -263,7 +263,7 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
   r0.w = dot(float3(-0.00552588282, 0.00402521016, 1.00150073), r1.xyz);
   r0.gba = lerp(preCG, r0.gba, injectedData.colorGradeLUTStrength);
   r0.gba = mul(ACES_to_SRGB_MAT, r0.gba);
-  r0.rgb = applyUserTonemapMenuConquest(r0.gba);
+  r0.rgb = applyUserTonemapMenuCES(r0.gba);
   r0.w = 1;
   u0[vThreadID.xyz] = r0.xyzw;
   return;

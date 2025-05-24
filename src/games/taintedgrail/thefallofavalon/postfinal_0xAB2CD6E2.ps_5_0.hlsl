@@ -44,6 +44,6 @@ void main(
   r1.z = 0;
   r1.xyzw = t1.SampleLevel(s0_s, r1.xyz, 0).xyzw;
   o0.xyz = r1.www * r0.xyz + r1.xyz;
-  o0.rgb = PostToneMapScale(o0.rgb);
+    o0.rgb = PostToneMapScale(o0.rgb);
   return;
 }

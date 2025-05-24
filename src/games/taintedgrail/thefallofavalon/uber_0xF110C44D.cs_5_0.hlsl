@@ -14,8 +14,6 @@ cbuffer cb0 : register(b0){
   float4 cb0[55];
 }
 
-#define cmp -
-
 [numthreads(8, 8, 1)]
 void main(uint3 vThreadID: SV_DispatchThreadID) {
   float4 r0,r1,r2,r3,r4,r5,r6,r7;
@@ -95,7 +93,6 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
   } else {
     if (cb1[6].w != 0) {
       r0.xyz = cb1[6].zzz * r2.xyz;
-      float3 preCG = r0.rgb;
       r0.rgb = lutShaper(r0.rgb);
       if (injectedData.colorGradeLUTSampling == 0.f) {
       r0.xyz = cb1[6].yyy * r0.xyz;
@@ -105,10 +102,8 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
       } else {
         r2.rgb = renodx::lut::SampleTetrahedral(t3, r0.rgb, 1 / cb1[6].x);
       }
-      r2.rgb = lerp(preCG, r2.rgb, injectedData.colorGradeLUTStrength);
     }
   }
-  r2.rgb = applyUserTonemapAvalon(r2.rgb);
   u0[vThreadID] = r2.xyzx;
   return;
 }

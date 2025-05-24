@@ -162,7 +162,6 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
     r0.w = cmp(0 != cb1[6].w);
     if (r0.w != 0) {
       r1.xyz = cb1[6].zzz * r0.xyz;
-      float3 preCG = r1.rgb;
       r1.rgb = lutShaper(r1.rgb);
       if (injectedData.colorGradeLUTSampling == 0.f) {
       r1.xyz = cb1[6].yyy * r1.xyz;
@@ -172,10 +171,8 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
       } else {
         r0.rgb = renodx::lut::SampleTetrahedral(t4, r1.rgb, 1 / cb1[6].x);
       }
-      r0.rgb = lerp(preCG, r0.rgb, injectedData.colorGradeLUTStrength);
     }
   }
-  r0.rgb = applyUserTonemapAvalon(r0.rgb);
   u0[vThreadID] = r0.xyzx;
   return;
 }

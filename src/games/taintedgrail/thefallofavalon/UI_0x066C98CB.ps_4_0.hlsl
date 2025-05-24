@@ -29,7 +29,7 @@ void main(
   o0.w = r0.w;
   uint2 textureSize;
   t0.GetDimensions(textureSize.x, textureSize.y);
-  if (injectedData.is_UI && (textureSize.x == 2048 && textureSize.y == 1152)) {
+  if (injectedData.stateCheck && (textureSize.x == 2048 && textureSize.y == 1152)) {
     o0.rgb = PostToneMapScale(o0.rgb);
   }
   return;

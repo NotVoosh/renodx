@@ -11,7 +11,7 @@ Texture2D<float4> t0 : register(t0);
 SamplerState s0_s : register(s0);
 RWTexture3D<float4> u0 : register(u0);
 cbuffer cb0 : register(b0){
-  float4 cb0[18];
+  float4 cb0[25];
 }
 
 #define cmp -
@@ -50,7 +50,7 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
     r1.xyz = float3(0.0570776239,0.0570776239,0.0570776239) * r1.xyz;
     r1.xyz = r2.xyz ? r3.xyz : r1.xyz;
     r1.xyz = float3(-0.413588405,-0.413588405,-0.413588405) + r1.xyz;
-    r1.xyz = r1.xyz * cb0[7].zzz + float3(0.413588405,0.413588405,0.413588405); // in-game Contrast slider
+    r1.xyz = r1.xyz * cb0[7].zzz + float3(0.413588405,0.413588405,0.413588405);
     r2.xyz = r1.xyz * float3(17.5200005,17.5200005,17.5200005) + float3(-9.72000027,-9.72000027,-9.72000027);
     r2.xyz = exp2(r2.xyz);
     r3.xyz = float3(-1.52587891e-05,-1.52587891e-05,-1.52587891e-05) + r2.xyz;
@@ -130,23 +130,20 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
     r1.xyz = r3.xyz * r1.xxx + r1.yzw;
     r2.xyz = cb0[13].xyz * r2.xyz;
     r1.xyz = r2.xyz * r0.www + r1.xyz;
-    r1.xyz = r1.xyz + cb0[8].xyz;  // disabling game brightness setting
-    /*r1.xyz = r1.xyz * cb0[10].xyz + cb0[8].xyz;
+    r1.xyz = r1.xyz * cb0[10].xyz + cb0[8].xyz;
     r2.xyz = cmp(float3(0,0,0) < r1.xyz);
     r3.xyz = cmp(r1.xyz < float3(0,0,0));
     r2.xyz = (int3)-r2.xyz + (int3)r3.xyz;
     r2.xyz = (int3)r2.xyz;
-    /*r1.xyz = log2(abs(r1.xyz));
+    r1.xyz = log2(abs(r1.xyz));
     r1.xyz = cb0[9].xyz * r1.xyz;
     r1.xyz = exp2(r1.xyz);
-    r3.xyz = r2.xyz * r1.xyz;*/
-    r3.xyz = r1.xyz;  //
+    r3.xyz = r2.xyz * r1.xyz;
     r0.w = cmp(r3.y >= r3.z);
     r0.w = r0.w ? 1.000000 : 0;
     r4.xy = r3.zy;
     r4.zw = float2(-1,0.666666687);
-    //r1.xy = r2.yz * r1.yz + -r4.xy;
-    r1.xy = r1.yz + -r4.xy; //
+    r1.xy = r2.yz * r1.yz + -r4.xy;
     r1.zw = float2(1,-1);
     r1.xyzw = r0.wwww * r1.xyzw + r4.xyzw;
     r0.w = cmp(r3.x >= r1.x);
@@ -236,8 +233,55 @@ void main(uint3 vThreadID: SV_DispatchThreadID) {
     r2.y = dot(float3(-0.130260006,1.1408,-0.0105499998), r0.xyz);
     r2.z = dot(float3(-0.0240000002,-0.128969997,1.15296996), r0.xyz);
   }
-  r2.rgb = applyUserTonemapMenuClip(r2.rgb);
-  r2.w = 1;
-  u0[vThreadID.xyz] = r2;
+  if (injectedData.toneMapType == 0.f) {
+  r0.xyz = max(float3(0,0,0), r2.xyz);
+  r1.xyz = cb0[18].xxx * r0.xyz;
+  r2.xyzw = cmp(r1.xxyy < cb0[18].yzyz);
+  r3.xyzw = r2.yyyy ? cb0[21].xyzw : cb0[23].xyzw;
+  r4.xyzw = r2.yyww ? cb0[22].xyxy : cb0[24].xyxy;
+  r3.xyzw = r2.xxxx ? cb0[19].xyzw : r3.xyzw;
+  r4.xyzw = r2.xxzz ? cb0[20].xyxy : r4.xyzw;
+  r0.x = r0.x * cb0[18].x + -r3.x;
+  r0.x = r0.x * r3.z;
+  r0.w = cmp(0 < r0.x);
+  r0.x = log2(r0.x);
+  r0.x = r4.y * r0.x;
+  r0.x = r0.x * 0.693147182 + r4.x;
+  r0.x = 1.44269502 * r0.x;
+  r0.x = exp2(r0.x);
+  r0.x = r0.w ? r0.x : 0;
+  r3.x = r0.x * r3.w + r3.y;
+  r5.xyzw = r2.wwww ? cb0[21].xyzw : cb0[23].xyzw;
+  r2.xyzw = r2.zzzz ? cb0[19].xyzw : r5.xyzw;
+  r0.x = r0.y * cb0[18].x + -r2.x;
+  r0.x = r0.x * r2.z;
+  r0.y = cmp(0 < r0.x);
+  r0.x = log2(r0.x);
+  r0.x = r4.w * r0.x;
+  r0.x = r0.x * 0.693147182 + r4.z;
+  r0.x = 1.44269502 * r0.x;
+  r0.x = exp2(r0.x);
+  r0.x = r0.y ? r0.x : 0;
+  r3.y = r0.x * r2.w + r2.y;
+  r0.xy = cmp(r1.zz < cb0[18].yz);
+  r1.xyzw = r0.yyyy ? cb0[21].xyzw : cb0[23].xyzw;
+  r0.yw = r0.yy ? cb0[22].xy : cb0[24].xy;
+  r1.xyzw = r0.xxxx ? cb0[19].xyzw : r1.xyzw;
+  r0.xy = r0.xx ? cb0[20].xy : r0.yw;
+  r0.z = r0.z * cb0[18].x + -r1.x;
+  r0.z = r0.z * r1.z;
+  r0.w = cmp(0 < r0.z);
+  r0.z = log2(r0.z);
+  r0.y = r0.y * r0.z;
+  r0.x = r0.y * 0.693147182 + r0.x;
+  r0.x = 1.44269502 * r0.x;
+  r0.x = exp2(r0.x);
+  r0.x = r0.w ? r0.x : 0;
+  r3.z = r0.x * r1.w + r1.y;
+  r2.xyz = max(float3(0,0,0), r3.xyz);
+  }
+  r0.rgb = applyUserTonemapMenuNeutral(r2.rgb);
+  r0.w = 1;
+  u0[vThreadID.xyz] = r0;
   return;
 }
