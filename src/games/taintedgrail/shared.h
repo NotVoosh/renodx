@@ -17,7 +17,7 @@ struct ShaderInjectData {
   float toneMapHueShift;
   float toneMapHueCorrection;
   float toneMapPerChannel;
-  float toneMapShoulderStart;
+  float toneMapColorSpace;
   float colorGradeExposure;
   float colorGradeHighlights;
   float colorGradeShadows;
@@ -37,7 +37,7 @@ struct ShaderInjectData {
   float fxFilmGrainType;
 
   float random;
-  bool is_UI;
+  bool stateCheck;
 };
 
 #ifndef __cplusplus
