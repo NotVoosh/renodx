@@ -122,7 +122,7 @@ float3 FinalizeOutput(float3 color) {
 
 //-----TONEMAP-----//
 float3 vanillaTonemap(float3 color) {
-  return 1 - exp2(-1.4426950216293335f * color);
+  return 1 - exp(-color);
 }
 
 float3 applyFrostbite(float3 input, renodx::tonemap::Config FbConfig) {
