@@ -267,6 +267,16 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value; },
     },
     new renodx::utils::settings::Setting{
+        .key = "colorGradeFilter",
+        .binding = &shader_injection.colorGradeFilter,
+        .default_value = 100.f,
+        .label = "Filter",
+        .section = "Color Grading",
+        .tint = 0x432A26,
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.01f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "fxBloom",
         .binding = &shader_injection.fxBloom,
         .default_value = 50.f,

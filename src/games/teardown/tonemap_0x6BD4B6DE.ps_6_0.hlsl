@@ -50,8 +50,9 @@ float4 main(
   float _55 = _54 * _46;
   float _56 = mubColorBalance.z;
   float _57 = _56 * _47;
-  float3 untonemapped = applyVignette(float3(_53,_55,_57), TEXCOORD, injectedData.fxVignette);
-  float3 output = applyUserTonemap(untonemapped);
+  float3 untonemapped = lerp(float3(_31,_32,_33), float3(_53,_55,_57), injectedData.colorGradeFilter);
+  float3 vignetted = applyVignette(untonemapped, TEXCOORD, injectedData.fxVignette);
+  float3 output = applyUserTonemap(vignetted);
     if (injectedData.fxFilmGrain > 0.f) {
       output = applyFilmGrain(output, TEXCOORD, injectedData.fxFilmGrainType != 0.f);
     }
