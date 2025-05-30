@@ -44,11 +44,11 @@ float4 main(
   float _45 = _42 + _38;
   float _46 = _43 + _38;
   float _47 = _44 + _38;
-  float _52 = mubColorBalance.x * 1.4426950216293335f;
+  float _52 = mubColorBalance.x;
   float _53 = _52 * _45;
-  float _54 = mubColorBalance.y * 1.4426950216293335f;
+  float _54 = mubColorBalance.y;
   float _55 = _54 * _46;
-  float _56 = mubColorBalance.z * 1.4426950216293335f;
+  float _56 = mubColorBalance.z;
   float _57 = _56 * _47;
   float3 untonemapped = applyVignette(float3(_53,_55,_57), TEXCOORD, injectedData.fxVignette);
   float3 output = applyUserTonemap(untonemapped);
