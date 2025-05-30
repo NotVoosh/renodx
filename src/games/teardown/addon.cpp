@@ -29,6 +29,7 @@ ShaderInjectData shader_injection;
 
 renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x6BD4B6DE),  // tonemap
+    CustomShaderEntry(0xEBDF5C46),  // UI
     CustomShaderEntry(0x2DDB97A7),  // Final
 };
 
