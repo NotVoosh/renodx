@@ -2304,10 +2304,9 @@ void OnPresent(
 }
 
 void MergeShaders() {
-  custom_shaders.max_load_factor(0.7f);
-  custom_shaders.reserve(custom_shaders.size() + other_shaders.size());
+  custom_shaders.reserve(other_shaders.size());  // other_shaders contains all shaders
   for (auto& kv : other_shaders) {
-    custom_shaders.insert_or_assign(kv.first, std::move(kv.second));
+    custom_shaders.try_emplace(kv.second.crc32, std::move(kv.second));
   }
 }
 bool initialized = false;
