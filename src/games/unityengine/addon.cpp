@@ -1105,6 +1105,7 @@ const ShaderItem INITIAL_SHADERS[] = {
 	  UberHDLinearOnDraw(0x07D3D894),
 	  UberHDLinearOnDraw(0x7E2F585E),
 	  UberHDLinearOnDraw(0x07E6710E),
+    UberHDLinearOnDraw(0x7EE888FF),
 	  UberHDLinearOnDraw(0x9B813389),
 	  UberHDLinearOnDraw(0x9CFC6AFA),
 	  UberHDLinearOnDraw(0x9DF20CC3),
@@ -1175,8 +1176,15 @@ const ShaderItem INITIAL_SHADERS[] = {
 	  UberHDLinearOnDraw(0xF09D3285),
 	  UberHDLinearOnDraw(0xFDC03846),
 	  UberHDGammaOnDraw(0x3BB091D1),
+    UberHDGammaOnDraw(0x6FC5EBBD),
+    UberHDGammaOnDraw(0x21E04E36),
+    UberHDGammaOnDraw(0x4424716A),
+    UberHDGammaOnDraw(0xF0DB2F63),
 	  UberHDLinearOnDraw(0x8C592D8D),
     UberHDLinearOnDraw(0x342E56C7),
+    UberHDLinearOnDraw(0xA8A0A101),
+    UberHDLinearOnDraw(0x72C37E3A),
+    UberHDLinearOnDraw(0x66CCE9A2),
     ////// URP END //////
     ////// CUSTOM START //////
     CustomShaderEntryCallback(0x459D4153, &CountLinear),    // Colour Correction
@@ -1897,6 +1905,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xC8194FF2, &CountLinear),
     CustomShaderEntryCallback(0x5D490E8A, &CountLinear),
     CustomShaderEntryCallback(0xD90A4513, &CountGamma),
+    CustomShaderEntryCallback(0x780BC110, &CountGamma),
     CustomShaderEntryCallback(0xAEE78EFC, &CountGamma),      // BlitSpace
     CustomShaderEntryCallback(0xFD37FE01, &CountGamma),      // BlitSpace
     CustomShaderEntryCallback(0x4AF45563, &CountLinear),      // BlitSpace

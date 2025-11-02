@@ -453,7 +453,7 @@ void main(
     r0.xyz = max(float3(0,0,0), r1.xzw);
     r5.xyz = min(float3(65472,65472,65472), r0.xyz);
     } else {
-    r5.xyz = r1.xzw;
+    r5.xyz = renodx::color::bt709::clamp::AP1(r1.xzw);
     }
   }
   r0.xy = (uint2)v0.xy;

@@ -1,4 +1,4 @@
-#include "../../shared.h"
+#include "../shared.h"
 
 Texture2D<float4> t0 : register(t0);
 SamplerState s0_s : register(s0);
@@ -32,7 +32,7 @@ void main(
   r1.xy = w1.xy * cb0[2].xy + cb0[2].zw;
   r1.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
   r0.xyz = -r0.xyz * float3(0.25,0.25,0.25) + r1.xyz;
-  r2.xyz = float3(0.255800009,0.65109998,0.0930999964) * cb0[4].zzz;
+  r2.xyz = float3(0.2558,0.6511,0.0931) * cb0[4].zzz;
   r2.w = 0.5 / cb0[4].y;
   r2.xyz = r2.xyz * r2.www;
   r0.w = 1;

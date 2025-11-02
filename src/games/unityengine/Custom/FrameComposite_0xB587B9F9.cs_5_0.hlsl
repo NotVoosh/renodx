@@ -18,6 +18,8 @@ cbuffer cb0 : register(b0){
   float4 cb0[5];
 }
 
+// Wheel World
+
 float3 vanillaSH(float3 color){
   // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
   const float3x3 ACESInputMat = {

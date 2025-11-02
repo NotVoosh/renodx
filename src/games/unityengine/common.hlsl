@@ -220,8 +220,29 @@ float3 handleUserLUT(float3 hdrLinearColor, Texture2D lut_texture, SamplerState 
   lut_config.tetrahedral = injectedData.colorGradeLUTSampling != 0.f;
   lut_config.recolor = 0.f;
   lut_config.max_channel = injectedData.toneMapType == 0.f ? 0.f : 1.f;
-  lut_config.gamut_compress = injectedData.toneMapType == 0.f ? 0.f : 2.f;
+  lut_config.gamut_compress = injectedData.toneMapType == 0.f ? 0.f : 1.f;
     float3 sdrColor = renodx::tonemap::renodrt::NeutralSDR(hdrLinearColor);
+    float max_channel = 1.f;           
+    float min_channel = 0.f;           
+    float gamut_compression_scale = 1.f;                                                                    
+    if (lut_config.max_channel > 0.f) {                                                                     
+      max_channel = renodx::math::Max(sdrColor.r, sdrColor.g, sdrColor.b, 1.f);              
+      min_channel = renodx::math::Min(sdrColor.r, sdrColor.g, sdrColor.b, 0.f);              
+      max_channel = max(max_channel, -min_channel);                                     
+      sdrColor /= max_channel;                                                     
+    }                                                                                   
+      const float MID_GRAY_LINEAR = 1 / (pow(10, 0.75));                                
+      const float MID_GRAY_PERCENT = 0.5f;                                           
+      const float MID_GRAY_GAMMA = log(MID_GRAY_LINEAR) / log(MID_GRAY_PERCENT);     
+      float encode_gamma = MID_GRAY_GAMMA;                                           
+    if (lut_config.gamut_compress > 0.f) {
+      float grayscale = renodx::color::y::from::BT709(sdrColor.rgb);            
+      float3 encoded = renodx::color::gamma::EncodeSafe(sdrColor.rgb, encode_gamma);
+      float encoded_gray = renodx::color::gamma::Encode(grayscale, encode_gamma);        
+      gamut_compression_scale = renodx::color::correct::ComputeGamutCompressionScale(encoded.rgb, encoded_gray); 
+      float3 compressed = renodx::color::correct::GamutCompress(encoded, encoded_gray, gamut_compression_scale);       
+      sdrColor = renodx::color::gamma::DecodeSafe(compressed, encode_gamma);     
+    }
     float3 lutLinearInput = injectedData.toneMapType == 0.f ? saturate(hdrLinearColor) : sdrColor;
     float3 lutInputColor = ConvertInput(lutLinearInput, encoding);
     float3 lutOutputColor = renodx::lut::SampleColor(lutInputColor, lut_config, lut_texture);
@@ -242,6 +263,12 @@ float3 handleUserLUT(float3 hdrLinearColor, Texture2D lut_texture, SamplerState 
       color_output = recolored;
     } else {
     }
+   if (lut_config.gamut_compress > 0.f) {                                                       
+      float3 encoded = renodx::color::gamma::EncodeSafe(color_output.rgb, encode_gamma);        
+      float3 decompressed = renodx::color::correct::GamutDecompress(color_output.rgb, gamut_compression_scale);      
+      color_output = renodx::color::gamma::DecodeSafe(decompressed, encode_gamma);             
+    }                                                                                          
+    color_output *= max_channel;                                                               
     if (lut_config.recolor != 0.f) {
       color_output = renodx::lut::RestoreSaturationLoss(lutLinearInput, color_output, lut_config);
     }
@@ -256,6 +283,8 @@ float3 handleUserLUT(float3 hdrLinearColor, Texture2D lut_texture, SamplerState 
       return renodx::color::srgb::EncodeSafe(color_output);
     } else if(encoding == 1){
       return fastSrgbEncodeSafe(color_output);
+    } else if(encoding == 2) {
+      return renodx::math::SignSqrt(color_output);
     } else {
       return color_output;
     }
@@ -285,8 +314,29 @@ float3 handleUserLUT(float3 hdrLinearColor, Texture3D lut_texture, SamplerState 
   lut_config.tetrahedral = injectedData.colorGradeLUTSampling != 0.f;
   lut_config.recolor = 0.f;
   lut_config.max_channel = injectedData.toneMapType == 0.f ? 0.f : 1.f;
-  lut_config.gamut_compress = injectedData.toneMapType == 0.f ? 0.f : 2.f;
+  lut_config.gamut_compress = injectedData.toneMapType == 0.f ? 0.f : 1.f;
     float3 sdrColor = renodx::tonemap::renodrt::NeutralSDR(hdrLinearColor);
+    float max_channel = 1.f;           
+    float min_channel = 0.f;           
+    float gamut_compression_scale = 1.f;                                                                    
+    if (lut_config.max_channel > 0.f) {                                                                     
+      max_channel = renodx::math::Max(sdrColor.r, sdrColor.g, sdrColor.b, 1.f);              
+      min_channel = renodx::math::Min(sdrColor.r, sdrColor.g, sdrColor.b, 0.f);              
+      max_channel = max(max_channel, -min_channel);                                     
+      sdrColor /= max_channel;                                                     
+    }                                                                                   
+      const float MID_GRAY_LINEAR = 1 / (pow(10, 0.75));                                
+      const float MID_GRAY_PERCENT = 0.5f;                                           
+      const float MID_GRAY_GAMMA = log(MID_GRAY_LINEAR) / log(MID_GRAY_PERCENT);     
+      float encode_gamma = MID_GRAY_GAMMA;                                           
+    if (lut_config.gamut_compress > 0.f) {
+      float grayscale = renodx::color::y::from::BT709(sdrColor.rgb);            
+      float3 encoded = renodx::color::gamma::EncodeSafe(sdrColor.rgb, encode_gamma);
+      float encoded_gray = renodx::color::gamma::Encode(grayscale, encode_gamma);        
+      gamut_compression_scale = renodx::color::correct::ComputeGamutCompressionScale(encoded.rgb, encoded_gray); 
+      float3 compressed = renodx::color::correct::GamutCompress(encoded, encoded_gray, gamut_compression_scale);       
+      sdrColor = renodx::color::gamma::DecodeSafe(compressed, encode_gamma);     
+    }
     float3 lutLinearInput = injectedData.toneMapType == 0.f ? saturate(hdrLinearColor) : sdrColor;
     float3 lutInputColor = ConvertInput(lutLinearInput, encoding);
     float3 lutOutputColor = renodx::lut::SampleColor(lutInputColor, lut_config, lut_texture);
@@ -307,6 +357,12 @@ float3 handleUserLUT(float3 hdrLinearColor, Texture3D lut_texture, SamplerState 
       color_output = recolored;
     } else {
     }
+   if (lut_config.gamut_compress > 0.f) {                                                       
+      float3 encoded = renodx::color::gamma::EncodeSafe(color_output.rgb, encode_gamma);        
+      float3 decompressed = renodx::color::correct::GamutDecompress(color_output.rgb, gamut_compression_scale);      
+      color_output = renodx::color::gamma::DecodeSafe(decompressed, encode_gamma);             
+    }                                                                                          
+    color_output *= max_channel;  
     if (lut_config.recolor != 0.f) {
       color_output = renodx::lut::RestoreSaturationLoss(lutLinearInput, color_output, lut_config);
     }
@@ -321,6 +377,8 @@ float3 handleUserLUT(float3 hdrLinearColor, Texture3D lut_texture, SamplerState 
       return renodx::color::srgb::EncodeSafe(color_output);
     } else if(encoding == 1){
       return fastSrgbEncodeSafe(color_output);
+    } else if(encoding == 2) {
+      return renodx::math::SignSqrt(color_output);
     } else {
       return color_output;
     }
