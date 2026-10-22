@@ -8,10 +8,8 @@ cbuffer cb0 : register(b0){
   float4 cb0[17];
 }
 
-// CUSTOM_UNORM_BOUNDS (SIGNALIS): the noise blends, scanlines and white level were bounded by saturate and the UNORM
-// target. Keep those exact bounds for Vanilla and for SDR-range channels; otherwise a channel may keep the over-range
-// magnitude of its reference input, so noise cannot push a highlight past its own value and divide-mode spikes stay
-// bounded.
+// Vanilla keeps the exact UNORM bounds. Otherwise the ceiling scales with each channel's over-range input, so noise
+// and divide-mode blends can't push a highlight past its own value.
 float3 UnormCeiling(float3 ceiling, float3 reference) {
   return RENODX_TONE_MAP_TYPE == 0.f ? ceiling : ceiling * max(1.f, reference);
 }

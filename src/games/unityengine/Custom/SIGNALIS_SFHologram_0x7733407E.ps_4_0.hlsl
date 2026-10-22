@@ -35,8 +35,7 @@ void main(
   r0.yz = cb1[0].xy * cb0[7].yy;
   r1.xyzw = t1.Sample(s1_s, r0.yz).xyzw;
   o0.w = r1.x * r0.x;
-  // Hologram opacity is unbounded (cb0[6].x scales it). UNORM targets clamped it before blending; float targets let
-  // 1-alpha go negative and subtract the background. Restore the original opacity and keep the RGB glow.
+  // UNORM clamped opacity before blending; above 1, 1 - alpha goes negative and subtracts the background.
   o0.w = saturate(o0.w);
   return;
 }

@@ -105,8 +105,7 @@ void main(
   r0.y = 1 + r0.y;
   r0.y = cb0[6].y * r0.y;
   o0.w = r0.y * r0.x;
-  // The depth-based fog factor is unbounded and the lighting sum can go negative. UNORM targets clamped both before
-  // blending; float targets blend them as-is and produce dark or inverted fog patches.
+  // UNORM clamped these before blending; unbounded fog alpha and negative lighting give dark or inverted patches.
   o0.xyz = max(0, o0.xyz);
   o0.w = saturate(o0.w);
   return;

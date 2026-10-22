@@ -3292,11 +3292,8 @@ bool Blend_OnDrawIndexed(reshade::api::command_list* cmd_list,
   return false;
 }
 
-// SIGNALIS's mirrors, glass and water (Custom/Mirror Transparent Test) blend One/DstAlpha so the opaque scene shows
-// through the reflection. UNORM targets held destination alpha at 1, but upgraded float targets let every opaque
-// ForwardAdd light add 1, which multiplies the scene behind the surface. All forward variants of that shader output
-// alpha 1, so drawing the same geometry first with an alpha-only MIN blend restores the UNORM bound.
-// Maps the game's One/DstAlpha blend state to that MIN blend state, created on the same device.
+// SIGNALIS mirrors/glass/water blend One/DstAlpha. Float targets let opaque ForwardAdd lights push destination alpha
+// past 1; the shader writes alpha 1, so an alpha-only MIN pre-pass restores the UNORM bound.
 renodx::utils::data::ParallelFlatHashMap<uint64_t, reshade::api::pipeline, std::shared_mutex>
     alpha_clamp_by_dest_alpha_blend;
 

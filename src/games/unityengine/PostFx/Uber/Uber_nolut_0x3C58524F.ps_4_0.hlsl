@@ -120,11 +120,6 @@ void main(
   if (CUSTOM_COUNT_OLD_2 == CUSTOM_COUNT_NEW_2) {
     r0.xyz = GradeAndDisplayMap(r0.xyz);
   }
-  /*r0.xyz = log2(r0.xyz);
-  r0.xyz = float3(0.416666657,0.416666657,0.416666657) * r0.xyz;
-  r0.xyz = exp2(r0.xyz);
-  r0.xyz = r0.xyz * float3(1.05499995,1.05499995,1.05499995) + float3(-0.0549999997,-0.0549999997,-0.0549999997);
-  r0.xyz = max(float3(0,0,0), r0.xyz);*/
   if (CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW) {
     r0.xyz = PostToneMapScale(r0.xyz, true);
   } else {

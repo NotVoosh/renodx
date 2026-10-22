@@ -24,8 +24,7 @@ void main(
   r0.x = r0.x * r0.y;
   r1.xyzw = t0.Sample(s0_s, v2.xy).xyzw;
   if (CUSTOM_UNORM_BOUNDS != 0.f) {
-    // Upgraded render textures can carry alpha above 1 (additive model lighting reaches 6 in SIGNALIS's item
-    // preview). Restore the UNORM opacity before tinting and premultiplying; RGB stays unclamped.
+    // Float render textures can hold alpha above 1; restore UNORM opacity before tinting and premultiplying.
     r1.w = saturate(r1.w);
   }
   r1.xyzw = cb0[3].xyzw + r1.xyzw;

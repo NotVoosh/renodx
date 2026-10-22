@@ -23,8 +23,7 @@ void main(
   uint4 bitmask, uiDest;
   float4 fDest;
 
-  // These samples drive the CRT ghost mask, not scene color. UNORM history bounded them and turned NaN into 0;
-  // float history keeps NaN pixels that feed back every frame (a black band over the inventory).
+  // Mask inputs, not scene color: UNORM history clamped them and flushed NaN to 0; float history feeds NaN back.
   r0.xyzw = t1.Sample(s1_s, v1.xy).xyzw;
   r0.xyz = saturate(r0.xyz);
   r1.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
