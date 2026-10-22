@@ -834,6 +834,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CountLinearOnDraw(0x40072B90),
     CountLinearOnDraw(0x44080C9A),
     CountLinearOnDraw(0x49550CBC),
+    CountLinearOnDraw(0x72841CF9),
     CountLinearOnDraw(0x774090A7),
     CountLinearOnDraw(0x2548186A),
     CountLinearOnDraw(0x78363901),
@@ -846,6 +847,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CountLinearOnDraw(0xAE7EE10F),
     CountLinearOnDraw(0xB2B44A63),
     CountLinearOnDraw(0xB26F4E2D),
+    CountLinearOnDraw(0xB8831327),
     CountLinearOnDraw(0xBBC1FA0B),
     CountLinearOnDraw(0xBD481C0C),
     CountLinearOnDraw(0xBDA2DF56),
@@ -1608,7 +1610,11 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xB7AFA999, &CountGammaTonemap1),    // EtG pixelator
     UberTonemapLinearOnDraw(0xB587B9F9),    // Frame Composite (Wheel World)
     CustomShaderEntryCallback(0x2CD4F51E, &UberTonemapLinear),    // BT ToneMapping
+    CustomShaderEntryCallback(0x03C0717B, &UberTonemapLinear),    // BT ToneMapping
+    //CustomShaderEntryCallback(0x7C6C4F42, &UberTonemapLinear),    // BT ToneMapping
     CustomShaderEntryCallback(0x60F16875, &UberTonemapLinear),    // BT ToneMapping
+    CustomShaderEntryCallback(0x196D8F11, &UberTonemapLinear),    // BT ToneMapping
+    CustomShaderEntryCallback(0xF42B0675, &UberTonemapLinear),    // BT ToneMapping
     CustomShaderEntryCallback(0xF143281D, &UberTonemapLinear),    // BT ToneMapping
     CustomShaderEntryCallback(0xFDD23A9F, &CountGamma),      // Owlcat FinalBlit
     CustomShaderEntryCallback(0x08D3C61F, &CountGamma),      // Owlcat FinalBlit
@@ -1744,7 +1750,8 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0x3E73EC75, &CountTonemap1),       // Gamma Effect
     CustomShaderEntryCallback(0xC6262486, &CountTonemap1),       // Stylized Fog
     CustomShaderEntryCallback(0x3177F565, &Count),       // Motion Effect
-    CustomShaderEntryCallback(0x9B572899, &CountLinearTonemap2),  //PugRP Color Resolve
+    CustomShaderEntryCallback(0xA4C564E8, &CountLinearTonemap2),  //PugRP Color Resolve
+    CustomShaderEntryCallback(0x49CCAF70, &CountLinearTonemap2),  //PugRP Color Resolve
     //CustomShaderEntryCallback(0xA6AE1DEC, &CountTonemap1),       // Depth Gray Scale
       // Colorful
     CustomShaderEntryCallback(0x7108F19B, &CountTonemap1),       // BCG
@@ -2101,6 +2108,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberLinearOnDraw(0xB1A3409D),
     UberGammaOnDraw(0xB5D55000),
     UberGammaOnDraw(0xB7AC8C16),
+    UberLinearOnDraw(0xB48CA671),
     UberGammaOnDraw(0xB339A072),
     UberLinearOnDraw(0xB354D940),
     UberGammaOnDraw(0xB811DE51),
@@ -2131,6 +2139,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDGammaOnDraw(0x01AF86C9),
     UberHDLinearOnDraw(0x1BF2161B),
     UberHDLinearOnDraw(0x1F59543C),
+    UberHDLinearOnDraw(0x2E67091D),
     UberHDLinearOnDraw(0x2E293919),
     UberHDLinearOnDraw(0x2EB942D3),
     UberHDGammaOnDraw(0x2EE0A27B),
@@ -2182,6 +2191,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDGammaOnDraw(0x42D5A5B2),
     UberHDLinearOnDraw(0x45B1DBE4),
     UberHDLinearOnDraw(0x46D3ECE8),
+    UberHDLinearOnDraw(0x53F10D59),
     UberHDGammaOnDraw(0x58F9D31B),
     UberHDGammaOnDraw(0x60B79FE3),
     UberHDLinearOnDraw(0x63D93240),
@@ -2200,6 +2210,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDLinearOnDraw(0x123EB0AB),
     UberHDGammaOnDraw(0x164B94AF),
     UberHDGammaOnDraw(0x177B85BE),
+    UberHDLinearOnDraw(0x227EA313),
     UberHDLinearOnDraw(0x272EB112),
     UberHDLinearOnDraw(0x404CC9B9),
     UberHDLinearOnDraw(0x440F1911),
@@ -2208,6 +2219,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDLinearOnDraw(0x505A6061),
     UberHDLinearOnDraw(0x599DC26E),
     UberHDLinearOnDraw(0x609D706C),
+    UberHDLinearOnDraw(0x659F594C),
     UberHDOnDraw(0x664C7B0C),
     UberHDLinearOnDraw(0x666FB3A8),
     UberHDLinearOnDraw(0x691CF2FB),
@@ -2253,6 +2265,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDLinearOnDraw(0xA31D6E8F),
     UberHDLinearOnDraw(0xA46C1ECB),
     UberHDLinearOnDraw(0xA66D3ADA),
+    UberHDLinearOnDraw(0xA784FA36),
     UberHDLinearOnDraw(0xA885A390),
     UberHDGammaOnDraw(0xA932CAC7),
     UberHDLinearOnDraw(0xA9229E77),
@@ -2267,6 +2280,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDLinearOnDraw(0xB05DD1FC),
     UberHDLinearOnDraw(0xB94F0EC5),
     UberHDLinearOnDraw(0xB27721A3),
+    UberHDLinearOnDraw(0xB817803F),
     UberHDLinearOnDraw(0xB8308863),
     UberHDLinearOnDraw(0xBCA28AB5),
     UberHDLinearOnDraw(0xBD3E0603),
@@ -2316,6 +2330,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDGammaOnDraw(0xF4E5CCA5),
     UberHDGammaOnDraw(0xF5E818A0),
     UberHDLinearOnDraw(0xF47A06A5),
+    UberHDLinearOnDraw(0xF76BD763),
     UberHDLinearOnDraw(0xF455EE3C),
     UberHDGammaOnDraw(0xF3924891),
     UberHDLinearOnDraw(0xFA2F9A68),
@@ -4508,7 +4523,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       //renodx::mods::shader::expected_constant_buffer_space = 50;
       renodx::mods::shader::expected_constant_buffer_index = 13;
       renodx::mods::shader::allow_multiple_push_constants = true;
-      //renodx::mods::shader::revert_constant_buffer_ranges = true;
+      renodx::mods::shader::revert_constant_buffer_ranges = true;
       renodx::mods::swapchain::expected_constant_buffer_index = 13;
       renodx::mods::swapchain::expected_constant_buffer_space = 50;
       renodx::mods::swapchain::use_resource_cloning = true;

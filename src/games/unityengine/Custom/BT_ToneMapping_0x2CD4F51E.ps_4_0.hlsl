@@ -82,8 +82,14 @@ void main(
   r1.x = dot(float3(2.85846996,-1.62879002,-0.0248910002), r0.xyz);
   r1.y = dot(float3(-0.210181996,1.15820003,0.000324280991), r0.xyz);
   r1.z = dot(float3(-0.0418119989,-0.118169002,1.06867003), r0.xyz);
-  r1.yzx = Ap1AcesTonemap(r1.xyz, 3);
+  r0.y = dot(float3(0.439700991,0.382977992,0.177334994), r1.xyz);
+  r0.z = dot(float3(0.0897922963,0.813422978,0.0967615992), r1.xyz);
+  r0.w = dot(float3(0.0175439995,0.111543998,0.870703995), r1.xyz);
+  r1.yzx = Ap1AcesTonemap(r0.yzw, 3);
   r0.xyz = handleUserLUT(r1.yzx, t1, s2_s, cb0[4].xyz, 2, true);
+  if (CUSTOM_COUNT_OLD_2 == CUSTOM_COUNT_NEW_2) {
+    r0.xyz = GradeAndDisplayMap(r0.xyz);
+  }
   r1.xy = v1.xy * cb0[7].xy + cb0[7].zw;
   r1.xyzw = t2.Sample(s4_s, r1.xy).xyzw;
   r0.w = r1.w * 2 + -1;
@@ -109,7 +115,7 @@ void main(
     o0.xyz = saturate(o0.xyz);
   }
   if (CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW) {
-  o0.xyz = PostToneMapScale(o0.xyz);
+    o0.xyz = PostToneMapScale(o0.xyz);
   }
   return;
 }

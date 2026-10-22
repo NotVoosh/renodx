@@ -86,8 +86,14 @@ void main(
   r1.x = dot(float3(2.85846996,-1.62879002,-0.0248910002), r0.xyz);
   r1.y = dot(float3(-0.210181996,1.15820003,0.000324280991), r0.xyz);
   r1.z = dot(float3(-0.0418119989,-0.118169002,1.06867003), r0.xyz);
-  r1.yzx = Ap1AcesTonemap(r1.xyz, 3);
+  r0.y = dot(float3(0.439700991,0.382977992,0.177334994), r1.xyz);
+  r0.z = dot(float3(0.0897922963,0.813422978,0.0967615992), r1.xyz);
+  r0.w = dot(float3(0.0175439995,0.111543998,0.870703995), r1.xyz);
+  r1.yzx = Ap1AcesTonemap(r0.yzw, 3);
   r0.xyz = handleUserLUT(r1.yzx, t1, s2_s, cb0[4].xyz, 2, true);
+  if (CUSTOM_COUNT_OLD_2 == CUSTOM_COUNT_NEW_2) {
+    r0.xyz = GradeAndDisplayMap(r0.xyz);
+  }
   r1.xy = v1.xy * cb0[7].xy + cb0[7].zw;
   r1.xyzw = t2.Sample(s4_s, r1.xy).xyzw;
   r0.w = r1.w * 0.01 + -0.005;
@@ -95,17 +101,17 @@ void main(
   if (CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW) {
   r0.xyz = PostToneMapScale(r0.xyz);
   }
-  r0.xyz = renodx::color::srgb::EncodeSafe(r0.xyz);
+  r0.xyz = fastSrgbEncodeSafe(r0.xyz);
   r1.xy = cb1[6].xy * v1.xy;
   r1.xy = (int2)r1.xy;
   r1.zw = float2(0,0);
   r1.xyzw = t4.Load(r1.xyz).xyzw;
   r1.xyz = cb0[51].xyz * r1.xyz;
   r0.w = saturate(r1.w);
-  r1.xyz = renodx::color::srgb::EncodeSafe(r1.xyz);
+  r1.xyz = fastSrgbEncode(r1.xyz);
   r1.xyz = r1.xyz + -r0.xyz;
   r0.xyz = r0.www * r1.xyz + r0.xyz;
-  r1.xyz = renodx::color::srgb::DecodeSafe(r0.xyz);
+  r1.xyz = fastSrgbDecodeSafe(r0.xyz);
   r2.xyzw = t6.Sample(s1_s, w1.xy).xyzw;
   r2.xyz = cb0[49].www * r2.xyz;
   r0.xyz = r1.xyz + r2.xyz;
