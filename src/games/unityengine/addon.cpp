@@ -3314,18 +3314,19 @@ void DestAlphaClamp_OnInitPipeline(reshade::api::device* device, reshade::api::p
   // D3D11 returns cached state objects, which re-run init_pipeline for the same handle.
   if (alpha_clamp_by_dest_alpha_blend.contains(pipeline.handle)) return;
 
-  reshade::api::blend_desc bd = {};
-  bd.blend_enable[0] = true;
-  bd.alpha_blend_op[0] = reshade::api::blend_op::min;
-  bd.render_target_write_mask[0] = 0x8;
+  reshade::api::blend_desc alpha_min_blend = {};
+  alpha_min_blend.blend_enable[0] = true;
+  alpha_min_blend.alpha_blend_op[0] = reshade::api::blend_op::min;
+  alpha_min_blend.render_target_write_mask[0] = 0x8;
 
-  reshade::api::pipeline_subobject sub = {};
-  sub.type = reshade::api::pipeline_subobject_type::blend_state;
-  sub.count = 1;
-  sub.data = &bd;
+  const reshade::api::pipeline_subobject blend_subobject = {
+      .type = reshade::api::pipeline_subobject_type::blend_state,
+      .count = 1,
+      .data = &alpha_min_blend,
+  };
 
   reshade::api::pipeline alpha_clamp = {0u};
-  if (!device->create_pipeline(PIPELINE_LAYOUT, 1, &sub, &alpha_clamp)) return;
+  if (!device->create_pipeline(PIPELINE_LAYOUT, 1, &blend_subobject, &alpha_clamp)) return;
   if (!alpha_clamp_by_dest_alpha_blend.emplace(pipeline.handle, alpha_clamp).second) {
     device->destroy_pipeline(alpha_clamp);
     return;
@@ -3505,6 +3506,7 @@ void AddGamePatches() {
   } else if (filename == "SIGNALIS.exe") {
     clampDestAlphaBlends = true;
     shader_injection.unormBounds = 1.f;
+    shader_injection.legacyFxSliders = 1.f;
   } else {
     return;
   }
