@@ -10,7 +10,11 @@
 //#define DEBUG_LEVEL_2
 #define RENODX_MODS_SWAPCHAIN_VERSION 2
 
+#include <algorithm>
 #include <chrono>
+#include <format>
+#include <shared_mutex>
+#include <span>
 
 #include <deps/imgui/imgui.h>
 #include <embed/shaders.h>
@@ -22,6 +26,8 @@
 #include "../../utils/date.hpp"
 #include "../../utils/settings.hpp"
 #include "../../utils/random.hpp"
+#include "../../utils/data.hpp"
+#include "../../utils/state.hpp"
 #include "./dump_uber.hpp"
 #include "./shared.h"
 
@@ -65,6 +71,7 @@ float InternalLutCheck = 0.f;
 bool finalBlitCheck;
 bool isD3D12 = false;
 bool upgradeSmolLUT = false;
+bool clampDestAlphaBlends = false;
 
 ShaderInjectData shader_injection;
 
@@ -2023,6 +2030,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CountGammaTonemap1ClampedOnDraw(0x363122F4),
     CountGammaTonemap1ClampedOnDraw(0x599066C8),
     CountGammaTonemap1ClampedOnDraw(0x3806037E),
+    CountGammaTonemap1ClampedOnDraw(0x3C58524F),
     CountGammaTonemap1ClampedOnDraw(0xAB3A8C76),
     CountGammaTonemap1ClampedOnDraw(0xAE488FB0),
     CountLinearTonemap1ClampedOnDraw(0xB41582C3),
@@ -3299,6 +3307,81 @@ bool Blend_OnDrawIndexed(reshade::api::command_list* cmd_list,
   return false;
 }
 
+// SIGNALIS mirrors/glass/water blend One/DstAlpha. Float targets let opaque ForwardAdd lights push destination alpha
+// past 1; the shader writes alpha 1, so an alpha-only MIN pre-pass restores the UNORM bound.
+renodx::utils::data::ParallelFlatHashMap<uint64_t, reshade::api::pipeline, std::shared_mutex>
+    alpha_clamp_by_dest_alpha_blend;
+
+void DestAlphaClamp_OnInitPipeline(reshade::api::device* device, reshade::api::pipeline_layout layout,
+                                   uint32_t subobject_count, const reshade::api::pipeline_subobject* subobjects,
+                                   reshade::api::pipeline pipeline) {
+  const auto pipeline_subobjects = std::span(subobjects, subobject_count);
+  const auto blend_subobject = std::ranges::find_if(pipeline_subobjects, [](const auto& subobject) {
+    return subobject.type == reshade::api::pipeline_subobject_type::blend_state;
+  });
+  if (blend_subobject == pipeline_subobjects.end()) return;
+  const auto& blend = *static_cast<const reshade::api::blend_desc*>(blend_subobject->data);
+  if (!blend.blend_enable[0]
+      || blend.source_color_blend_factor[0] != reshade::api::blend_factor::one
+      || blend.dest_color_blend_factor[0] != reshade::api::blend_factor::dest_alpha) {
+    return;
+  }
+  // D3D11 returns cached state objects, which re-run init_pipeline for the same handle.
+  if (alpha_clamp_by_dest_alpha_blend.contains(pipeline.handle)) return;
+
+  reshade::api::blend_desc alpha_min_blend = {};
+  alpha_min_blend.blend_enable[0] = true;
+  alpha_min_blend.alpha_blend_op[0] = reshade::api::blend_op::min;
+  alpha_min_blend.render_target_write_mask[0] = 0x8;
+
+  const reshade::api::pipeline_subobject blend_subobject = {
+      .type = reshade::api::pipeline_subobject_type::blend_state,
+      .count = 1,
+      .data = &alpha_min_blend,
+  };
+
+  reshade::api::pipeline alpha_clamp = {0u};
+  if (!device->create_pipeline(PIPELINE_LAYOUT, 1, &blend_subobject, &alpha_clamp)) return;
+  if (!alpha_clamp_by_dest_alpha_blend.emplace(pipeline.handle, alpha_clamp).second) {
+    device->destroy_pipeline(alpha_clamp);
+    return;
+  }
+  reshade::log::message(
+      reshade::log::level::info,
+      std::format("Clamping destination alpha before One/DstAlpha blend 0x{:016X}.", pipeline.handle).c_str());
+}
+
+void DestAlphaClamp_OnDestroyPipeline(reshade::api::device* device, reshade::api::pipeline pipeline) {
+  reshade::api::pipeline alpha_clamp = {0u};
+  alpha_clamp_by_dest_alpha_blend.erase_if(pipeline.handle, [&](const auto& entry) {
+    const auto& [dest_alpha_blend, mapped_alpha_clamp] = entry;
+    alpha_clamp = mapped_alpha_clamp;
+    return true;
+  });
+  if (alpha_clamp.handle != 0u) {
+    device->destroy_pipeline(alpha_clamp);
+  }
+}
+
+bool DestAlphaClamp_OnDrawIndexed(reshade::api::command_list* cmd_list, uint32_t index_count, uint32_t instance_count,
+                                  uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) {
+  const auto bound_blend =
+      renodx::utils::state::GetBoundShaderPipeline(cmd_list, reshade::api::pipeline_stage::output_merger);
+  if (bound_blend.handle == 0u) return false;
+
+  reshade::api::pipeline alpha_clamp = {0u};
+  alpha_clamp_by_dest_alpha_blend.if_contains(bound_blend.handle, [&](const auto& entry) {
+    const auto& [dest_alpha_blend, mapped_alpha_clamp] = entry;
+    alpha_clamp = mapped_alpha_clamp;
+  });
+  if (alpha_clamp.handle == 0u) return false;
+
+  cmd_list->bind_pipeline(reshade::api::pipeline_stage::output_merger, alpha_clamp);
+  cmd_list->draw_indexed(index_count, instance_count, first_index, vertex_offset, first_instance);
+  cmd_list->bind_pipeline(reshade::api::pipeline_stage::output_merger, bound_blend);
+  return false;
+}
+
 void AddLiRTEDUpgrades() {
       renodx::mods::swapchain::resource_upgrade_infos.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
@@ -3435,6 +3518,10 @@ void AddGamePatches() {
     } else if(filename == "Aniimo.exe"){
     AddUnrealEngineUpgrades();
     renodx::mods::shader::expected_constant_buffer_space = 50;
+  } else if (filename == "SIGNALIS.exe") {
+    clampDestAlphaBlends = true;
+    shader_injection.unormBounds = 1.f;
+    shader_injection.legacyFxSliders = 1.f;
   } else {
     return;
   }
@@ -3820,6 +3907,16 @@ const std::unordered_map<
                 {"Upgrade_R11G11B10_FLOAT", UPGRADE_TYPE_OUTPUT_SIZE},
                 {"Scaling_Offset", 1.f},
                 {"Tonemap_Offset", 1.f},
+            },
+        },
+        {
+            "SIGNALIS.exe",
+            {
+                {"Upgrade_R8G8B8A8_TYPELESS", UPGRADE_TYPE_ANY},
+                {"Upgrade_R16G16B16A16_TYPELESS", UPGRADE_TYPE_ANY},
+                {"Upgrade_CopyDestinations", 0.f},
+                {"Swapchain_Encoding", 1.f},
+                {"Blit_Copy_Hack", 0.f},
             },
         },
         {
@@ -4537,6 +4634,11 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       reshade::register_event<reshade::addon_event::init_swapchain>(OnInitSwapchain);
       reshade::register_event<reshade::addon_event::draw_indexed>(Blend_OnDrawIndexed);
       reshade::register_event<reshade::addon_event::present>(OnPresent);
+      if (clampDestAlphaBlends) {
+        reshade::register_event<reshade::addon_event::init_pipeline>(DestAlphaClamp_OnInitPipeline);
+        reshade::register_event<reshade::addon_event::destroy_pipeline>(DestAlphaClamp_OnDestroyPipeline);
+        reshade::register_event<reshade::addon_event::draw_indexed>(DestAlphaClamp_OnDrawIndexed);
+      }
         initialized = true;
       }
       break;
@@ -4545,6 +4647,11 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
       reshade::unregister_event<reshade::addon_event::init_device>(OnInitDevice);
       reshade::unregister_event<reshade::addon_event::init_swapchain>(OnInitSwapchain);
       reshade::unregister_event<reshade::addon_event::present>(OnPresent);
+      if (clampDestAlphaBlends) {
+        reshade::unregister_event<reshade::addon_event::init_pipeline>(DestAlphaClamp_OnInitPipeline);
+        reshade::unregister_event<reshade::addon_event::destroy_pipeline>(DestAlphaClamp_OnDestroyPipeline);
+        reshade::unregister_event<reshade::addon_event::draw_indexed>(DestAlphaClamp_OnDrawIndexed);
+      }
       break;
   }
   renodx::utils::settings::Use(fdw_reason, &settings, &OnPresetOff);
