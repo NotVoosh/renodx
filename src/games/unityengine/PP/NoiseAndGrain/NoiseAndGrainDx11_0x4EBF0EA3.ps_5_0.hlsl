@@ -25,6 +25,7 @@ void main(
     r2.xyz = saturate(r2.xyz);
   }
   if (CUSTOM_FILM_GRAIN_TYPE == 0.f) {
+  float3 preGrain = r2.xyz;
   r1.xyz = float3(1,1,1) + -r0.xyz;
   r3.xyz = float3(-0.5,-0.5,-0.5) + r2.xyz;
   r3.xyz = -r3.xyz * float3(2,2,2) + float3(1,1,1);
@@ -34,6 +35,9 @@ void main(
   r2.xyz = r2.xyz >= float3(0.5,0.5,0.5) ? float3(1,1,1) : 0;
   r0.xyz = r0.xyz + r0.xyz;
   r0.xyz = r2.xyz * r1.xyz + r0.xyz;
+  if (CUSTOM_LEGACY_FX_SLIDERS != 0.f) {
+    r0.xyz = lerp(preGrain, r0.xyz, CUSTOM_FILM_GRAIN);
+  }
   } else {
     r2.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::DecodeSafe(r2.xyz) : r2.xyz;
     r0.xyz = applyFilmGrain(r2.xyz, v1);

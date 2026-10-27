@@ -19,6 +19,10 @@ void main(
   float4 fDest;
 
   r0.xyzw = t0.Sample(s0_s, v2.xy).xyzw;
+  if (CUSTOM_UNORM_BOUNDS != 0.f) {
+    // Float render textures can hold alpha above 1; restore UNORM opacity before tinting and premultiplying.
+    r0.w = saturate(r0.w);
+  }
   r0.xyzw = cb0[3].xyzw + r0.xyzw;
   r0.xyzw = v1.xyzw * r0.xyzw;
   o0.xyz = r0.xyz * r0.www;

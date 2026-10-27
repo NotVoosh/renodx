@@ -72,8 +72,8 @@ struct ShaderInjectData {
 
   float isTonemapped;
   float psychovConeResponse;
-  float padding03;
-  float padding04;
+  float legacyFxSliders;
+  float unormBounds;
 };
 
 #ifndef __cplusplus
@@ -146,6 +146,8 @@ cbuffer shader_injection : register(b13) {
 
 #define CUSTOM_IS_TONEMAPPED                          shader_injection.isTonemapped
 #define PSYCHOV_CONE_RESPONSE                         shader_injection.psychovConeResponse
+#define CUSTOM_LEGACY_FX_SLIDERS                      shader_injection.legacyFxSliders
+#define CUSTOM_UNORM_BOUNDS                           shader_injection.unormBounds
 
 #endif
 #ifndef __cplusplus
