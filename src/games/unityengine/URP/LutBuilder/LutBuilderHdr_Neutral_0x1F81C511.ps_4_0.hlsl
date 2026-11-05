@@ -13,26 +13,6 @@ cbuffer cb0 : register(b0){
   float4 cb0[21];
 }
 
-float3 vanillaNeutral(float3 color) {
-float a = cb0[19].x;
-float b = cb0[19].y;
-float c = cb0[19].z;
-float d = cb0[19].w;
-float e = cb0[20].x;
-float f = cb0[20].y;
-float w1 = cb0[20].z;
-float w2 = cb0[20].w;
-
-float scale = 1.0 / renodx::tonemap::ApplyCurve(w1, a, b, c, d, e, f);
-return renodx::tonemap::ApplyCurve(max(0.f, color) * scale, a, b, c, d, e, f) * scale / w2;
-}
-
-float setNeutralParam(float4 params0, float4 params1) {
-  if (params0.y == 0.11666669 && params0.z == 0.58571965 && params0.w == 0.428) return 1;      // Pathfinder WotR
-  if (params0.y == 0.29000002 && params0.z == 0.21322903 && params0.w == 0.272) return 2;      // Pathfinder WotR
-return 0;
-}
-
 void main(
   float4 v0 : SV_POSITION0,
   float2 v1 : TEXCOORD0,
