@@ -3448,7 +3448,7 @@ void AddGamePatches() {
   || filename == "Copycat.exe" || filename == "Make Way.exe" || filename == "Digimon World Next Order.exe"
   || filename == "Quern.exe" || filename == "reverse1999.exe" || filename == "NineSols.exe" || filename == "Distance.exe"
   || filename == "SlimeRancher.exe" || filename == "Source of Madness.exe" || filename == "Stirring Abyss.exe"
-  || filename == "thief.exe" || filename == "STASIS2.exe" || filename == "Elementallis.exe"){
+  || filename == "thief.exe" || filename == "STASIS2.exe" || filename == "Elementallis.exe" || filename == "FallenTear.exe"){
     shader_injection.isClamped = 2.f;
     } else if(filename == "It Steals.exe"){
     shader_injection.isClamped = 3.f;
