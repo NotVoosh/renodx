@@ -1,0 +1,30 @@
+#include "../common.hlsli"
+
+Texture2D<float4> t0 : register(t0);
+SamplerState s0_s : register(s0);
+cbuffer cb0 : register(b0){
+  float4 cb0[20];
+}
+
+void main(
+  float4 v0 : SV_POSITION0,
+  float2 v1 : TEXCOORD0,
+  out float4 o0 : SV_Target0)
+{
+  float4 r0;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.xyzw = t0.SampleBias(s0_s, v1.xy, cb0[19].x).xyzw;
+  if (CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW) {
+    r0.xyz = InvertToneMapScale(r0.xyz, true);
+  } else {
+    r0.xyz = renodx::color::gamma::DecodeSafe(r0.xyz, 2.2f);
+  }
+  if (CUSTOM_COUNT_OLD <= CUSTOM_COUNT_NEW) {
+    r0.xyz = PostToneMapScale(r0.xyz);
+  }
+  o0.xyz = r0.xyz;
+  o0.w = renodx::color::gamma::Decode(saturate(r0.w));
+  return;
+}

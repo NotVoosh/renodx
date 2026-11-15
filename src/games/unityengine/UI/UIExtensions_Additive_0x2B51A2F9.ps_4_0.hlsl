@@ -1,0 +1,30 @@
+#include "../common.hlsli"
+
+Texture2D<float4> t0 : register(t0);
+SamplerState s0_s : register(s0);
+
+void main(
+  float4 v0 : SV_POSITION0,
+  float4 v1 : COLOR0,
+  float2 v2 : TEXCOORD0,
+  out float4 o0 : SV_Target0)
+{
+  float4 r0,r1;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.xyzw = t0.Sample(s0_s, v2.xy).xyzw;
+  r1.x = r0.w * v1.w + -0.00999999978;
+  r0.xyzw = v1.xyzw * r0.xyzw;
+  if (r1.x < 0) discard;
+  o0.xyz = r0.xyz * r0.www;
+  if(CUSTOM_ROLLOFF_UI == 1.f){
+    o0.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::DecodeSafe(o0.xyz) : o0.xyz;
+    o0.xyz = rolloff(o0.xyz, 0.85f, true);
+    o0.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(o0.xyz) : o0.xyz;
+  } else if(CUSTOM_ROLLOFF_UI == 2.f){
+    o0.xyz = saturate(o0.xyz);
+  }
+  o0.w = saturate(r0.w);
+  return;
+}

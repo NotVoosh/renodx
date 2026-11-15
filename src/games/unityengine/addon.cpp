@@ -1234,6 +1234,16 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberGammaOnDraw(0x19D0AFA5),
     UberGammaOnDraw(0x7DB4806B),
     UberGammaOnDraw(0x7549CF91),
+        // AgX
+    UberTonemapGammaOnDraw(0x3C3E556A),
+    UberTonemapGammaOnDraw(0x3C6490FC),
+    UberTonemapGammaOnDraw(0x463BB315),
+    UberTonemapGammaOnDraw(0x716FD941),
+    UberTonemapGammaOnDraw(0x498927A7),
+    UberTonemapGammaOnDraw(0x6936267B),
+    UberTonemapGammaOnDraw(0xA0F71C98),
+    UberTonemapGammaOnDraw(0xBA021540),
+    UberTonemapGammaOnDraw(0xE84718B2),
         // Neutral
     UberTonemapLinearOnDraw(0x0B383A2F),
     UberTonemapGammaOnDraw(0x0EA73DAA),
@@ -2395,6 +2405,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CountGammaTonemap1OnDraw(0xD633A7EE),
     CountGammaTonemap1OnDraw(0xE16F5F43),
     CountGammaTonemap1OnDraw(0xE832FE2B),
+    CountLinearTonemap1OnDraw(0xE7517CC5),
     CountGammaTonemap1OnDraw(0xE9177A14),
     CountGammaTonemap1OnDraw(0xEAD9C39B),
     CountLinearTonemap1OnDraw(0xEBC7375B),
@@ -2523,6 +2534,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xAEE78EFC, &CountGamma),      // BlitSpace
     CustomShaderEntryCallback(0xFD37FE01, &CountGamma),      // BlitSpace
     CustomShaderEntryCallback(0x4AF45563, &CountLinear),      // BlitSpace
+    CustomShaderEntryCallback(0xCECCC13D, &CountLinear),      // Blit
     CustomShaderEntryCallback(0xB1CE8C1C, &CountLinear),
     CustomShaderEntryCallback(0x1BD93430, &CountLinear),
     CustomShaderEntryCallback(0xE819EC01, &CountLinear),
