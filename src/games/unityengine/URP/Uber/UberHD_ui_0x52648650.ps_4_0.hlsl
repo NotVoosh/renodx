@@ -21,6 +21,9 @@ void main(
   float4 fDest;
 
   r0.xyzw = t0.SampleBias(s0_s, v1.xy, cb0[5].x).xyzw;
+  if (CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW) {
+    r0.xyz = InvertToneMapScale(r0.xyz);
+  }
   r1.xyzw = t1.SampleBias(s0_s, v1.xy, cb0[5].x).xyzw;
   if (cb0[135].x > 0) {
     r2.xyz = r1.xyz * r1.www;
@@ -80,7 +83,7 @@ void main(
   r0.w = 1 + -r0.w;
   r0.w = r1.x * r0.w;
   r0.xyz = applyDither(r0.xyz, r0.w * (1.0 / 255.0));
-  if (CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW) {
+  if (CUSTOM_COUNT_OLD <= CUSTOM_COUNT_NEW) {
     r0.xyz = PostToneMapScale(r0.xyz);
   }
   o0.xyz = r0.xyz;

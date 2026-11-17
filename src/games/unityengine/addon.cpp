@@ -999,6 +999,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberLinearOnDraw(0x6BC3D81A),
     UberGammaOnDraw(0x6BFABBE2),
     UberLinearOnDraw(0x5EE0EFE9),
+    UberLinearOnDraw(0x5FC2AE34),
     UberLinearOnDraw(0x7C36C890),
     UberLinearOnDraw(0x8596AD69),
     UberLinearOnDraw(0x83BB5283),
@@ -2284,6 +2285,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDLinearOnDraw(0x98834C99),
     UberHDLinearOnDraw(0x99257EBF),
     UberHDLinearOnDraw(0x99273E5D),
+    UberHDLinearOnDraw(0x7115027F),
     UberHDLinearOnDraw(0x18486417),
     UberHDGammaOnDraw(0x86692346),
     UberHDGammaOnDraw(0xA1B5810B),
@@ -2295,6 +2297,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDLinearOnDraw(0xA46C1ECB),
     UberHDLinearOnDraw(0xA66D3ADA),
     UberHDLinearOnDraw(0xA99D70DB),
+    UberHDLinearOnDraw(0xA771E2C6),
     UberHDLinearOnDraw(0xA784FA36),
     UberHDLinearOnDraw(0xA885A390),
     UberHDGammaOnDraw(0xA932CAC7),
@@ -2535,6 +2538,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xFD37FE01, &CountGamma),      // BlitSpace
     CustomShaderEntryCallback(0x4AF45563, &CountLinear),      // BlitSpace
     CustomShaderEntryCallback(0xCECCC13D, &CountLinear),      // Blit
+    CustomShaderEntryCallback(0xB3950101, &CountLinear),      // CoreBlit
     CustomShaderEntryCallback(0xB1CE8C1C, &CountLinear),
     CustomShaderEntryCallback(0x1BD93430, &CountLinear),
     CustomShaderEntryCallback(0xE819EC01, &CountLinear),
