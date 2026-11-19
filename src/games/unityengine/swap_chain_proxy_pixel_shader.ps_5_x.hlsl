@@ -26,7 +26,7 @@ float3 FinalizeOutput(float3 color, bool gamma) {
   [branch]
   if (RENODX_TONE_MAP_TYPE == 0.f) {
     color = renodx::color::bt709::clamp::BT709(color);
-    color = min(RENODX_DIFFUSE_WHITE_NITS, color);
+    color = min(max(RENODX_DIFFUSE_WHITE_NITS, RENODX_GRAPHICS_WHITE_NITS), color);
   } else if(RENODX_TONE_MAP_TYPE >= 2.f) {
     color = renodx::color::lms::from::BT709(color);
     color = renodx::color::gamut::GamutCompressLMSBoundBT2020(color);

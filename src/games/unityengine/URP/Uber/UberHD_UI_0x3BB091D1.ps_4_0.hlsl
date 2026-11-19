@@ -18,6 +18,9 @@ void main(
   float4 fDest;
 
   r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
+  if (CUSTOM_COUNT_OLD <= CUSTOM_COUNT_NEW) {
+    r0.xyz = InvertToneMapScale(r0.xyz);
+  }
   if (cb0[10].z > 0) {
     r1.xy = -cb0[10].xy + v1.xy;
     r1.yz = cb0[10].zz * abs(r1.xy) * min(1.f, CUSTOM_VIGNETTE);
@@ -66,7 +69,7 @@ void main(
   if (CUSTOM_COUNT_OLD_2 == CUSTOM_COUNT_NEW_2) {
     r0.xyz = GradeAndDisplayMap(r0.xyz);
   }
-  if (CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW) {
+  if (CUSTOM_COUNT_OLD <= CUSTOM_COUNT_NEW) {
     r0.xyz = PostToneMapScale(r0.xyz, true);
   } else {
     r0.xyz = renodx::color::srgb::EncodeSafe(r0.xyz);

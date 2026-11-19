@@ -1235,6 +1235,9 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberGammaOnDraw(0x19D0AFA5),
     UberGammaOnDraw(0x7DB4806B),
     UberGammaOnDraw(0x7549CF91),
+    UberGammaOnDraw(0x9B637844),
+    UberGammaOnDraw(0xA24CBC48),
+    UberGammaOnDraw(0xBBEE02A3),
         // AgX
     UberTonemapGammaOnDraw(0x3C3E556A),
     UberTonemapGammaOnDraw(0x3C6490FC),
@@ -2538,7 +2541,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xFD37FE01, &CountGamma),      // BlitSpace
     CustomShaderEntryCallback(0x4AF45563, &CountLinear),      // BlitSpace
     CustomShaderEntryCallback(0xCECCC13D, &CountLinear),      // Blit
-    CustomShaderEntryCallback(0xB3950101, &CountLinear),      // CoreBlit
+    //CustomShaderEntryCallback(0xB3950101, &CountLinear),      // CoreBlit
     CustomShaderEntryCallback(0xB1CE8C1C, &CountLinear),
     CustomShaderEntryCallback(0x1BD93430, &CountLinear),
     CustomShaderEntryCallback(0xE819EC01, &CountLinear),
@@ -3224,7 +3227,7 @@ renodx::utils::settings::Settings settings = {
         .key = "rolloffUI",
         .binding = &shader_injection.rolloffUI,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 1.f,
+        .default_value = 2.f,
         .can_reset = false,
         .label = "UI Behavior",
         .section = "Compatibility",
@@ -3955,6 +3958,13 @@ const std::unordered_map<
             {
                 {"Upgrade_R8G8B8A8_TYPELESS", UPGRADE_TYPE_NONE},
                 {"Use_Swapchain_Proxy", 1.f},
+            },
+        },
+        {
+            "Wrath.exe",    // Pathfinder
+            {
+                {"Scaling_Offset", 2.f},
+                {"Tonemap_Offset", 2.f},
             },
         },
 };

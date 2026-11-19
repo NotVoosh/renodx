@@ -31,7 +31,7 @@ float SecondDerivativeNeutral(float x, float a, float b, float c, float d, float
 }
 
 // Find the positive root where second derivative == 0 (pivot point).
-// Returns 0 if no meaningful positive root found.
+// Returns 0 when there is no positive inflection, making the origin the extension pivot.
 float FindSecondDerivativeRootNeutral(float a, float b, float c, float d, float e, float f){
     // Coefficients of cubic numerator: A3 x^3 + A2 x^2 + A1 x + A0
     float A3 = a * a * b * (c - 1.0);
@@ -92,44 +92,15 @@ float3 Neutral(float3 x, float a, float b, float c, float d, float e, float f, f
     return sdr_color;
 }
 float3 NeutralExtended(float3 x, float a, float b, float c, float d, float e, float f, float whiteLevel, float whiteClip){
-      //x = max(0.f, x);
-    // --- compute scalar whiteScale and pivot in raw curve domain ---
-    // Use scalar whiteScale (all channels use same neutral coefficients so whiteScale.x is representative)
-    float3 whiteScale = (1.0).xxx / renodx::tonemap::ApplyCurve(whiteLevel, a, b, c, d, e, f);
-    float W = 1.0 / renodx::tonemap::ApplyCurve(whiteLevel, a, b, c, d, e, f).x;
+  float whiteScale = 1.0 / renodx::tonemap::ApplyCurve(whiteLevel, a, b, c, d, e, f);
+  float3 positiveX = max(0.0, x);
+  float3 baseColor = renodx::tonemap::ApplyCurve(positiveX * whiteScale, a, b, c, d, e, f) * whiteScale / whiteClip;
+  float u_pivot = FindSecondDerivativeRootNeutral(a, b, c, d, e, f);
 
-    // Find pivot in raw curve domain (u domain)
-    float u_pivot = FindSecondDerivativeRootNeutral(a, b, c, d, e, f);
+  float x_pivot = u_pivot / whiteScale;
+  float3 pivotColor = renodx::tonemap::ApplyCurve(u_pivot, a, b, c, d, e, f) * whiteScale / whiteClip;
+  float slope = DerivativeNeutral(u_pivot, a, b, c, d, e, f) * whiteScale * whiteScale / whiteClip;
+  float3 extendedLine = pivotColor + slope * (positiveX - x_pivot);
 
-    // If degenerate or no positive pivot, return base (no extension)
-    if (u_pivot <= 0.0)
-        return renodx::tonemap::ApplyCurve(x * whiteScale, a, b, c, d, e, f) * whiteScale / whiteClip;
-
-    // Convert pivot to shader input domain: x_pivot = u_pivot / W
-    float x_pivot = u_pivot / W;
-
-    // Compute pivot output (per-channel) in the same way base was computed:
-    // pivot_out = NeutralCurve(u_pivot) * W
-    float3 pivot_out = renodx::tonemap::ApplyCurve(u_pivot, a, b, c, d, e, f) * W;
-
-    // Compute slope in output space using chain rule:
-    // slope_out = d(NeutralCurve)/du (at u_pivot) * du/dx * W
-    // du/dx = W, so slope_out = DerivativeNeutral(u_pivot) * W * W
-    float slope_scalar = DerivativeNeutral(u_pivot, a, b, c, d, e, f) * W * W;
-
-    // Make slope per-channel (same scalar slope for each channel)
-    float3 slope = slope_scalar.xxx;
-
-    // Compute offset so the line passes through pivot_out at x_pivot:
-    // offset = pivot_out - slope * x_pivot
-    float3 offset = pivot_out - slope * x_pivot;
-
-    // Compute linear extension per-channel
-    float3 extendedLine = slope * x + offset;
-
-    // Blend: for x <= x_pivot use base, for x > x_pivot use linear extension
-    // step(a,b) returns 0 if b < a else 1; broadcasting works with scalar a and float3 b
-    float3 mask = step(x_pivot, x); // 0 for below pivot, 1 for above (per-channel)
-    float3 hdr_color = lerp(renodx::tonemap::ApplyCurve(x * whiteScale, a, b, c, d, e, f) * whiteScale / whiteClip, extendedLine, mask);
-  return hdr_color;
+  return lerp(baseColor, extendedLine, step(x_pivot, positiveX));
 }

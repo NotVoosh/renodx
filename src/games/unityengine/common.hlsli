@@ -74,6 +74,9 @@ float3 GradeAndDisplayMap(float3 color) {
 //-----SCALING-----//
 float3 PostToneMapScale(float3 color, bool gamma = false) {
   if (gamma) {
+    if(RENODX_TONE_MAP_TYPE == 0.f){
+      //color = saturate(color);
+    }
     [branch]
     if (RENODX_GAMMA_CORRECTION == 2.f) {
       color = renodx::color::srgb::EncodeSafe(color);
@@ -90,6 +93,9 @@ float3 PostToneMapScale(float3 color, bool gamma = false) {
       color = renodx::color::srgb::EncodeSafe(color);
     }
   } else {
+    if(RENODX_TONE_MAP_TYPE == 0.f){
+      //color = saturate(color);
+    }
     [branch]
     if (RENODX_GAMMA_CORRECTION == 2.f) {
       color = renodx::color::correct::GammaSafe(color, false, 2.4f);
