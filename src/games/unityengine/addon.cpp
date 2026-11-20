@@ -1322,8 +1322,10 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberTonemapLinearOnDraw(0x2C36979C),
     UberTonemapLinearOnDraw(0x4B92CD8E),
     UberTonemapLinearOnDraw(0xEF39E7C4),
+    UberTonemapLinearOnDraw(0xEF421D9D),
     UberTonemapLinearOnDraw(0xF8B145F6),
     UberTonemapLinearOnDraw(0xFDA8A0F6),
+    UberTonemapLinearOnDraw(0xFF203F38),
     UberTonemapLinearOnDraw(0x9A27FDCD),
     UberTonemapLinearOnDraw(0x9D2A9AD7),
     UberTonemapLinearOnDraw(0x9F4A9AEC),
@@ -1586,6 +1588,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xC4B616D2, &CountLinear),    // ShaderGraphs_MetaSourceCombine
     CustomShaderEntryCallback(0x927E0696, &CountLinear),    // ShaderGraphs_SG_VHS
     CustomShaderEntryCallback(0xB0E8F20C, &CountLinearTonemap1),    // ShaderGraphs_FullScreenLUT
+    UberHDGammaOnDraw(0x88EB29C9),
     UberHDGammaOnDraw(0x3875CEA0),
     UberHDGammaOnDraw(0xE375BBC4),
     UberHDGammaOnDraw(0x5FE56D00),
@@ -1596,9 +1599,13 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDGammaOnDraw(0xA7FEA8BE),
     UberHDGammaOnDraw(0x8A96EF8D),
     UberHDGammaOnDraw(0x7325AAEB),
+    UberHDGammaOnDraw(0x68136321),
+    UberHDGammaOnDraw(0xFCF2EF8B),
     SneakyBuilderTonemapOnDraw(0x5B3A6D48),
+    SneakyBuilderTonemapOnDraw(0x8FA11CE1),
     SneakyBuilderTonemapOnDraw(0x3B50094B),
     SneakyBuilderTonemapOnDraw(0x86920855),
+    SneakyBuilderTonemapOnDraw(0xC284C066),
     SneakyBuilderTonemapOnDraw(0x2D96DDD6),
     LutBuilderTonemapOnDraw(0xF3CE6DDA),
     LutBuilderTonemapOnDraw(0x32767461),
@@ -4401,6 +4408,8 @@ void OnInitDevice(reshade::api::device* device) {
       });
       }
   } else {
+    reshade::log::message(reshade::log::level::info, "d3d12 detected");
+    reshade::set_config_value(nullptr, "renodx", "Force_Pipeline_Cloning", "0");
     if(g_upgrade_internal_lut == 1.f){
       renodx::mods::swapchain::resource_upgrade_infos.push_back({
           .old_format = reshade::api::format::r8g8b8a8_typeless,
