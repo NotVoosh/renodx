@@ -1678,6 +1678,7 @@ const ShaderItem INITIAL_SHADERS[] = {
     CustomShaderEntryCallback(0xD0434E6B, &CountTonemap1), // TintedVignette
     CustomShaderEntryCallback(0x74AAB469, &CountTonemap1),  // Beat Saber
     CustomShaderEntryCallback(0xCEEF2538, &CountClamped), // CRT
+    CustomShaderEntryCallback(0xDB1C31D7, &CountClamped), // CRT
     CustomShaderEntryCallback(0xD063498D, &Count), // VolFx Dither
     CustomShaderEntryCallback(0x1772A606, &Count), // VHS
     CustomShaderEntryCallback(0x2B66789E, &CountClamped), // ResolutionPresenterSharpen
