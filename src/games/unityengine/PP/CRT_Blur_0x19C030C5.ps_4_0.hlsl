@@ -19,14 +19,14 @@ void main(
   r0.yw = float2(0,0);
   r0.xy = v1.xy + r0.xy;
   r1.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r1.xyz = InvertToneMapScale(r1.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r1.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r1.xyz) : r1.xyz;
   }
   r2.xyzw = cb0[3].xyxy * float4(1,-1,-1,1) + v1.xyxy;
   r3.xyzw = t0.Sample(s0_s, r2.xy).xyzw;
   r2.xyzw = t0.Sample(s0_s, r2.zw).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r3.xyz = InvertToneMapScale(r3.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r3.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r3.xyz) : r3.xyz;
     r2.xyz = InvertToneMapScale(r2.xyz, CUSTOM_GAMMA_SPACE != 0.f);
@@ -38,7 +38,7 @@ void main(
   r4.z = 0;
   r0.xy = v1.xy + r4.zw;
   r4.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r5.xyz = InvertToneMapScale(r5.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r5.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r5.xyz) : r5.xyz;
     r4.xyz = InvertToneMapScale(r4.xyz, CUSTOM_GAMMA_SPACE != 0.f);
@@ -50,7 +50,7 @@ void main(
   r3.xyz = r3.xyz * r6.xxx + r4.xyz;
   r1.xyz = r1.xyz * r6.yyy + r3.xyz;
   r3.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r3.xyz = InvertToneMapScale(r3.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r3.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r3.xyz) : r3.xyz;
   }
@@ -58,7 +58,7 @@ void main(
   r0.z = cb0[3].x;
   r0.xy = v1.xy + r0.zw;
   r0.xyzw = t0.Sample(s0_s, r0.xy).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r0.xyz = InvertToneMapScale(r0.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r0.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r0.xyz) : r0.xyz;
   }
@@ -68,14 +68,14 @@ void main(
   r1.y = cb0[3].y;
   r1.xy = v1.xy + r1.xy;
   r1.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r1.xyz = InvertToneMapScale(r1.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r1.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r1.xyz) : r1.xyz;
   }
   r0.xyz = r1.xyz * r6.yyy + r0.xyz;
   r1.xy = cb0[3].xy + v1.xy;
   r1.xyzw = t0.Sample(s0_s, r1.xy).xyzw;
-  if(CUSTOM_COUNT_OLD == CUSTOM_COUNT_NEW){
+  if(CUSTOM_COUNT_OLD < CUSTOM_COUNT_NEW){
     r1.xyz = InvertToneMapScale(r1.xyz, CUSTOM_GAMMA_SPACE != 0.f);
     r1.xyz = CUSTOM_GAMMA_SPACE != 0.f ? renodx::color::srgb::EncodeSafe(r1.xyz) : r1.xyz;
   }

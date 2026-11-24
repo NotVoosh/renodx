@@ -1591,13 +1591,13 @@ const ShaderItem INITIAL_SHADERS[] = {
     UberHDGammaOnDraw(0x88EB29C9),
     UberHDGammaOnDraw(0x3875CEA0),
     UberHDGammaOnDraw(0xE375BBC4),
-    UberHDGammaOnDraw(0x5FE56D00),
-    UberHDGammaOnDraw(0x2F096075),
-    UberHDGammaOnDraw(0x6F8C4866),
+    //UberHDGammaOnDraw(0x5FE56D00),
+    //UberHDGammaOnDraw(0x2F096075),
+    //UberHDGammaOnDraw(0x6F8C4866),
     UberHDGammaOnDraw(0xAE34D6E4),
-    UberHDGammaOnDraw(0xF6757514),
+    //UberHDGammaOnDraw(0xF6757514),
     UberHDGammaOnDraw(0xA7FEA8BE),
-    UberHDGammaOnDraw(0x8A96EF8D),
+    //UberHDGammaOnDraw(0x8A96EF8D),
     UberHDGammaOnDraw(0x7325AAEB),
     UberHDGammaOnDraw(0x68136321),
     UberHDGammaOnDraw(0xFCF2EF8B),
@@ -3235,19 +3235,6 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() { renodx::utils::platform::LaunchURL("https://github.com/clshortfuse/renodx"); },
     },
     new renodx::utils::settings::Setting{
-        .key = "rolloffUI",
-        .binding = &shader_injection.rolloffUI,
-        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 2.f,
-        .can_reset = false,
-        .label = "UI Behavior",
-        .section = "Compatibility",
-        .tooltip = "Only affects a few selected shaders",
-        .labels = {"Do nothing", "Rolloff (peak)", "Clamp (sdr)"},
-        .tint = 0x1C1C3C,
-        .is_visible = []() { return current_settings_mode >= 2; },
-    },
-    new renodx::utils::settings::Setting{
         .key = "isTonemappedCheck",
         .binding = &isTonemappedCheck,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
@@ -3835,6 +3822,13 @@ const std::unordered_map<
             },
         },
         {
+            "REPO.exe",
+            {
+                {"rolloffUI", 0.f},                
+                {"Upgrade_R8G8B8A8_TYPELESS", UPGRADE_TYPE_ANY},
+            },
+        },
+        {
             "RimWorldWin64.exe",
             {
                 {"Swapchain_Encoding", 1.f},
@@ -4031,6 +4025,23 @@ void AddAdvancedSettings() {
     renodx::utils::settings::LoadSetting(renodx::utils::settings::global_name, setting);
     settings.push_back(setting);
   };
+  {
+    auto* setting = new renodx::utils::settings::Setting{
+        .key = "rolloffUI",
+        .binding = &shader_injection.rolloffUI,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 2.f,
+        .can_reset = false,
+        .label = "UI Behavior",
+        .section = "Compatibility",
+        .tooltip = "Only affects a few selected shaders",
+        .labels = {"Do nothing", "Rolloff (peak)", "Clamp (sdr)"},
+        .tint = 0x1C1C3C,
+        .is_global = true,
+        .is_visible = []() { return settings[0]->GetValue() >= 2; },
+    };
+    add_setting(setting);
+  }
   {
     auto* setting = new renodx::utils::settings::Setting{
         .key = "Swapchain_Encoding",
