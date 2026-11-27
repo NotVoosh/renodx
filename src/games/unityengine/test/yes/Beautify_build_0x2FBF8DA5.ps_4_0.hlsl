@@ -21,7 +21,7 @@ void main(
 
   r0.xyzw = t0.Sample(s0_s, v2.xy).xyzw;
   if(CUSTOM_IS_CLAMPED != 0.f){
-    r0.xyz = rolloffSdr(r0.xyz, 0.45f);
+    r0.xyz = rolloffSdr(r0.xyz, 0.05f);
   }
   r0.xyz = max(float3(0,0,0), r0.xyz);
   r0.xyz = min(cb0[7].zzz, r0.xyz);
@@ -32,7 +32,7 @@ void main(
   r0.xyzw = r1.xxxx * r0.xyzw;
   r2.xyzw = t0.Sample(s0_s, w1.xy).xyzw;
   if(CUSTOM_IS_CLAMPED != 0.f){
-    r2.xyz = rolloffSdr(r2.xyz, 0.45f);
+    r2.xyz = rolloffSdr(r2.xyz, 0.05f);
   }
   r1.yzw = max(float3(0,0,0), r2.xyz);
   r2.xyz = min(cb0[7].zzz, r1.yzw);
@@ -44,7 +44,7 @@ void main(
   r1.x = r1.y + r1.x;
   r2.xyzw = t0.Sample(s0_s, w2.xy).xyzw;
   if(CUSTOM_IS_CLAMPED != 0.f){
-    r2.xyz = rolloffSdr(r2.xyz, 0.45f);
+    r2.xyz = rolloffSdr(r2.xyz, 0.05f);
   }
   r1.yzw = max(float3(0,0,0), r2.xyz);
   r2.xyz = min(cb0[7].zzz, r1.yzw);
@@ -56,7 +56,7 @@ void main(
   r1.x = r1.x + r1.y;
   r2.xyzw = t0.Sample(s0_s, v3.xy).xyzw;
   if(CUSTOM_IS_CLAMPED != 0.f){
-    r2.xyz = rolloffSdr(r2.xyz, 0.45f);
+    r2.xyz = rolloffSdr(r2.xyz, 0.05f);
   }
   r1.yzw = max(float3(0,0,0), r2.xyz);
   r2.xyz = min(cb0[7].zzz, r1.yzw);

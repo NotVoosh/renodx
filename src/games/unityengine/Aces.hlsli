@@ -71,7 +71,7 @@ float3 RRT(float3 aces) {
   return rgb_pre;
 }
 
-float3 Ap1Aces(float3 color, int curve, float DSG) {
+float3 Ap1Aces(float3 color, int curve, float DSG = 0.9811f) {
   float a;
   float b;
   float c;
@@ -107,8 +107,6 @@ float3 Ap1Aces(float3 color, int curve, float DSG) {
     if (curve == 2) {
         sdrCurve = (color * (color + a) - b) / (color * (c * color + d) + e);
         sdrCurve = max(0, sdrCurve);
-    } else if (curve == 3){
-      sdrCurve = (color * (a * color + b)) / (color * (c * color + d) + e);
     } else {
         sdrCurve = (color * (a * color + b)) / (color * (c * color + d) + e);
     }
@@ -116,8 +114,8 @@ float3 Ap1Aces(float3 color, int curve, float DSG) {
   sdr_color = renodx::tonemap::aces::DarkToDim(sdr_color, DSG);
   sdr_color = mul(renodx::color::XYZ_TO_AP1_MAT, sdr_color);
   float3 AP1_RGB2Y = renodx::color::AP1_TO_XYZ_MAT[1].rgb;
-  sdr_color = lerp(dot(color, AP1_RGB2Y).rrr, sdr_color, 0.93);
-  if (curve == 3 ) {
+  sdr_color = lerp(dot(sdr_color, AP1_RGB2Y).rrr, sdr_color, 0.93);
+  if (curve == 3) {
     sdr_color = renodx::color::bt709::from::AP1(sdr_color);
   } else {
     sdr_color = mul(renodx::color::AP1_TO_XYZ_MAT, sdr_color);
@@ -127,7 +125,7 @@ float3 Ap1Aces(float3 color, int curve, float DSG) {
   return sdr_color;
 }
 
-float3 Ap1AcesExtended(float3 color, int curve, float DSG) {
+float3 Ap1AcesExtended(float3 color, int curve, float DSG = 0.9811f) {
   float a;
   float b;
   float c;
@@ -161,20 +159,17 @@ float3 Ap1AcesExtended(float3 color, int curve, float DSG) {
   color = RRT(color);
   float3 hdrCurve;
     if (curve == 2) {
-      //hdrCurve = color > 0.47399 ? 0.733076360295 * color + 0.0081270771627 : max(0.f, (color * (color + a) - b) / (color * (c * color + d) + e));
       hdrCurve = renodx::math::Select(color > 0.47399, 0.733076360295 * color + 0.0081270771627, max(0.f, (color * (color + a) - b) / (color * (c * color + d) + e)));
     } else if (curve == 3){
-      //hdrCurve = color > 0.230976 ? 1.46658788438 * color + 0.00821561635884 : (color * (a * color + b)) / (color * (c * color + d) + e);
       hdrCurve = renodx::math::Select(color > 0.230976, 1.46658788438 * color + 0.00821561635884, (color * (a * color + b)) / (color * (c * color + d) + e));
     } else {
-      //hdrCurve = color > 0.499412 ? 0.73014784681 * color + 0.0129418403546 : (color * (a * color + b)) / (color * (c * color + d) + e);
       hdrCurve = renodx::math::Select(color > 0.499412, 0.73014784681 * color + 0.0129418403546, (color * (a * color + b)) / (color * (c * color + d) + e));
     }
   float3 hdr_color = mul(renodx::color::AP1_TO_XYZ_MAT, hdrCurve);
   hdr_color = renodx::tonemap::aces::DarkToDim(hdr_color, DSG);
   hdr_color = mul(renodx::color::XYZ_TO_AP1_MAT, hdr_color);
   float3 AP1_RGB2Y = renodx::color::AP1_TO_XYZ_MAT[1].rgb;
-  hdr_color = lerp(dot(color, AP1_RGB2Y).rrr, hdr_color, 0.93);
+  hdr_color = lerp(dot(hdr_color, AP1_RGB2Y).rrr, hdr_color, 0.93);
   if (curve == 3 ) {
     hdr_color = renodx::color::bt709::from::AP1(hdr_color);
   } else {
